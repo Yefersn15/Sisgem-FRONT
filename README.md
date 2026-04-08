@@ -2,6 +2,8 @@
 
 Este proyecto es una aplicación web de comercio electrónico (e-commerce) desarrollada con React + Vite. Permite gestionar una tienda en línea con catálogo de productos, carrito de compras, pedidos, sistema de usuarios y panel de administración.
 
+> **Nota**: La documentación detallada del API REST se encuentra en `../API_PROYECTO/README.md`
+
 ---
 
 ## Configuración de conexión al API remoto
@@ -454,6 +456,95 @@ El sistema utiliza un **carrito separado por proveedor** (a diferencia del carri
 | `/admin/productos` | Administración de productos |
 | `/admin/categorias` | Administración de categorías |
 | `/admin/marcas` | Administración de marcas |
+
+---
+
+## API del Proyecto
+
+### Conexión al API
+
+El frontend Sisgem se conecta a la API REST del proyecto `API_PROYECTO`. La comunicación se realiza mediante el servicio `dataService` que utiliza Fetch API para realizar peticiones HTTP.
+
+#### Variables de Entorno
+
+| Variable | Descripción | Valor por defecto |
+|----------|-------------|-------------------|
+| `VITE_API_BASE_URL` | URL base del API | `http://localhost:3000` |
+| `VITE_USE_REMOTE_API` | Habilitar API remoto | `false` |
+
+#### Funcionamiento del dataService
+
+El archivo `src/services/dataService.js` centraliza todas las peticiones al API:
+
+```javascript
+const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api';
+
+// Cabeceras por defecto
+const headers = {
+  'Content-Type': 'application/json',
+  'Authorization': `Bearer ${token}`
+};
+```
+
+**Métodos disponibles:**
+
+| Método | Descripción |
+|--------|-------------|
+| `get(endpoint)` | GET request |
+| `post(endpoint, data)` | POST request |
+| `put(endpoint, data)` | PUT request |
+| `patch(endpoint, data)` | PATCH request |
+| `delete(endpoint)` | DELETE request |
+
+#### Autenticación
+
+El frontend maneja autenticación JWT mediante `AuthContext`:
+
+1. **Login**: Envía credenciales a `/api/auth/login`
+2. **Registro**: Envía datos a `/api/auth/register`
+3. **Token**: Se almacena en localStorage y se incluye en todas las peticiones protegidas
+
+**Estructura del token:**
+```javascript
+// Header de Authorization
+Authorization: Bearer eyJhbGciOiJIUzI1NiIs...
+```
+
+#### Endpoints Consumidos
+
+| Módulo | Endpoint | Métodos |
+|--------|----------|---------|
+| Auth | `/api/auth/login`, `/api/auth/register`, `/api/auth/me` | POST, GET |
+| Usuarios | `/api/usuarios` | GET, PUT, PATCH |
+| Productos | `/api/productos` | GET, POST, PUT, DELETE |
+| Categorías | `/api/categorias` | GET, POST, PUT, DELETE |
+| Marcas | `/api/marcas` | GET, POST, PUT, DELETE |
+| Pedidos | `/api/pedidos`, `/api/pedidos/mis-pedidos` | GET, POST, PUT, PATCH |
+| Pagos | `/api/pagos`, `/api/pagos/mis-pagos` | GET, POST, PATCH |
+| Carrito | `/api/carrito` | GET, POST, PUT, DELETE |
+| Dashboard | `/api/dashboard` | GET |
+| Banners | `/api/banners` | GET, POST, PUT, DELETE |
+
+#### Manejo de Errores
+
+El dataService maneja errores HTTP comunes:
+
+| Código | Acción en Frontend |
+|--------|-------------------|
+| 401 | Redirigir a login, limpiar token |
+| 403 | Mostrar mensaje "No tienes permiso" |
+| 404 | Mostrar "Recurso no encontrado" |
+| 500 | Mostrar "Error del servidor" |
+
+#### Fallbacks Locales
+
+Si `VITE_USE_REMOTE_API` es `false`, el sistema usa datos guardados en localStorage como fallback:
+
+- **Productos**: Se cachean en localStorage
+- **Carrito**: Se guarda en localStorage
+- **Categorías/Marcas**: Se cachean para navegación offline
+
+Esto permite que la tienda funcione parcialmente sin conexión al API.
 
 ---
 
