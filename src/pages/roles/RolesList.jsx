@@ -118,9 +118,9 @@ const RolesList = () => {
                           <div className="row">
                             {Object.entries(categoriasPermisos).map(([categoria, permisos]) => (
                               <div key={categoria} className="col-md-4 mb-3">
-                                <div className="card">
-                                  <div className="card-header bg-secondary text-white py-1">
-                                    <small>{categoria.toUpperCase()}</small>
+                                <div className="card border-secondary">
+                                  <div className="card-header bg-light border-secondary py-2 fw-bold text-dark">
+                                    {categoria.toUpperCase()}
                                   </div>
                                   <div className="card-body py-2">
                                     {permisos.map(p => (
@@ -132,8 +132,8 @@ const RolesList = () => {
                                           checked={getPermisosAsignados(r).includes(p)}
                                           disabled
                                         />
-                                        <label className="form-check-label" htmlFor={`${r.id}-${p}`} style={{ fontSize: '0.8rem' }}>
-                                          {p.split('.')[1]}
+                                        <label className={`form-check-label fw-bold ${getPermisosAsignados(r).includes(p) ? 'text-white bg-success px-2 rounded' : 'text-muted'}`} htmlFor={`${r.id}-${p}`} style={{ fontSize: '0.8rem' }}>
+                                          {p.split('.')[1].replace('read', 'LEER').replace('write', 'ESCRIBIR').replace('delete', 'ELIMINAR')}
                                         </label>
                                       </div>
                                     ))}

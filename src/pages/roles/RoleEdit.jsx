@@ -145,9 +145,9 @@ const RoleEdit = () => {
                   const allSelected = perms.every(p => permisos.includes(p));
                   return (
                     <div key={categoria} className="col-md-4 mb-3">
-                      <div className="card">
-                        <div className="card-header bg-secondary text-white py-1 d-flex justify-content-between align-items-center">
-                          <span><small>{categoria.toUpperCase()}</small></span>
+                      <div className="card border-secondary">
+                        <div className="card-header bg-light border-secondary py-2 d-flex justify-content-between align-items-center fw-bold text-dark">
+                          <span>{categoria.toUpperCase()}</span>
                           <input
                             type="checkbox"
                             checked={allSelected}
@@ -165,8 +165,8 @@ const RoleEdit = () => {
                                 checked={permisos.includes(p)}
                                 onChange={() => togglePermiso(p)}
                               />
-                              <label className="form-check-label" htmlFor={`edit-${p}`} style={{ fontSize: '0.85rem' }}>
-                                {p.split('.')[1]}
+                              <label className={`form-check-label fw-bold ${permisos.includes(p) ? 'text-white bg-primary px-2 rounded' : ''}`} htmlFor={`edit-${p}`} style={{ fontSize: '0.85rem' }}>
+                                {p.split('.')[1].replace('read', 'LEER').replace('write', 'ESCRIBIR').replace('delete', 'ELIMINAR')}
                               </label>
                             </div>
                           ))}
