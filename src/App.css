@@ -39,6 +39,15 @@
   --primary: #3b82f6;          /* Azul para editar */
   --primary-dim: rgba(59,130,246,0.1);
 
+  /* ----------------------------   Estandarización de botones de acción
+    btn-outline-primary: Ver, Editar, Crear, Guardar, Agregar
+    btn-outline-success: Aprobar, Convertir, Aceptar
+    btn-outline-danger: Eliminar, Anular, Rechazar
+    btn-outline-warning: Desactivar
+    btn-outline-success: Activar (cuando no hay conflicto)
+    btn-secondary: Cancelar, Volver, Limpiar
+  ---------------------------- */
+
   /* Efectos y medidas */
   --radius: 8px;
   --radius-lg: 12px;
