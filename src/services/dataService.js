@@ -1416,7 +1416,7 @@ export const getVentasDeLaSemana = async () => {
   const hace7Dias = new Date();
   hace7Dias.setDate(hoy.getDate() - 7);
   return ventas.filter(v => {
-    const fecha = new Date(v.fechaVenta);
+    const fecha = new Date(v.fecha || v.fechaVenta);
     return fecha >= hace7Dias && fecha <= hoy;
   });
 };
@@ -1433,7 +1433,7 @@ export const getVentasDelMes = async () => {
 
 export const getTopProductos = async (take = 10) => {
   const ventas = await getVentas();
-  const detalleVentas = ventas.flatMap(v => v.detalleVenta || []);
+  const detalleVentas = ventas.flatMap(v => v.productos || []);
   const grouped = detalleVentas.reduce((acc, det) => {
     const key = det.productoId || det.productoSnapshot?.nombre || 'desconocido';
     if (!acc[key]) {
@@ -1451,11 +1451,11 @@ export const getTopProductos = async (take = 10) => {
   return Object.values(grouped).sort((a, b) => b.cantidad - a.cantidad).slice(0, take);
 };
 
-export const getTopByBrand = async (take = 5) => {
+export const getTopByBrand = async (take = 10) => {
   const ventas = await getVentas();
   const productos = await getProductos();
   const marcas = await getMarcas();
-  const detalleVentas = ventas.flatMap(v => v.detalleVenta || []);
+  const detalleVentas = ventas.flatMap(v => v.productos || []);
   const grouped = {};
   detalleVentas.forEach(det => {
     const producto = productos.find(p => p.id === det.productoId);
@@ -1471,11 +1471,11 @@ export const getTopByBrand = async (take = 5) => {
   return Object.values(grouped).sort((a, b) => b.cantidad - a.cantidad).slice(0, take);
 };
 
-export const getTopByCategory = async (take = 5) => {
+export const getTopByCategory = async (take = 10) => {
   const ventas = await getVentas();
   const productos = await getProductos();
   const categorias = await getCategorias();
-  const detalleVentas = ventas.flatMap(v => v.detalleVenta || []);
+  const detalleVentas = ventas.flatMap(v => v.productos || []);
   const grouped = {};
   detalleVentas.forEach(det => {
     const producto = productos.find(p => p.id === det.productoId);

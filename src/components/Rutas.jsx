@@ -5,10 +5,8 @@ import ProductoCreate from '../pages/productos/ProductoCreate';
 import ProductoEdit from '../pages/productos/ProductoEdit';
 import ProductosPorCategoria from '../pages/productos/ProductosPorCategoria';
 import ProductosPorMarca from '../pages/productos/ProductosPorMarca';
-import MarcasList from '../pages/marcas/MarcasList';
 import MarcaCreate from '../pages/marcas/MarcaCreate';
 import MarcaEdit from '../pages/marcas/MarcaEdit';
-import CategoriasList from '../pages/categorias/CategoriasList';
 import CategoriaCreate from '../pages/categorias/CategoriaCreate';
 import CategoriaEdit from '../pages/categorias/CategoriaEdit';
 import ProveedoresList from '../pages/proveedores/ProveedoresList';
@@ -71,12 +69,12 @@ const Rutas = () => {
       <Route path="/productos/por-marca/:id" element={<ProductosPorMarca />} />
 
       {/* === MARCAS === */}
-      <Route path="/marcas" element={<MarcasList />} />
+      <Route path="/marcas" element={<Navigate to="/productos" replace />} />
       <Route path="/marcas/nueva" element={<PrivateRoute module="Marcas"><MarcaCreate /></PrivateRoute>} />
       <Route path="/marcas/editar/:id" element={<PrivateRoute module="Marcas"><MarcaEdit /></PrivateRoute>} />
 
       {/* === CATEGORÍAS === */}
-      <Route path="/categorias" element={<CategoriasList />} />
+      <Route path="/categorias" element={<Navigate to="/productos" replace />} />
       <Route path="/categorias/nueva" element={<PrivateRoute module="Categorías"><CategoriaCreate /></PrivateRoute>} />
       <Route path="/categorias/editar/:id" element={<PrivateRoute module="Categorías"><CategoriaEdit /></PrivateRoute>} />
 

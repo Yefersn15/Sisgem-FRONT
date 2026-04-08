@@ -14,6 +14,10 @@ const ProductosList = () => {
   const [selectedProducto, setSelectedProducto] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [modalCantidad, setModalCantidad] = useState(1);
+  const [filterMarca, setFilterMarca] = useState('');
+  const [filterCategoria, setFilterCategoria] = useState('');
+  const [filteredMarcas, setFilteredMarcas] = useState([]);
+  const [filteredCategorias, setFilteredCategorias] = useState([]);
 
   const debouncedSearch = useDebounce(searchQuery, 500);
 
@@ -24,6 +28,8 @@ const ProductosList = () => {
       const cat = await getCategorias();
       setMarcas(Array.isArray(mar) ? mar : mar || []);
       setCategorias(Array.isArray(cat) ? cat : cat || []);
+      setFilteredMarcas(Array.isArray(mar) ? mar : mar || []);
+      setFilteredCategorias(Array.isArray(cat) ? cat : cat || []);
       await cargarProductos(mar, cat);
     };
     init();
@@ -32,7 +38,7 @@ const ProductosList = () => {
   // Recargar cuando cambien búsqueda o filtro
   useEffect(() => {
     cargarProductos();
-  }, [debouncedSearch, sortBy]);
+  }, [debouncedSearch, sortBy, filterMarca, filterCategoria]);
 
   const cargarProductos = async (marcasLocalParam, categoriasLocalParam) => {
     let lista = await getProductos();
@@ -49,12 +55,42 @@ const ProductosList = () => {
       categoriaNombre: (categoriasLocal || []).find(c => String(c.id) === String(p.categoriaId))?.nombre || 'Desconocida'
     }));
 
+    // Filtrar por marca
+    if (filterMarca) {
+      lista = lista.filter(p => String(p.marcaId) === String(filterMarca));
+    }
+
+    // Filtrar por categoría
+    if (filterCategoria) {
+      lista = lista.filter(p => String(p.categoriaId) === String(filterCategoria));
+    }
+
     // Búsqueda
     if (debouncedSearch) {
       lista = lista.filter(p =>
         p.nombre.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
         p.descripcion.toLowerCase().includes(debouncedSearch.toLowerCase())
       );
+    }
+
+    // Actualizar opciones de filtros según productos mostrados
+    if (!filterMarca && !filterCategoria && lista.length > 0) {
+      const catsConProductos = [...new Set(lista.map(p => p.categoriaId))].filter(Boolean);
+      const marsConProductos = [...new Set(lista.map(p => p.marcaId))].filter(Boolean);
+      const catsFiltradas = (categoriasLocal || []).filter(c => catsConProductos.includes(String(c.id)));
+      const marsFiltradas = (marcasLocal || []).filter(m => marsConProductos.includes(String(m.id)));
+      setFilteredMarcas(marsFiltradas);
+      setFilteredCategorias(catsFiltradas);
+    } else if (filterMarca && !filterCategoria) {
+      // Si hay marca seleccionada, mostrar solo categorías que tienen productos de esa marca
+      const catsConMarca = [...new Set(lista.map(p => p.categoriaId))].filter(Boolean);
+      const catsFiltradas = (categoriasLocal || []).filter(c => catsConMarca.includes(String(c.id)));
+      setFilteredCategorias(catsFiltradas);
+    } else if (filterCategoria && !filterMarca) {
+      // Si hay categoría seleccionada, mostrar solo marcas que tienen productos de esa categoría
+      const marsConCategoria = [...new Set(lista.map(p => p.marcaId))].filter(Boolean);
+      const marsFiltradas = (marcasLocal || []).filter(m => marsConCategoria.includes(String(m.id)));
+      setFilteredMarcas(marsFiltradas);
     }
 
     // Ordenamiento
@@ -99,7 +135,37 @@ const ProductosList = () => {
     <div className="container my-4">
       {/* Barra de búsqueda y filtros */}
       <form className="row mb-4" onSubmit={(e) => e.preventDefault()}>
-        <div className="col-md-3">
+        <div className="col-md-2">
+          <select
+            className="form-select"
+            value={filterMarca}
+            onChange={(e) => {
+              setFilterMarca(e.target.value);
+              if (!e.target.value) setFilterCategoria('');
+            }}
+          >
+            <option value="">Todas las marcas</option>
+            {filteredMarcas.map(m => (
+              <option key={m.id} value={m.id}>{m.nombre}</option>
+            ))}
+          </select>
+        </div>
+        <div className="col-md-2">
+          <select
+            className="form-select"
+            value={filterCategoria}
+            onChange={(e) => {
+              setFilterCategoria(e.target.value);
+              if (!e.target.value) setFilterMarca('');
+            }}
+          >
+            <option value="">Todas las categorías</option>
+            {filteredCategorias.map(c => (
+              <option key={c.id} value={c.id}>{c.nombre}</option>
+            ))}
+          </select>
+        </div>
+        <div className="col-md-2">
           <select
             className="form-select"
             value={sortBy}
@@ -110,20 +176,16 @@ const ProductosList = () => {
               else setSortBy(val);
             }}
           >
-            <option value="">Ir a...</option>
-            <option value="categorias">Categorías</option>
-            <option value="marcas">Marcas</option>
-            <optgroup label="Ordenar productos">
-              <option value="nombre">Nombre (A-Z)</option>
-              <option value="-nombre">Nombre (Z-A)</option>
-              <option value="precio">Precio (menor a mayor)</option>
-              <option value="-precio">Precio (mayor a menor)</option>
-              <option value="stock">Stock (mayor a menor)</option>
-              <option value="-stock">Stock (menor a mayor)</option>
-            </optgroup>
+            <option value="">Ordenar...</option>
+            <option value="nombre">Nombre (A-Z)</option>
+            <option value="-nombre">Nombre (Z-A)</option>
+            <option value="precio">Precio (menor a mayor)</option>
+            <option value="-precio">Precio (mayor a menor)</option>
+            <option value="stock">Stock (mayor a menor)</option>
+            <option value="-stock">Stock (menor a mayor)</option>
           </select>
         </div>
-        <div className="col-md-7">
+        <div className="col-md-4">
           <input
             type="text"
             className="form-control"
@@ -139,6 +201,8 @@ const ProductosList = () => {
             onClick={() => {
               setSearchQuery('');
               setSortBy('');
+              setFilterMarca('');
+              setFilterCategoria('');
             }}
           >
             <i className="fas fa-times me-1"></i>Limpiar

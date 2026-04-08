@@ -12,7 +12,7 @@ const Checkout = () => {
   const [direcciones, setDirecciones] = useState([]);
   const [selectedDireccionId, setSelectedDireccionId] = useState('');
   const [showNewAddress, setShowNewAddress] = useState(false);
-  const [newAddress, setNewAddress] = useState({ direccion: '', barrio: '', telefono: '' });
+  const [newAddress, setNewAddress] = useState({ direccion: '', barrio: '', telefono: '', tipo: 'casa' });
   
   const [formData, setFormData] = useState({
     direccion: '',
@@ -36,21 +36,16 @@ const Checkout = () => {
       if (user && user.id) {
         try {
           const dirs = await getDirecciones();
-          setDirecciones(dirs);
-          // Seleccionar la primera dirección si existe
-          if (dirs.length > 0 && !selectedDireccionId) {
-            setSelectedDireccionId(dirs[0].id);
+          setDirecciones(dirs || []);
+          // Seleccionar la opción "Mis datos registrados" por defecto
+          if (!selectedDireccionId) {
+            setSelectedDireccionId('registered');
+            // Inicializar con datos del usuario registrado
             setFormData(prev => ({
               ...prev,
-              direccion: dirs[0].direccion,
-              barrio: dirs[0].barrio,
-              telefono: dirs[0].telefono || user.telefono || ''
-            }));
-          } else if (!selectedDireccionId) {
-            // Si no hay direcciones, inicializar con datos del usuario
-            setFormData(prev => ({
-              ...prev,
-              telefono: user.telefono || ''
+              direccion: user.direccion || '',
+              barrio: user.barrio || '',
+              telefono: user.telefono || user.celular || ''
             }));
           }
         } catch (err) {
@@ -59,7 +54,17 @@ const Checkout = () => {
       }
     };
     loadDirecciones();
-  }, [user, selectedDireccionId]);
+  }, [user]);
+
+  // Inicializar teléfono con datos del usuario
+  useEffect(() => {
+    if (user && !formData.telefono) {
+      setFormData(prev => ({
+        ...prev,
+        telefono: user.telefono || user.celular || ''
+      }));
+    }
+  }, [user]);
 
   const subtotal = cartItemsWithDetails.reduce(
     (sum, item) => sum + (item.producto.precio || 0) * item.cantidad,
@@ -116,6 +121,16 @@ const Checkout = () => {
       setShowNewAddress(true);
       setSelectedDireccionId('');
       setFormData(prev => ({ ...prev, direccion: '', barrio: '', telefono: '' }));
+    } else if (id === 'registered') {
+      setShowNewAddress(false);
+      setSelectedDireccionId('registered');
+      // Cargar datos del usuario registrado
+      setFormData(prev => ({
+        ...prev,
+        direccion: user.direccion || '',
+        barrio: user.barrio || '',
+        telefono: user.telefono || user.celular || ''
+      }));
     } else {
       setShowNewAddress(false);
       setSelectedDireccionId(id);
@@ -134,11 +149,18 @@ const Checkout = () => {
   const handleAddAddress = async () => {
     try {
       if (newAddress.direccion.trim() && user) {
+        // Verificar límite de 3 direcciones
+        if (direcciones.length >= 3) {
+          alert('Máximo 3 direcciones guardadas. Por favor elimina una para agregar una nueva.');
+          return;
+        }
+        
         const dirData = {
           nombre: `${newAddress.direccion} ${newAddress.barrio || ''}`.trim(),
           direccion: newAddress.direccion,
           barrio: newAddress.barrio,
-          telefono: newAddress.telefono || user.telefono,
+          telefono: newAddress.telefono || user.telefono || user.celular || '',
+          tipo: newAddress.tipo || 'casa',
           es_predeterminada: direcciones.length === 0
         };
         const nuevaDir = await createDireccion(dirData);
@@ -151,7 +173,7 @@ const Checkout = () => {
           telefono: nuevaDir.telefono
         }));
         setShowNewAddress(false);
-        setNewAddress({ direccion: '', barrio: '', telefono: '' });
+        setNewAddress({ direccion: '', barrio: '', telefono: '', tipo: 'casa' });
       }
     } catch (e) {
       console.error('Error agregando dirección:', e);
@@ -285,29 +307,39 @@ const Checkout = () => {
 
                 {formData.delivery && (
                   <>
-                    {direcciones.length > 0 && !showNewAddress && (
-                      <div className="mb-3">
-                        <label htmlFor="savedAddress" className="form-label">Dirección de entrega</label>
-                        <select
-                          className="form-select"
-                          id="savedAddress"
-                          value={selectedDireccionId}
-                          onChange={handleDireccionSelect}
-                        >
-                          <option value="">Seleccionar dirección guardada...</option>
-                          {direcciones.map(addr => (
-                            <option key={addr.id} value={addr.id}>
-                              {addr.direccion} {addr.barrio ? `- ${addr.barrio}` : ''} {addr.es_predeterminada ? '(Principal)' : ''}
-                            </option>
-                          ))}
-                          <option value="new">+ Agregar nueva dirección</option>
-                        </select>
-                      </div>
-                    )}
+                    <div className="mb-3">
+                      <label htmlFor="savedAddress" className="form-label">Dirección de entrega</label>
+                      <select
+                        className="form-select"
+                        id="savedAddress"
+                        value={selectedDireccionId}
+                        onChange={handleDireccionSelect}
+                      >
+                        <option value="registered">Mis datos registrados</option>
+                        {direcciones.map(addr => (
+                          <option key={addr.id} value={addr.id}>
+                            {addr.direccion} {addr.barrio ? `- ${addr.barrio}` : ''} {addr.tipo ? `(${addr.tipo})` : ''} {addr.es_predeterminada ? '(Principal)' : ''}
+                          </option>
+                        ))}
+                        {direcciones.length < 3 && <option value="new">+ Agregar nueva dirección</option>}
+                      </select>
+                    </div>
 
                     {showNewAddress && (
                       <div className="card bg-light mb-3 p-3">
                         <h6 className="mb-3">Nueva Dirección</h6>
+                        <div className="mb-2">
+                          <label className="form-label">Tipo de residencia *</label>
+                          <select
+                            className="form-select"
+                            value={newAddress.tipo}
+                            onChange={e => setNewAddress({...newAddress, tipo: e.target.value})}
+                          >
+                            <option value="casa">Casa</option>
+                            <option value="apartamento">Apartamento</option>
+                            <option value="oficina">Oficina</option>
+                          </select>
+                        </div>
                         <div className="mb-2">
                           <label className="form-label">Dirección *</label>
                           <input
@@ -349,47 +381,43 @@ const Checkout = () => {
                       </div>
                     )}
 
-                    {(!direcciones.length || showNewAddress) && (
-                      <>
-                        <div className="mb-3">
-                          <label htmlFor="direccion" className="form-label">Dirección *</label>
-                          <input
-                            type="text"
-                            className={`form-control ${errors.direccion ? 'is-invalid' : ''}`}
-                            id="direccion"
-                            name="direccion"
-                            value={formData.direccion}
-                            onChange={handleChange}
-                            placeholder="Carrera 1 # 2-3"
-                          />
-                          {errors.direccion && <div className="invalid-feedback">{errors.direccion}</div>}
-                        </div>
+                    <div className="mb-3">
+                      <label htmlFor="direccion" className="form-label">Dirección *</label>
+                      <input
+                        type="text"
+                        className={`form-control ${errors.direccion ? 'is-invalid' : ''}`}
+                        id="direccion"
+                        name="direccion"
+                        value={formData.direccion}
+                        onChange={handleChange}
+                        placeholder="Carrera 1 # 2-3"
+                      />
+                      {errors.direccion && <div className="invalid-feedback">{errors.direccion}</div>}
+                    </div>
 
-                        <div className="mb-3">
-                          <label htmlFor="direccion2" className="form-label">Apartamento / Suite (opcional)</label>
-                          <input
-                            type="text"
-                            className="form-control"
-                            id="direccion2"
-                            name="direccion2"
-                            value={formData.direccion2}
-                            onChange={handleChange}
-                          />
-                        </div>
+                    <div className="mb-3">
+                      <label htmlFor="direccion2" className="form-label">Apartamento / Suite (opcional)</label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        id="direccion2"
+                        name="direccion2"
+                        value={formData.direccion2}
+                        onChange={handleChange}
+                      />
+                    </div>
 
-                        <div className="mb-3">
-                          <label htmlFor="barrio" className="form-label">Barrio</label>
-                          <input
-                            type="text"
-                            className="form-control"
-                            id="barrio"
-                            name="barrio"
-                            value={formData.barrio}
-                            onChange={handleChange}
-                          />
-                        </div>
-                      </>
-                    )}
+                    <div className="mb-3">
+                      <label htmlFor="barrio" className="form-label">Barrio</label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        id="barrio"
+                        name="barrio"
+                        value={formData.barrio}
+                        onChange={handleChange}
+                      />
+                    </div>
 
                     <div className="mb-3">
                       <label htmlFor="telefono" className="form-label">Teléfono *</label>

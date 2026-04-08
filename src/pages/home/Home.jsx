@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useContext, useRef, useLayoutEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { getBanners, getMarcas, getProductos, getCategorias, createBanner, updateBanner, deleteBanner, formatPrice } from '../../services/dataService';
+import { getBanners, getMarcas, getProductos, getCategorias, createBanner, updateBanner, deleteBanner, formatPrice, getTopProductos } from '../../services/dataService';
 import CartContext from '../../context/CartContext';
 import { useAuth } from '../../context/AuthContext';
 
@@ -45,17 +45,37 @@ const Home = () => {
         const m = await getMarcas() || [];
         setMarcas(m.filter(x => x.activo !== false));
 
+        // Obtener productos más vendidos (top 10 para el carrusel)
+        const topVendidos = await getTopProductos(10);
         const p = await getProductos() || [];
         const activos = p.filter(x => x.activo !== false);
-        activos.sort((a, b2) => new Date(b2.fechaCreacion || 0) - new Date(a.fechaCreacion || 0));
-        setDestacados(activos.slice(0, 6));
+        
+        // Si hay ventas, usar los más vendidos; si no, usar los más recientes
+        if (topVendidos.length > 0) {
+            const topIds = topVendidos.map(t => t.productoId);
+            const topProducts = activos.filter(prod => topIds.includes(prod.id));
+            // Mantener el orden de los más vendidos
+            const orderedTop = topIds.map(id => topProducts.find(p => String(p.id) === String(id))).filter(Boolean);
+            // Si no encuentra productos (IDs no coinciden), usar los más recientes
+            if (orderedTop.length > 0) {
+                setDestacados(orderedTop);
+            } else {
+                activos.sort((a, b2) => new Date(b2.fechaCreacion || 0) - new Date(a.fechaCreacion || 0));
+                setDestacados(activos.slice(0, 12));
+            }
+        } else {
+            activos.sort((a, b2) => new Date(b2.fechaCreacion || 0) - new Date(a.fechaCreacion || 0));
+            setDestacados(activos.slice(0, 12));
+        }
 
         const cats = await getCategorias() || [];
         setCategorias(cats.filter(x => x.activo !== false));
     };
 
     const trackRef = useRef(null);
+    const trackRefProductos = useRef(null);
     const [translatePx, setTranslatePx] = useState(0);
+    const [translatePxProductos, setTranslatePxProductos] = useState(0);
 
     useLayoutEffect(() => {
         const el = trackRef.current;
@@ -67,6 +87,17 @@ const Home = () => {
         const dur = Math.max(8, Math.round(half / 60));
         el.style.animationDuration = `${dur}s`;
     }, [marcas]);
+
+    useLayoutEffect(() => {
+        const el = trackRefProductos.current;
+        if (!el) return;
+        const total = el.scrollWidth || 0;
+        const half = Math.floor(total / 2);
+        setTranslatePxProductos(-half);
+        el.style.setProperty('--translate-x', `${-half}px`);
+        const dur = Math.max(8, Math.round(half / 60));
+        el.style.animationDuration = `${dur}s`;
+    }, [destacados]);
 
     const [successMessage, setSuccessMessage] = useState('');
     const [modalCantidad, setModalCantidad] = useState(1);
@@ -182,22 +213,24 @@ const Home = () => {
                 <div className="text-muted mb-5">No hay marcas disponibles.</div>
             )}
 
-            {/* Productos Destacados */}
-            <h3 className="mb-4"><Link to="/productos" className="text-decoration-none">Productos Destacados</Link></h3>
+            {/* Productos Destacados - Carrusel infinito */}
+            <h3 className="mb-3"><Link to="/productos" className="text-decoration-none">Productos Destacados</Link></h3>
             {destacados.length > 0 ? (
-                <div className="row g-4 mb-5">
-                    {destacados.map(p => (
-                        <div key={p.id} className="col-6 col-sm-4 col-md-3 col-lg-2">
-                            <div className="card shadow-sm h-100" style={{ cursor: 'pointer', overflow: 'fit' }} onClick={() => openProducto(p)}>
-                                <img
+                <div className="infinite-brands-wrapper productos mb-5">
+                    <div ref={trackRefProductos} className="infinite-brands-track" style={{ ['--translate-x']: `${translatePxProductos}px` }}>
+                        {([...(destacados || []), ...(destacados || [])]).map((p, idx) => (
+                            <div key={`${p.id}-${idx}`} className="infinite-product-item">
+                                <div className="card shadow-sm h-100" style={{ cursor: 'pointer' }} onClick={() => openProducto(p)}>
+                                    <img
                                         src={p.fotoUrl || p.foto || 'https://via.placeholder.com/400'}
                                         className="card-img-top"
                                         alt={p.nombre}
-                                        style={{ height: 180, objectFit: 'contain', backgroundColor: 'var(--surface2)' }}
+                                        style={{ backgroundColor: 'var(--surface2)' }}
                                     />
+                                </div>
                             </div>
-                        </div>
-                    ))}
+                        ))}
+                    </div>
                 </div>
             ) : (
                 <div className="text-muted mb-5">No hay productos destacados.</div>

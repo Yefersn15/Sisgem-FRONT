@@ -7,9 +7,6 @@ import {
   getUsuarios,
   getOrdenesCompra,
   getDomicilios,
-  getVentasDelDia,
-  getVentasDeLaSemana,
-  getVentasDelMes,
   getTopProductos,
   getTopByBrand,
   getTopByCategory,
@@ -49,15 +46,23 @@ const AdminDashboard = () => {
       const hoy = new Date();
       hoy.setHours(0, 0, 0, 0);
       const ventasHoy = ventas.filter(v => {
-        const fecha = new Date(v.fechaVenta || v.fecha);
+        const fecha = new Date(v.fecha || v.fechaVenta);
         return fecha >= hoy;
       });
 
       // Calcular ventas del mes
       const inicioMes = new Date(hoy.getFullYear(), hoy.getMonth(), 1);
       const ventasMes = ventas.filter(v => {
-        const fecha = new Date(v.fechaVenta || v.fecha);
+        const fecha = new Date(v.fecha || v.fechaVenta);
         return fecha >= inicioMes;
+      });
+
+      // Calcular ventas de la semana
+      const hace7Dias = new Date(hoy);
+      hace7Dias.setDate(hoy.getDate() - 7);
+      const ventasSemana = ventas.filter(v => {
+        const fecha = new Date(v.fecha || v.fechaVenta);
+        return fecha >= hace7Dias && fecha <= hoy;
       });
 
       // Domicilios pendientes (usar estados unificados en lowercase)
@@ -68,16 +73,13 @@ const AdminDashboard = () => {
 
       // Ventas recientes (últimas 5)
       const recientes = [...ventas]
-        .sort((a, b) => new Date(b.fechaVenta || b.fecha) - new Date(a.fechaVenta || a.fecha))
+        .sort((a, b) => new Date(b.fecha || b.fechaVenta) - new Date(a.fecha || a.fechaVenta))
         .slice(0, 5);
-
-      // Datos de la semana (para estadística superior y gráfico)
-      const ventasSemanaData = await getVentasDeLaSemana();
 
       setStats({
         ventasHoy: ventasHoy.reduce((sum, v) => sum + (v.total || 0), 0),
         ventasMes: ventasMes.reduce((sum, v) => sum + (v.total || 0), 0),
-        ventasSemana: ventasSemanaData.reduce((sum, v) => sum + (v.total || 0), 0),
+        ventasSemana: ventasSemana.reduce((sum, v) => sum + (v.total || 0), 0),
         productos: productos.length,
         proveedores: proveedores.length,
         usuarios: usuarios.length,
@@ -86,9 +88,9 @@ const AdminDashboard = () => {
       });
 
       setVentasRecientes(recientes);
-      setTopProductos(await getTopProductos(5));
-      setTopMarcas(await getTopByBrand(5));
-      setTopCategorias(await getTopByCategory(5));
+      setTopProductos(await getTopProductos(15));
+      setTopMarcas(await getTopByBrand(15));
+      setTopCategorias(await getTopByCategory(15));
 
       // Datos para gráfico de últimos 7 días
       const dias = [];
@@ -96,7 +98,7 @@ const AdminDashboard = () => {
         const fecha = new Date(hoy);
         fecha.setDate(hoy.getDate() - i);
         const fechaStr = fecha.toISOString().split('T')[0];
-        const ventasDiaData = ventasSemanaData.filter(v => (v.fechaVenta || v.fecha).split('T')[0] === fechaStr);
+        const ventasDiaData = ventas.filter(v => (v.fecha || v.fechaVenta || '').toString().split('T')[0] === fechaStr);
         dias.push({
           dia: fecha.toLocaleDateString('es-ES', { weekday: 'short' }),
           ventas: ventasDiaData.reduce((s, v) => s + (v.total || 0), 0)

@@ -85,7 +85,7 @@ const ProductosPorCategoria = () => {
     return (
       <div className="container mt-4">
         <div className="alert alert-danger">Categoría no encontrada</div>
-        <Link to="/categorias" className="btn btn-primary">Volver a Categorías</Link>
+        <Link to="/productos" className="btn btn-primary">Ver Todos los Productos</Link>
       </div>
     );
   }
@@ -94,9 +94,6 @@ const ProductosPorCategoria = () => {
     <div className="container my-4">
       <div className="d-flex justify-content-between align-items-center mb-3">
         <div>
-          <Link to="/categorias" className="btn btn-secondary me-2">
-            <i className="fas fa-arrow-left me-2"></i>Volver a Categorías
-          </Link>
           <Link to="/productos" className="btn btn-primary">
             <i className="fas fa-box me-2"></i>Ver Todos los Productos
           </Link>

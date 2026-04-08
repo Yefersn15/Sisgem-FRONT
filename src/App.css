@@ -1109,6 +1109,30 @@ label {
   object-fit: contain;
 }
 
+/* Carrusel de productos destacados */
+.infinite-product-item {
+  flex: 0 0 auto;
+  width: 160px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+}
+.infinite-product-item .card {
+  width: 100%;
+  border: none;
+}
+.infinite-product-item .card-img-top {
+  height: 140px;
+  object-fit: contain;
+  border-radius: 8px;
+}
+
+/* Carrusel de productos - reducir gap */
+.infinite-brands-wrapper.productos .infinite-brands-track {
+  gap: 12px;
+}
+
 @keyframes scroll-left {
   0% {
     transform: translateX(0);
@@ -2040,4 +2064,23 @@ body * {
   --bs-warning-rgb: 255, 179, 71;
   --bs-secondary-rgb: 136, 136, 132;
   --bs-dark-rgb: 240, 240, 238;
+}
+
+/* Recharts tooltip para tema oscuro */
+.recharts-tooltip-wrapper {
+  background-color: var(--surface) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 8px !important;
+}
+.recharts-default-tooltip {
+  background-color: var(--surface) !important;
+  border: 1px solid var(--border) !important;
+  color: var(--text-primary) !important;
+}
+.recharts-tooltip-label {
+  color: var(--text-primary) !important;
+  font-weight: 600 !important;
+}
+.recharts-tooltip-item {
+  color: var(--text-secondary) !important;
 }

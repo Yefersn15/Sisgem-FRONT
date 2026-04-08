@@ -11,12 +11,12 @@ export const openPrintVoucher = async (venta, domicilio, options = {}) => {
     const blockedVentaStates = ['Anulada', 'Rechazada', 'Cancelado'];
     if (blockedVentaStates.includes(venta.estado)) { alert('No se puede imprimir voucher de una venta anulada o cancelada'); return; }
     if (domicilio && ['Anulada', 'Rechazada', 'Cancelado'].includes(domicilio.estado)) { alert('No se puede imprimir voucher de un domicilio anulado/cancelado'); return; }
-    const fecha = venta?.fechaVenta ? new Date(venta.fechaVenta).toLocaleString() : new Date().toLocaleString();
-    const detalleRows = (venta.detalleVenta || []).map(d => `
+    const fecha = venta?.fecha ? new Date(venta.fecha).toLocaleString() : new Date().toLocaleString();
+    const detalleRows = (venta.productos || []).map(d => `
       <tr>
-        <td style="padding:6px;border:1px solid #ddd">${(d.productoSnapshot?.nombre) || 'Producto'}</td>
+        <td style="padding:6px;border:1px solid #ddd">${(d.productoSnapshot?.nombre) || (d.producto?.nombre) || 'Producto'}</td>
         <td style="padding:6px;border:1px solid #ddd;text-align:center">${d.cantidad}</td>
-        <td style="padding:6px;border:1px solid #ddd;text-align:right">${formatPrice(d.precioUnitario||0)}</td>
+        <td style="padding:6px;border:1px solid #ddd;text-align:right">${formatPrice(d.precioUnitario||d.precio_unitario||0)}</td>
         <td style="padding:6px;border:1px solid #ddd;text-align:right">${formatPrice(d.subtotal||0)}</td>
       </tr>`).join('');
 
@@ -72,7 +72,7 @@ export const openPrintVoucher = async (venta, domicilio, options = {}) => {
 
         <div style="margin-top:8px;text-align:right">
           <div style="font-size:${forBag ? '12px' : '14px'}">Subtotal: <strong>${formatPrice(venta.subtotal||0)}</strong></div>
-          <div style="font-size:${forBag ? '12px' : '14px'}">Envío: <strong>${formatPrice(venta.shipping||0)}</strong></div>
+          <div style="font-size:${forBag ? '12px' : '14px'}">Envío: <strong>${formatPrice(venta.shipping||(parseFloat(venta.total||0) - parseFloat(venta.subtotal||0))||0)}</strong></div>
           <div style="margin-top:6px;font-size:${forBag ? '14px' : '18px'}"><strong>Total: ${formatPrice(venta.total||0)}</strong></div>
         </div>
 
