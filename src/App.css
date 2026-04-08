@@ -3,56 +3,71 @@
    ================================ */
 :root {
   /* Colores base */
-  --bg: #f8fafc;               /* Fondo general */
-  --surface: #ffffff;          /* Tarjetas, paneles */
-  --surface2: #f1f5f9;         /* Fondo secundario (encabezados de tabla, inputs) */
-  --surface3: #e9eef3;         /* Fondo terciario (botones secundarios) */
+  --bg: #f8fafc;
+  /* Fondo general */
+  --surface: #ffffff;
+  /* Tarjetas, paneles */
+  --surface2: #f1f5f9;
+  /* Fondo secundario (encabezados de tabla, inputs) */
+  --surface3: #e9eef3;
+  /* Fondo terciario (botones secundarios) */
 
   /* Bordes */
-  --border: #e2e8f0;           /* Borde principal */
-  --border2: #cbd5e1;          /* Borde más claro */
+  --border: #e2e8f0;
+  /* Borde principal */
+  --border2: #cbd5e1;
+  /* Borde más claro */
 
   /* Textos */
-  --text-primary: #0f172a;     /* Texto principal */
-  --text-secondary: #334155;   /* Texto secundario */
-  --text-muted: #64748b;       /* Texto deshabilitado o placeholder */
+  --text-primary: #0f172a;
+  /* Texto principal */
+  --text-secondary: #334155;
+  /* Texto secundario */
+  --text-muted: #64748b;
+  /* Texto deshabilitado o placeholder */
 
   /* Colores de acento */
-  --accent: #3b82f6;           /* Color principal (azul) */
-  --accent-dim: rgba(59,130,246,0.1);
+  --accent: #3b82f6;
+  /* Color principal (azul) */
+  --accent-dim: rgba(59, 130, 246, 0.1);
   --accent-hover: #2563eb;
 
   /* Header / Footer llamativos (tema claro) */
   --header-bg: linear-gradient(90deg, #3b82f6 0%, #06b6d4 50%, #f59e0b 100%);
   --header-text: #ffffff;
-  --header-overlay: rgba(0,0,0,0.06);
+  --header-overlay: rgba(0, 0, 0, 0.06);
 
   /* Estados */
-  --danger: #ef4444;           /* Rojo para eliminar, errores */
-  --danger-dim: rgba(239,68,68,0.1);
-  --warning: #f59e0b;          /* Naranja para advertencias, cambios de estado */
-  --warning-dim: rgba(245,158,11,0.1);
-  --success: #10b981;          /* Verde para éxito, confirmación */
-  --success-dim: rgba(16,185,129,0.1);
-  --info: #06b6d4;             /* Azul cielo para información */
-  --info-dim: rgba(6,182,212,0.1);
-  --primary: #3b82f6;          /* Azul para editar */
-  --primary-dim: rgba(59,130,246,0.1);
+  /* PRIMARY (Azul) → Acciones principales de gestión */
+  --primary: #3b82f6;
+  /* Ver, Editar, Crear, Guardar, Agregar */
+  --primary-dim: rgba(59, 130, 246, 0.1);
 
-  /* ----------------------------   Estandarización de botones de acción
-    btn-outline-primary: Ver, Editar, Crear, Guardar, Agregar
-    btn-outline-success: Aprobar, Convertir, Aceptar
-    btn-outline-danger: Eliminar, Anular, Rechazar
-    btn-outline-warning: Desactivar
-    btn-outline-success: Activar (cuando no hay conflicto)
-    btn-secondary: Cancelar, Volver, Limpiar
-  ---------------------------- */
+  /* SUCCESS (Verde) → Acciones positivas / confirmaciones */
+  --success: #10b981;
+  /* Aprobar, Convertir, Aceptar, Activar */
+  --success-dim: rgba(16, 185, 129, 0.1);
+
+  /* DANGER (Rojo) → Acciones destructivas */
+  --danger: #ef4444;
+  /* Eliminar, Anular, Rechazar */
+  --danger-dim: rgba(239, 68, 68, 0.1);
+
+  /* WARNING (Naranja) → Cambios de estado o precaución */
+  --warning: #f59e0b;
+  /* Desactivar */
+  --warning-dim: rgba(245, 158, 11, 0.1);
+
+  /* INFO (Azul cielo) → Información (opcional para “Ver” si se separa de primary) */
+  --info: #06b6d4;
+  --info-dim: rgba(6, 182, 212, 0.1);
+
 
   /* Efectos y medidas */
   --radius: 8px;
   --radius-lg: 12px;
-  --shadow: 0 1px 3px rgba(0,0,0,0.1);
-  --shadow-lg: 0 10px 25px -5px rgba(0,0,0,0.1);
+  --shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
   --transition: all 0.2s ease;
 
   /* Layout */
@@ -66,48 +81,84 @@
 
 /* Modal backdrop color (can be tuned per theme) */
 :root {
-  --modal-backdrop: rgba(0,0,0,0.45);
+  --modal-backdrop: rgba(0, 0, 0, 0.45);
 }
 
 /* ================================
-   DARK THEME
-   ================================ */
+    DARK THEME
+    ================================ */
 .theme-dark {
   /* Dark theme tuned for low-light comfort */
-  --bg: #0b1120;           /* very dark blue-black for page background */
-  --surface: #0f1724;      /* panels, cards */
-  --surface2: #111827;     /* secondary surfaces (inputs, headers) */
-  --surface3: #0d1116;     /* tertiary surfaces */
+  --bg: #0b1120;
+  /* very dark blue-black for page background */
+  --surface: #0f1724;
+  /* panels, cards */
+  --surface2: #111827;
+  /* secondary surfaces (inputs, headers) */
+  --surface3: #0d1116;
+  /* tertiary surfaces */
 
-  --border: rgba(255,255,255,0.06);   /* subtle light border on dark */
-  --border2: rgba(255,255,255,0.03);
+  --border: rgba(255, 255, 255, 0.06);
+  /* subtle light border on dark */
+  --border2: rgba(255, 255, 255, 0.03);
 
-  --text-primary: #e6f0fb; /* soft off-white for comfortable reading */
-  --text-secondary: #d4dde8; /* very bright secondary text for dark mode */
-  --text-muted: #b0bcc8;    /* much more visible muted text */
+  --text-primary: #e6f0fb;
+  /* soft off-white for comfortable reading */
+  --text-secondary: #d4dde8;
+  /* very bright secondary text for dark mode */
+  --text-muted: #b0bcc8;
+  /* much more visible muted text */
 
   /* Keep accent blue for recognizability but slightly brighter */
   --accent: #2b6ef6;
-  --accent-dim: rgba(43,110,246,0.08);
+  --accent-dim: rgba(43, 110, 246, 0.08);
   --accent-hover: #1e56d6;
 
   /* En tema oscuro usar superficies neutras para header/footer */
   --header-bg: var(--surface);
   --header-text: var(--text-primary);
-  --header-overlay: rgba(255,255,255,0.02);
+  --header-overlay: rgba(255, 255, 255, 0.02);
 
   --danger: #ff6b6b;
-  --danger-dim: rgba(255,107,107,0.08);
+  --danger-dim: rgba(255, 107, 107, 0.08);
   --warning: #f59e0b;
-  --warning-dim: rgba(245,158,11,0.08);
+  --warning-dim: rgba(245, 158, 11, 0.08);
   --success: #34d399;
-  --success-dim: rgba(52,211,153,0.08);
+  --success-dim: rgba(52, 211, 153, 0.08);
   --info: #60a5fa;
-  --info-dim: rgba(96,165,250,0.08);
+  --info-dim: rgba(96, 165, 250, 0.08);
 
-  --shadow: 0 6px 24px rgba(2,6,23,0.6);
-  --shadow-lg: 0 12px 40px rgba(2,6,23,0.65);
-  --modal-backdrop: rgba(2,6,23,0.6);
+  --shadow: 0 6px 24px rgba(2, 6, 23, 0.6);
+  --shadow-lg: 0 12px 40px rgba(2, 6, 23, 0.65);
+  --modal-backdrop: rgba(2, 6, 23, 0.6);
+}
+
+/* Tablas en tema oscuro - corregir fondo de celdas y texto */
+.theme-dark .table>tbody>tr>td,
+.theme-dark .table>thead>tr>th {
+  background-color: var(--surface) !important;
+  color: var(--text-primary) !important;
+}
+
+.theme-dark .table tbody tr:hover>td {
+  background-color: var(--surface2) !important;
+  color: var(--text-primary) !important;
+}
+
+.theme-dark .table thead th {
+  background-color: var(--surface2) !important;
+  color: var(--text-primary) !important;
+}
+
+/* Filtros y búsquedas - asegurar fondo y texto correcto en tema oscuro */
+.theme-dark .card .card-body {
+  background-color: var(--surface) !important;
+}
+
+.theme-dark .card .card-body input,
+.theme-dark .card .card-body select {
+  background-color: var(--surface2) !important;
+  color: var(--text-primary) !important;
 }
 
 /* ================================
@@ -146,7 +197,9 @@
 }
 
 /* Transición suave para todos los elementos al cambiar de tema */
-*, *::before, *::after {
+*,
+*::before,
+*::after {
   transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease !important;
 }
 
@@ -163,13 +216,16 @@ body {
   width: 8px;
   height: 8px;
 }
+
 ::-webkit-scrollbar-track {
   background: var(--surface2);
 }
+
 ::-webkit-scrollbar-thumb {
   background: var(--border2);
   border-radius: 4px;
 }
+
 ::-webkit-scrollbar-thumb:hover {
   background: var(--text-muted);
 }
@@ -177,21 +233,30 @@ body {
 /* ================================
    TYPOGRAPHY
    ================================ */
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   color: var(--text-primary);
   font-weight: 600;
   line-height: 1.2;
 }
+
 a {
   color: var(--accent);
   text-decoration: none;
   transition: var(--transition);
 }
+
 a:hover {
   color: var(--accent-hover);
   text-decoration: underline;
 }
-code, pre {
+
+code,
+pre {
   font-family: var(--font-mono);
   background: var(--surface2);
   padding: 0.2rem 0.4rem;
@@ -231,6 +296,7 @@ code, pre {
   flex-direction: column;
   padding: 24px 0;
 }
+
 .sidebar-brand {
   padding: 0 20px 28px;
   border-bottom: 1px solid var(--border);
@@ -238,12 +304,14 @@ code, pre {
   font-size: 18px;
   color: var(--accent);
 }
+
 .sidebar-nav {
   padding: 16px 12px;
   display: flex;
   flex-direction: column;
   gap: 4px;
 }
+
 .sidebar-nav a {
   display: flex;
   align-items: center;
@@ -255,10 +323,12 @@ code, pre {
   text-decoration: none;
   transition: var(--transition);
 }
+
 .sidebar-nav a:hover {
   background: var(--surface2);
   color: var(--text-primary);
 }
+
 .sidebar-nav a.active {
   background: var(--accent);
   color: white;
@@ -276,14 +346,17 @@ code, pre {
   justify-content: space-between;
   padding: 0 32px;
 }
+
 .topbar-title {
   font-size: 20px;
   font-weight: 700;
 }
+
 .topbar-date {
   font-size: 13px;
   color: var(--text-muted);
 }
+
 .theme-toggle {
   background: none;
   border: none;
@@ -295,6 +368,7 @@ code, pre {
   border-radius: 50%;
   transition: var(--transition);
 }
+
 .theme-toggle:hover {
   background: var(--surface2);
   color: var(--accent);
@@ -318,6 +392,7 @@ code, pre {
   background: transparent;
   color: var(--text-primary);
 }
+
 .btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
@@ -329,6 +404,7 @@ code, pre {
   color: white;
   border-color: var(--accent);
 }
+
 .btn-primary:hover:not(:disabled) {
   background: var(--accent-hover);
   border-color: var(--accent-hover);
@@ -340,6 +416,7 @@ code, pre {
   color: white;
   border-color: var(--success);
 }
+
 .btn-success:hover:not(:disabled) {
   background: #0ea271;
   border-color: #0ea271;
@@ -351,6 +428,7 @@ code, pre {
   color: white;
   border-color: var(--danger);
 }
+
 .btn-danger:hover:not(:disabled) {
   background: #dc2626;
   border-color: #dc2626;
@@ -362,6 +440,7 @@ code, pre {
   color: #0f172a;
   border-color: var(--warning);
 }
+
 .btn-warning:hover:not(:disabled) {
   background: #f59e0b;
 }
@@ -372,6 +451,7 @@ code, pre {
   border-color: var(--border);
   color: var(--text-primary);
 }
+
 .btn-secondary:hover:not(:disabled) {
   background: var(--surface2);
 }
@@ -382,6 +462,7 @@ code, pre {
   border-color: var(--border);
   color: var(--text-secondary);
 }
+
 .btn-ghost:hover:not(:disabled) {
   border-color: var(--accent);
   color: var(--accent);
@@ -393,6 +474,7 @@ code, pre {
   border-color: var(--accent);
   color: var(--accent);
 }
+
 .btn-outline-primary:hover:not(:disabled) {
   background: var(--accent-dim);
 }
@@ -401,6 +483,7 @@ code, pre {
   border-color: var(--danger);
   color: var(--danger);
 }
+
 .btn-outline-danger:hover:not(:disabled) {
   background: var(--danger-dim);
 }
@@ -409,6 +492,7 @@ code, pre {
   border-color: var(--success);
   color: var(--success);
 }
+
 .btn-outline-success:hover:not(:disabled) {
   background: var(--success-dim);
 }
@@ -419,6 +503,7 @@ code, pre {
   font-size: 12px;
   gap: 4px;
 }
+
 .btn-lg {
   padding: 12px 24px;
   font-size: 16px;
@@ -434,9 +519,11 @@ code, pre {
   box-shadow: var(--shadow);
   transition: var(--transition);
 }
+
 .card:hover {
   box-shadow: var(--shadow-lg);
 }
+
 .card-header {
   background: var(--surface2);
   border-bottom: 1px solid var(--border);
@@ -446,9 +533,11 @@ code, pre {
   border-top-left-radius: inherit;
   border-top-right-radius: inherit;
 }
+
 .card-body {
   padding: 20px;
 }
+
 .card-footer {
   background: var(--surface2);
   border-top: 1px solid var(--border);
@@ -467,9 +556,11 @@ code, pre {
   cursor: pointer;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
+
 .productCard:hover {
   transform: translateY(-4px);
 }
+
 .productImage {
   height: 250px;
   object-fit: contain;
@@ -481,6 +572,7 @@ code, pre {
   max-height: 65vh;
   overflow: auto;
 }
+
 .searchRow {
   gap: 0.5rem;
 }
@@ -491,11 +583,26 @@ code, pre {
   border-radius: 8px;
   transition: box-shadow 0.2s;
 }
-.domicilioCard.pendiente { border-left-color: #ffc107; }
-.domicilioCard.aprobado { border-left-color: #0d6efd; }
-.domicilioCard.enviado { border-left-color: #0dcaf0; }
-.domicilioCard.entregado { border-left-color: #198754; }
-.domicilioCard.cancelado { border-left-color: #dc3545; }
+
+.domicilioCard.pendiente {
+  border-left-color: #ffc107;
+}
+
+.domicilioCard.aprobado {
+  border-left-color: #0d6efd;
+}
+
+.domicilioCard.enviado {
+  border-left-color: #0dcaf0;
+}
+
+.domicilioCard.entregado {
+  border-left-color: #198754;
+}
+
+.domicilioCard.cancelado {
+  border-left-color: #dc3545;
+}
 
 .repartidorInfo {
   background-color: var(--surface2);
@@ -509,10 +616,12 @@ code, pre {
    ================================ */
 
 /* Navbar (override .bg-dark .navbar-dark from Bootstrap) */
-.navbar.bg-dark, .navbar {
+.navbar.bg-dark,
+.navbar {
   background-color: var(--surface) !important;
   border-bottom: 1px solid var(--border) !important;
 }
+
 .navbar.navbar-dark .navbar-brand,
 .navbar.navbar-dark .nav-link,
 .navbar .text-light,
@@ -528,6 +637,7 @@ code, pre {
   border-color: var(--border) !important;
   background: transparent !important;
 }
+
 .navbar .btn-outline-light:hover {
   background: var(--surface2) !important;
   color: var(--text-primary) !important;
@@ -539,15 +649,18 @@ code, pre {
   color: var(--text-primary) !important;
   border-right: 1px solid var(--border) !important;
 }
+
 .offcanvas .offcanvas-header,
 .offcanvas .offcanvas-body {
   color: var(--text-primary) !important;
 }
+
 .offcanvas .btn-close {
   filter: none;
 }
+
 .offcanvas-backdrop.show {
-  background: rgba(0,0,0,0.3) !important;
+  background: rgba(0, 0, 0, 0.3) !important;
 }
 
 /* Footer: override bg-dark + text-white to use variables */
@@ -556,21 +669,44 @@ footer.bg-dark {
   color: var(--text-primary) !important;
   border-top: 1px solid var(--border) !important;
 }
+
 footer.bg-dark .text-white {
   color: var(--text-primary) !important;
 }
 
 /* Small helpers to make badges and outline buttons follow theme */
-.badge.bg-secondary { background: var(--surface2) !important; color: var(--text-secondary) !important; }
-.btn-outline-light, .btn-outline-secondary { color: var(--text-primary) !important; border-color: var(--border) !important; background: transparent !important; }
+.badge.bg-secondary {
+  background: var(--surface2) !important;
+  color: var(--text-secondary) !important;
+}
+
+.btn-outline-light,
+.btn-outline-secondary {
+  color: var(--text-primary) !important;
+  border-color: var(--border) !important;
+  background: transparent !important;
+}
 
 /* Theme-aware outline button used in header */
-.btn-outline-theme { color: var(--text-primary) !important; border-color: var(--border) !important; background: transparent !important; }
-.btn-outline-theme:hover { background: var(--surface2) !important; color: var(--text-primary) !important; }
+.btn-outline-theme {
+  color: var(--text-primary) !important;
+  border-color: var(--border) !important;
+  background: transparent !important;
+}
+
+.btn-outline-theme:hover {
+  background: var(--surface2) !important;
+  color: var(--text-primary) !important;
+}
 
 /* Navbar links should inherit theme text color */
-.navbar .nav-link { color: var(--text-secondary) !important; }
-.navbar .nav-link:hover { color: var(--text-primary) !important; }
+.navbar .nav-link {
+  color: var(--text-secondary) !important;
+}
+
+.navbar .nav-link:hover {
+  color: var(--text-primary) !important;
+}
 
 /* App-specific navbar class for clarity */
 .app-navbar {
@@ -579,20 +715,36 @@ footer.bg-dark .text-white {
   border-bottom: 0 !important;
   box-shadow: 0 6px 18px var(--header-overlay);
 }
+
 .app-navbar .navbar-brand,
 .app-navbar .nav-link,
 .app-navbar .btn,
 .app-navbar .navbar-text {
   color: var(--header-text) !important;
 }
-.app-navbar .nav-link { color: rgba(255,255,255,0.9) !important; }
-.app-navbar .nav-link:hover { color: #fff !important; background: transparent !important; }
-.app-navbar .btn-outline-theme { border-color: rgba(255,255,255,0.14) !important; color: var(--header-text) !important; }
-.app-navbar .btn-outline-theme:hover { background: rgba(255,255,255,0.06) !important; color: var(--header-text) !important; }
+
+.app-navbar .nav-link {
+  color: rgba(255, 255, 255, 0.9) !important;
+}
+
+.app-navbar .nav-link:hover {
+  color: #fff !important;
+  background: transparent !important;
+}
+
+.app-navbar .btn-outline-theme {
+  border-color: rgba(255, 255, 255, 0.14) !important;
+  color: var(--header-text) !important;
+}
+
+.app-navbar .btn-outline-theme:hover {
+  background: rgba(255, 255, 255, 0.06) !important;
+  color: var(--header-text) !important;
+}
 
 /* Footer using variables */
 .app-footer {
-  background: linear-gradient(180deg, rgba(0,0,0,0.06), transparent), var(--header-bg) !important;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.06), transparent), var(--header-bg) !important;
   color: var(--header-text) !important;
   border-top: 0 !important;
   box-shadow: 0 -6px 18px var(--header-overlay);
@@ -604,11 +756,20 @@ footer.bg-dark .text-white {
 }
 
 /* Override Bootstrap utility backgrounds to respect theme */
-.bg-light { background-color: var(--surface2) !important; color: var(--text-primary) !important; }
-.bg-white { background-color: var(--surface) !important; color: var(--text-primary) !important; }
+.bg-light {
+  background-color: var(--surface2) !important;
+  color: var(--text-primary) !important;
+}
+
+.bg-white {
+  background-color: var(--surface) !important;
+  color: var(--text-primary) !important;
+}
 
 /* Ensure card images use theme-friendly background */
-.card-img-top { background-color: var(--surface2) !important; }
+.card-img-top {
+  background-color: var(--surface2) !important;
+}
 
 /* Modals: use variables, rounded corners and consistent shadows */
 .modal-content {
@@ -618,20 +779,27 @@ footer.bg-dark .text-white {
   border-radius: var(--radius-lg) !important;
   box-shadow: var(--shadow-lg) !important;
 }
-.modal-header, .modal-footer {
+
+.modal-header,
+.modal-footer {
   background: var(--surface2) !important;
   border-bottom: 1px solid var(--border) !important;
 }
 
 /* Brands: make provider/brand logos similar to Yeferson style */
-.infinite-brand-item img, .brand-logo {
+.infinite-brand-item img,
+.brand-logo {
   width: 120px;
   height: 120px;
   object-fit: contain;
   filter: none;
   transition: transform 0.18s ease, filter 0.18s ease;
 }
-.infinite-brand-item img:hover, .brand-logo:hover { transform: scale(1.04); }
+
+.infinite-brand-item img:hover,
+.brand-logo:hover {
+  transform: scale(1.04);
+}
 
 /* Admin layout classes */
 .app-admin-sidebar {
@@ -639,20 +807,41 @@ footer.bg-dark .text-white {
   color: var(--text-primary) !important;
   border-right: 1px solid var(--border) !important;
 }
-.app-admin-sidebar .nav-link { color: var(--text-secondary) !important; }
-.app-admin-sidebar .nav-link.active { background: var(--accent) !important; color: white !important; }
-.app-admin-sidebar .text-muted { color: var(--text-muted) !important; }
 
-.admin-main-content { background: var(--bg) !important; min-height: calc(100vh - var(--topbar-height) - 50px); }
+.app-admin-sidebar .nav-link {
+  color: var(--text-secondary) !important;
+}
 
-.app-admin-footer { background: var(--surface) !important; color: var(--text-muted) !important; border-top: 1px solid var(--border) !important; }
+.app-admin-sidebar .nav-link.active {
+  background: var(--accent) !important;
+  color: white !important;
+}
+
+.app-admin-sidebar .text-muted {
+  color: var(--text-muted) !important;
+}
+
+.admin-main-content {
+  background: var(--bg) !important;
+  min-height: calc(100vh - var(--topbar-height) - 50px);
+}
+
+.app-admin-footer {
+  background: var(--surface) !important;
+  color: var(--text-muted) !important;
+  border-top: 1px solid var(--border) !important;
+}
 
 
 
 /* ================================
    INPUTS, SELECTS, TEXTAREAS
    ================================ */
-input, select, textarea, .form-control, .form-select {
+input,
+select,
+textarea,
+.form-control,
+.form-select {
   background: var(--surface2);
   border: 1px solid var(--border);
   border-radius: var(--radius);
@@ -664,13 +853,21 @@ input, select, textarea, .form-control, .form-select {
   transition: var(--transition);
   outline: none;
 }
-input:focus, select:focus, textarea:focus, .form-control:focus, .form-select:focus {
+
+input:focus,
+select:focus,
+textarea:focus,
+.form-control:focus,
+.form-select:focus {
   border-color: var(--accent);
   box-shadow: 0 0 0 3px var(--accent-dim);
 }
-input::placeholder, textarea::placeholder {
+
+input::placeholder,
+textarea::placeholder {
   color: var(--text-muted);
 }
+
 label {
   font-size: 12px;
   font-weight: 500;
@@ -678,33 +875,40 @@ label {
   margin-bottom: 4px;
   display: block;
 }
+
 .form-check {
   display: flex;
   align-items: center;
   gap: 8px;
 }
+
 .form-check-input {
   width: 1rem;
   height: 1rem;
   margin: 0;
   accent-color: var(--accent);
 }
+
 .form-check-label {
   margin-bottom: 0;
   font-weight: normal;
 }
+
 .input-group {
   display: flex;
   align-items: stretch;
 }
-.input-group > *:first-child {
+
+.input-group>*:first-child {
   border-top-right-radius: 0;
   border-bottom-right-radius: 0;
 }
-.input-group > *:last-child {
+
+.input-group>*:last-child {
   border-top-left-radius: 0;
   border-bottom-left-radius: 0;
 }
+
 .input-group .btn {
   border-radius: 0;
 }
@@ -716,9 +920,11 @@ label {
   width: 100%;
   border-collapse: collapse;
 }
+
 .table thead tr {
   border-bottom: 1px solid var(--border);
 }
+
 .table th {
   text-align: left;
   padding: 12px 16px;
@@ -729,11 +935,13 @@ label {
   letter-spacing: 0.05em;
   background: var(--surface2);
 }
+
 .table td {
   padding: 12px 16px;
   font-size: 14px;
   border-bottom: 1px solid var(--border);
 }
+
 .table tr:hover td {
   background: var(--surface2);
 }
@@ -750,26 +958,32 @@ label {
   text-transform: uppercase;
   letter-spacing: 0.02em;
 }
+
 .badge-success {
   background: var(--success-dim);
   color: var(--success);
 }
+
 .badge-danger {
   background: var(--danger-dim);
   color: var(--danger);
 }
+
 .badge-warning {
   background: var(--warning-dim);
   color: var(--warning);
 }
+
 .badge-info {
   background: var(--info-dim);
   color: var(--info);
 }
+
 .badge-secondary {
   background: var(--surface3);
   color: var(--text-muted);
 }
+
 .badge-primary {
   background: var(--accent-dim);
   color: var(--accent);
@@ -788,6 +1002,7 @@ label {
   justify-content: center;
   z-index: 1000;
 }
+
 .modal-content {
   background: var(--surface);
   border: 1px solid var(--border2);
@@ -799,16 +1014,19 @@ label {
   position: relative;
   padding: 24px;
 }
+
 .modal-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 20px;
 }
+
 .modal-title {
   font-size: 18px;
   font-weight: 600;
 }
+
 .modal-close {
   background: none;
   border: none;
@@ -816,6 +1034,7 @@ label {
   cursor: pointer;
   color: var(--text-muted);
 }
+
 .modal-footer {
   display: flex;
   justify-content: flex-end;
@@ -832,21 +1051,25 @@ label {
   margin-bottom: 16px;
   border-left: 4px solid transparent;
 }
+
 .alert-success {
   background: var(--success-dim);
   border-left-color: var(--success);
   color: var(--success);
 }
+
 .alert-danger {
   background: var(--danger-dim);
   border-left-color: var(--danger);
   color: var(--danger);
 }
+
 .alert-warning {
   background: var(--warning-dim);
   border-left-color: var(--warning);
   color: var(--warning);
 }
+
 .alert-info {
   background: var(--info-dim);
   border-left-color: var(--info);
@@ -860,15 +1083,18 @@ label {
   overflow: hidden;
   width: 100%;
 }
+
 .infinite-brands-track {
   display: flex;
   gap: 24px;
   align-items: center;
   animation: scroll-left 18s linear infinite;
 }
+
 .infinite-brands-track:hover {
   animation-play-state: paused;
 }
+
 .infinite-brand-item {
   flex: 0 0 auto;
   width: 140px;
@@ -876,14 +1102,21 @@ label {
   align-items: center;
   justify-content: center;
 }
+
 .infinite-brand-item img {
   width: 120px;
   height: 120px;
   object-fit: contain;
 }
+
 @keyframes scroll-left {
-  0% { transform: translateX(0); }
-  100% { transform: translateX(var(--translate-x)); }
+  0% {
+    transform: translateX(0);
+  }
+
+  100% {
+    transform: translateX(var(--translate-x));
+  }
 }
 
 /* ================================
@@ -895,44 +1128,63 @@ label {
 .modal-overlay .modal-content {
   background: var(--surface) !important;
   color: var(--text-primary) !important;
-  border: 1px solid rgba(255,255,255,0.04);
+  border: 1px solid rgba(255, 255, 255, 0.04);
   border-radius: 12px !important;
   box-shadow: var(--shadow) !important;
   padding: 20px !important;
 }
+
 .modal-backdrop.show {
   background: var(--modal-backdrop) !important;
 }
+
 .modal-overlay {
-  background: rgba(2,6,23,0.55) !important;
+  background: rgba(2, 6, 23, 0.55) !important;
   backdrop-filter: blur(5px) !important;
 }
+
 .modal-header {
   background: transparent !important;
   border-bottom: 1px solid var(--border) !important;
   padding-bottom: 12px !important;
 }
+
 .modal-footer {
   background: transparent !important;
   border-top: 1px solid var(--border) !important;
   padding-top: 12px !important;
 }
-.modal-title { font-size: 18px; font-weight: 600; color: var(--text-primary) !important; }
-.modal-close { color: var(--text-muted) !important; }
+
+.modal-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text-primary) !important;
+}
+
+.modal-close {
+  color: var(--text-muted) !important;
+}
 
 /* En tema claro reducimos sombra para mantener look Yeferson */
-:root .modal .modal-content { box-shadow: 0 8px 24px rgba(2,6,23,0.04) !important; }
-.theme-dark .modal .modal-content { box-shadow: 0 12px 40px rgba(2,6,23,0.6) !important; }
+:root .modal .modal-content {
+  box-shadow: 0 8px 24px rgba(2, 6, 23, 0.04) !important;
+}
+
+.theme-dark .modal .modal-content {
+  box-shadow: 0 12px 40px rgba(2, 6, 23, 0.6) !important;
+}
 
 /* Force modal dialog sizing and backdrop to respect theme and be wider */
 .modal {
   background-color: var(--modal-backdrop) !important;
 }
+
 .modal .modal-dialog {
   width: 100% !important;
   max-width: 920px !important;
   margin: 0 auto !important;
 }
+
 .modal .modal-dialog .modal-content {
   max-width: 920px !important;
   width: 100% !important;
@@ -946,30 +1198,37 @@ label {
   .app-layout {
     flex-direction: column;
   }
+
   .sidebar {
     width: 100%;
     border-right: none;
     border-bottom: 1px solid var(--border);
     padding: 16px;
   }
+
   .sidebar-nav {
     flex-direction: row;
     flex-wrap: wrap;
     gap: 8px;
   }
+
   .page-content {
     padding: 20px;
   }
+
   .topbar {
     padding: 0 20px;
   }
+
   .modal-content {
     width: 95%;
     padding: 16px;
   }
+
   .infinite-brand-item {
     width: 100px;
   }
+
   .infinite-brand-item img {
     width: 80px;
     height: 80px;
@@ -979,39 +1238,117 @@ label {
 /* ================================
    UTILIDADES
    ================================ */
-.text-center { text-align: center; }
-.text-muted { color: var(--text-muted); }
-.text-primary { color: var(--accent); }
-.text-success { color: var(--success); }
-.text-danger { color: var(--danger); }
-.text-warning { color: var(--warning); }
+.text-center {
+  text-align: center;
+}
 
-.bg-surface { background: var(--surface); }
-.bg-surface2 { background: var(--surface2); }
+.text-muted {
+  color: var(--text-muted);
+}
 
-.mt-1 { margin-top: 4px; }
-.mt-2 { margin-top: 8px; }
-.mt-3 { margin-top: 12px; }
-.mt-4 { margin-top: 16px; }
-.mb-1 { margin-bottom: 4px; }
-.mb-2 { margin-bottom: 8px; }
-.mb-3 { margin-bottom: 12px; }
-.mb-4 { margin-bottom: 16px; }
+.text-primary {
+  color: var(--accent);
+}
 
-.p-1 { padding: 4px; }
-.p-2 { padding: 8px; }
-.p-3 { padding: 12px; }
-.p-4 { padding: 16px; }
+.text-success {
+  color: var(--success);
+}
 
-.d-flex { display: flex; }
-.align-items-center { align-items: center; }
-.justify-content-between { justify-content: space-between; }
-.justify-content-end { justify-content: flex-end; }
-.gap-1 { gap: 4px; }
-.gap-2 { gap: 8px; }
-.gap-3 { gap: 12px; }
+.text-danger {
+  color: var(--danger);
+}
 
-.w-100 { width: 100%; }
+.text-warning {
+  color: var(--warning);
+}
+
+.bg-surface {
+  background: var(--surface);
+}
+
+.bg-surface2 {
+  background: var(--surface2);
+}
+
+.mt-1 {
+  margin-top: 4px;
+}
+
+.mt-2 {
+  margin-top: 8px;
+}
+
+.mt-3 {
+  margin-top: 12px;
+}
+
+.mt-4 {
+  margin-top: 16px;
+}
+
+.mb-1 {
+  margin-bottom: 4px;
+}
+
+.mb-2 {
+  margin-bottom: 8px;
+}
+
+.mb-3 {
+  margin-bottom: 12px;
+}
+
+.mb-4 {
+  margin-bottom: 16px;
+}
+
+.p-1 {
+  padding: 4px;
+}
+
+.p-2 {
+  padding: 8px;
+}
+
+.p-3 {
+  padding: 12px;
+}
+
+.p-4 {
+  padding: 16px;
+}
+
+.d-flex {
+  display: flex;
+}
+
+.align-items-center {
+  align-items: center;
+}
+
+.justify-content-between {
+  justify-content: space-between;
+}
+
+.justify-content-end {
+  justify-content: flex-end;
+}
+
+.gap-1 {
+  gap: 4px;
+}
+
+.gap-2 {
+  gap: 8px;
+}
+
+.gap-3 {
+  gap: 12px;
+}
+
+.w-100 {
+  width: 100%;
+}
 
 /* ================================
    MEJORAS PARA CONSISTENCIA VISUAL
@@ -1021,26 +1358,35 @@ label {
 /* ----------------------------
    1. Iconos que hereden colores del tema
 ---------------------------- */
-i.fa, i.fas, i.far, i.fab,
+i.fa,
+i.fas,
+i.far,
+i.fab,
 svg:not([fill]) {
   color: currentColor;
 }
 
 /* Iconos en botones - que sigan el color del botón */
-.btn i, .btn svg,
-button i, button svg,
-.btn-icon i, .btn-icon svg {
+.btn i,
+.btn svg,
+button i,
+button svg,
+.btn-icon i,
+.btn-icon svg {
   color: inherit !important;
 }
 
 /* Iconos en enlaces y nav */
-a i, a svg,
-.nav-link i, .nav-link svg {
+a i,
+a svg,
+.nav-link i,
+.nav-link svg {
   color: inherit !important;
 }
 
 /* Espansión de transición para iconos */
-.btn i, .btn svg {
+.btn i,
+.btn svg {
   transition: transform 0.2s ease, color 0.2s ease;
 }
 
@@ -1053,11 +1399,16 @@ a i, a svg,
 /* ----------------------------
    2. Contraste y uso de variables en textos
 ---------------------------- */
-.text-body, p, span, div:not(.special) {
+.text-body,
+p,
+span,
+div:not(.special) {
   color: var(--text-primary);
 }
 
-.text-muted, small, .small {
+.text-muted,
+small,
+.small {
   color: var(--text-muted) !important;
 }
 
@@ -1193,6 +1544,7 @@ div.text-info {
   background: transparent;
   border: 1px solid var(--info);
 }
+
 .btn-action-view:hover {
   background: var(--info-dim);
 }
@@ -1202,6 +1554,7 @@ div.text-info {
   background: transparent;
   border: 1px solid var(--primary);
 }
+
 .btn-action-edit:hover {
   background: var(--primary-dim);
 }
@@ -1211,6 +1564,7 @@ div.text-info {
   background: transparent;
   border: 1px solid var(--warning);
 }
+
 .btn-action-toggle-on:hover {
   background: var(--warning-dim);
 }
@@ -1220,6 +1574,7 @@ div.text-info {
   background: transparent;
   border: 1px solid var(--success);
 }
+
 .btn-action-toggle-off:hover {
   background: var(--success-dim);
 }
@@ -1229,6 +1584,7 @@ div.text-info {
   background: transparent;
   border: 1px solid var(--danger);
 }
+
 .btn-action-delete:hover {
   background: var(--danger-dim);
 }
@@ -1237,6 +1593,7 @@ div.text-info {
 .btn-icon {
   transition: transform 0.2s ease;
 }
+
 .btn-icon:hover {
   transform: scale(1.05);
 }
@@ -1245,24 +1602,34 @@ div.text-info {
    4. Inputs y formularios - Estados y select
 ---------------------------- */
 /* Input con error */
-input.error, .form-control.error,
-input.is-invalid, .form-control.is-invalid {
+input.error,
+.form-control.error,
+input.is-invalid,
+.form-control.is-invalid {
   border-color: var(--danger) !important;
   background-color: var(--danger-dim) !important;
 }
-input.error:focus, .form-control.error:focus,
-input.is-invalid:focus, .form-control.is-invalid:focus {
+
+input.error:focus,
+.form-control.error:focus,
+input.is-invalid:focus,
+.form-control.is-invalid:focus {
   box-shadow: 0 0 0 3px var(--danger-dim) !important;
 }
 
 /* Input con éxito */
-input.success, .form-control.success,
-input.is-valid, .form-control.is-valid {
+input.success,
+.form-control.success,
+input.is-valid,
+.form-control.is-valid {
   border-color: var(--success) !important;
   background-color: var(--success-dim) !important;
 }
-input.success:focus, .form-control.success:focus,
-input.is-valid:focus, .form-control.is-valid:focus {
+
+input.success:focus,
+.form-control.success:focus,
+input.is-valid:focus,
+.form-control.is-valid:focus {
   box-shadow: 0 0 0 3px var(--success-dim) !important;
 }
 
@@ -1293,8 +1660,13 @@ select.form-select {
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
 }
 
 @keyframes slideUp {
@@ -1302,6 +1674,7 @@ select.form-select {
     transform: translateY(20px);
     opacity: 0;
   }
+
   to {
     transform: translateY(0);
     opacity: 1;
@@ -1314,6 +1687,7 @@ select.form-select {
 .sidebar-nav a {
   transition: background-color 0.2s ease, color 0.2s ease, padding-left 0.2s ease;
 }
+
 .sidebar-nav a:hover {
   padding-left: 20px;
 }
@@ -1332,9 +1706,11 @@ select.form-select {
 .theme-dark ::-webkit-scrollbar-thumb {
   background: #2d3748;
 }
+
 .theme-dark ::-webkit-scrollbar-track {
   background: #1a202c;
 }
+
 .theme-dark ::-webkit-scrollbar-thumb:hover {
   background: #4a5568;
 }
@@ -1345,6 +1721,7 @@ select.form-select {
 .spinner-border {
   color: var(--accent) !important;
 }
+
 .spinner-grow {
   color: var(--accent) !important;
 }
@@ -1360,6 +1737,7 @@ select.form-select {
 .card {
   transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
 }
+
 .card:hover {
   transform: translateY(-2px);
   box-shadow: var(--shadow-lg);
@@ -1373,18 +1751,22 @@ select.form-select {
   background-color: var(--success-dim) !important;
   color: var(--success) !important;
 }
+
 .badge.bg-danger {
   background-color: var(--danger-dim) !important;
   color: var(--danger) !important;
 }
+
 .badge.bg-warning {
   background-color: var(--warning-dim) !important;
   color: var(--warning) !important;
 }
+
 .badge.bg-info {
   background-color: var(--info-dim) !important;
   color: var(--info) !important;
 }
+
 .badge.bg-primary {
   background-color: var(--accent-dim) !important;
   color: var(--accent) !important;
@@ -1393,7 +1775,8 @@ select.form-select {
 /* ----------------------------
    12. Fondos Bootstrap - Corrección
 ---------------------------- */
-.bg-light, .bg-white {
+.bg-light,
+.bg-white {
   background-color: var(--surface) !important;
   color: var(--text-primary) !important;
 }
@@ -1463,11 +1846,13 @@ select.form-select {
   color: var(--text-primary);
   border: 1px solid var(--border);
 }
+
 .toast-header {
   background: var(--surface2);
   color: var(--text-primary);
   border-bottom: 1px solid var(--border);
 }
+
 .toast-body {
   color: var(--text-secondary);
 }
@@ -1476,7 +1861,9 @@ select.form-select {
    15. Transición suave del tema
 ---------------------------- */
 /* Mejorar transición para cambio de tema - ya definido arriba, refueros aquí */
-html, body, body * {
+html,
+body,
+body * {
   transition: background-color 0.25s ease, color 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease !important;
 }
 
@@ -1497,7 +1884,7 @@ html, body, body * {
    17. Fondo sutil para modo oscuro
 ---------------------------- */
 .theme-dark body {
-  background-image: radial-gradient(circle at 10% 20%, rgba(255,255,255,0.02) 1px, transparent 1px);
+  background-image: radial-gradient(circle at 10% 20%, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
   background-size: 20px 20px;
 }
 
@@ -1516,14 +1903,17 @@ html, body, body * {
 .bs-tooltip-top .tooltip-arrow::before {
   border-top-color: var(--surface) !important;
 }
+
 .bs-tooltip-auto[data-popper-placement^=bottom] .tooltip-arrow::before,
 .bs-tooltip-bottom .tooltip-arrow::before {
   border-bottom-color: var(--surface) !important;
 }
+
 .bs-tooltip-auto[data-popper-placement^=left] .tooltip-arrow::before,
 .bs-tooltip-start .tooltip-arrow::before {
   border-left-color: var(--surface) !important;
 }
+
 .bs-tooltip-auto[data-popper-placement^=right] .tooltip-arrow::before,
 .bs-tooltip-end .tooltip-arrow::before {
   border-right-color: var(--surface) !important;
@@ -1630,23 +2020,24 @@ html, body, body * {
 /* Estos estilos aseguran que los componentes de Bootstrap usen las variables personalizadas */
 :root {
   --bs-primary: var(--accent);
-  --bs-primary-rgb: 59,130,246;
+  --bs-primary-rgb: 59, 130, 246;
   --bs-success: var(--success);
-  --bs-success-rgb: 16,185,129;
+  --bs-success-rgb: 16, 185, 129;
   --bs-danger: var(--danger);
-  --bs-danger-rgb: 239,68,68;
+  --bs-danger-rgb: 239, 68, 68;
   --bs-warning: var(--warning);
-  --bs-warning-rgb: 245,158,11;
+  --bs-warning-rgb: 245, 158, 11;
   --bs-secondary: var(--text-muted);
-  --bs-secondary-rgb: 100,116,139;
+  --bs-secondary-rgb: 100, 116, 139;
   --bs-dark: var(--text-primary);
-  --bs-dark-rgb: 15,23,42;
+  --bs-dark-rgb: 15, 23, 42;
 }
+
 .theme-dark {
-  --bs-primary-rgb: 200,245,90;
-  --bs-success-rgb: 78,205,196;
-  --bs-danger-rgb: 255,87,87;
-  --bs-warning-rgb: 255,179,71;
-  --bs-secondary-rgb: 136,136,132;
-  --bs-dark-rgb: 240,240,238;
+  --bs-primary-rgb: 200, 245, 90;
+  --bs-success-rgb: 78, 205, 196;
+  --bs-danger-rgb: 255, 87, 87;
+  --bs-warning-rgb: 255, 179, 71;
+  --bs-secondary-rgb: 136, 136, 132;
+  --bs-dark-rgb: 240, 240, 238;
 }
