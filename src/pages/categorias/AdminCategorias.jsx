@@ -314,23 +314,26 @@ const AdminCategorias = () => {
                       </td>
                       <td>
                         <button 
-                          className={`btn btn-sm ${categoria.activa ? 'btn-success' : 'btn-secondary'}`}
+                          className={`btn btn-sm ${categoria.activa ? 'btn-outline-warning' : 'btn-outline-success'}`}
                           onClick={() => toggleActiva(categoria)}
+                          title={categoria.activa ? 'Desactivar' : 'Activar'}
                         >
-                          {categoria.activa ? 'Activa' : 'Inactiva'}
+                          <i className={`fas fa-toggle-${categoria.activa ? 'on' : 'off'}`}></i>
                         </button>
                       </td>
                       <td>
-                        <Link to={`/categorias/editar/${categoria.id}`} className="btn btn-outline-primary btn-sm me-2" title="Editar">
-                          <i className="fas fa-edit"></i>
-                        </Link>
-                        <button 
-                          className="btn btn-outline-danger btn-sm"
-                          onClick={() => handleDelete(categoria.id)}
-                          title="Eliminar"
-                        >
-                          <i className="fas fa-trash"></i>
-                        </button>
+                        <div className="d-flex gap-1">
+                          <Link to={`/categorias/editar/${categoria.id}`} className="btn btn-outline-primary btn-sm" title="Editar">
+                            <i className="fas fa-edit"></i>
+                          </Link>
+                          <button 
+                            className="btn btn-outline-danger btn-sm"
+                            onClick={() => handleDelete(categoria.id)}
+                            title="Eliminar"
+                          >
+                            <i className="fas fa-trash"></i>
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))

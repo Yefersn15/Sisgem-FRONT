@@ -16,18 +16,36 @@ const ProveedorDetail = () => {
   const [catalogo, setCatalogo] = useState([]);
 
   useEffect(() => {
-    const p = getProveedorById(id);
-    if (!p) {
-      alert('Proveedor no encontrado');
-      navigate('/proveedores');
-      return;
-    }
-    setProveedor(p);
-    setForm({ ...p });
-    
-    // Cargar marcas y catálogo del proveedor
-    setMarcas(getMarcasByProveedor(id));
-    setCatalogo(getCatalogoByProveedor(id));
+    (async () => {
+      try {
+        const p = await getProveedorById(id);
+        if (!p) {
+          alert('Proveedor no encontrado');
+          navigate('/proveedores');
+          return;
+        }
+        setProveedor(p);
+        setForm({ ...p });
+        
+        // Cargar marcas y catálogo del proveedor
+        try {
+          const m = await getMarcasByProveedor(id);
+          setMarcas(Array.isArray(m) ? m : []);
+        } catch (e) {
+          setMarcas([]);
+        }
+        try {
+          const c = await getCatalogoByProveedor(id);
+          setCatalogo(Array.isArray(c) ? c : []);
+        } catch (e) {
+          setCatalogo([]);
+        }
+      } catch (err) {
+        console.error('Error cargando proveedor:', err);
+        alert('Error al cargar proveedor');
+        navigate('/proveedores');
+      }
+    })();
   }, [id]);
 
   const handleInputChange = (e) => {
@@ -278,7 +296,7 @@ const ProveedorDetail = () => {
               </div>
               <div className="modal-footer">
                 <button className="btn btn-secondary" onClick={() => setShowDeleteModal(false)}>Cancelar</button>
-                <button className="btn btn-danger" onClick={handleDelete}>Eliminar</button>
+                <button className="btn btn-outline-danger" onClick={handleDelete}>Eliminar</button>
               </div>
             </div>
           </div>

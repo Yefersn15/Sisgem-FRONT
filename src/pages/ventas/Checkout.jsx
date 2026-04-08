@@ -339,7 +339,7 @@ const Checkout = () => {
                           />
                         </div>
                         <div className="d-flex gap-2 mt-2">
-                          <button type="button" className="btn btn-success btn-sm" onClick={handleAddAddress}>
+                          <button type="button" className="btn btn-outline-primary btn-sm" onClick={handleAddAddress}>
                             <i className="fas fa-check me-1"></i>Guardar Dirección
                           </button>
                           <button type="button" className="btn btn-secondary btn-sm" onClick={() => setShowNewAddress(false)}>

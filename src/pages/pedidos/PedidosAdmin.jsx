@@ -114,8 +114,12 @@ const PedidosAdmin = () => {
                     <td>
                       {pedido.metodoPago === 'Abono' && pedido.estadoPedido === 'pendiente' ? (
                         <div className="d-flex gap-1">
-                          <button className="btn btn-sm btn-success" onClick={() => handleAprobarSolicitudAbono(pedido.id)}>Aprobar abono</button>
-                          <button className="btn btn-sm btn-danger" onClick={() => handleCambiarEstado(pedido.id, 'cancelado')}>Rechazar</button>
+                          <button className="btn btn-sm btn-outline-success" onClick={() => handleAprobarSolicitudAbono(pedido.id)} title="Aprobar abono">
+                            <i className="fas fa-check"></i>
+                          </button>
+                          <button className="btn btn-sm btn-outline-danger" onClick={() => handleCambiarEstado(pedido.id, 'cancelado')} title="Rechazar">
+                            <i className="fas fa-times"></i>
+                          </button>
                         </div>
                       ) : (
                         <span className={`badge ${
@@ -134,14 +138,18 @@ const PedidosAdmin = () => {
                     <td>{pedido.metodoPago}</td>
                     <td>
                       <div className="d-flex gap-1">
-                        <button className="btn btn-sm btn-outline-primary" onClick={() => navigate(`/pedidos/${pedido.id}`)}>Ver</button>
+                        <button className="btn btn-sm btn-outline-primary" onClick={() => navigate(`/pedidos/${pedido.id}`)} title="Ver detalle">
+                          <i className="fas fa-eye"></i>
+                        </button>
                         {pedido.metodoPago === 'Abono' && pedido.estadoPedido === 'pendiente' && (
                           <>
                             {/* Buttons shown in Estado column; no extra action here */}
                           </>
                         )}
                         {puedeConvertir(pedido) && (
-                          <button className="btn btn-sm btn-success" onClick={() => handleConvertir(pedido.id)}>Convertir a Venta</button>
+                          <button className="btn btn-sm btn-outline-success" onClick={() => handleConvertir(pedido.id)} title="Convertir a Venta">
+                            <i className="fas fa-exchange-alt"></i>
+                          </button>
                         )}
                       </div>
                     </td>

@@ -254,7 +254,7 @@ const OrdenDetail = () => {
               </div>
               <div className="modal-footer">
                 <button className="btn btn-secondary" onClick={() => { setAnularModal(false); setMotivo(''); }}>Cancelar</button>
-                <button className="btn btn-danger" onClick={handleAnular}>Anular Orden</button>
+                <button className="btn btn-outline-danger" onClick={handleAnular}>Anular Orden</button>
               </div>
             </div>
           </div>

@@ -135,8 +135,12 @@ const Home = () => {
                                     <img src={ban.imageUrl || ban.ImageUrl || ''} className="d-block w-100" alt={ban.titulo || ban.title || ''} />
                                     {canManageBanners && (
                                         <div style={{ position: 'absolute', top: 8, left: 8, zIndex: 20 }}>
-                                            <button className="btn btn-sm btn-warning me-1" onClick={() => handleEditBanner(ban)}>Editar</button>
-                                            <button className="btn btn-sm btn-danger" onClick={() => handleDeleteBanner(ban)}>Eliminar</button>
+                                            <button className="btn btn-sm btn-outline-primary me-1" onClick={() => handleEditBanner(ban)} title="Editar">
+                                                <i className="fas fa-edit"></i>
+                                            </button>
+                                            <button className="btn btn-sm btn-outline-danger" onClick={() => handleDeleteBanner(ban)} title="Eliminar">
+                                                <i className="fas fa-trash"></i>
+                                            </button>
                                         </div>
                                     )}
                                 </div>
@@ -261,7 +265,7 @@ const Home = () => {
                                                     className="btn btn-primary"
                                                     onClick={() => handleAdd(modalProducto, modalCantidad)}
                                                 >
-                                                    <i className="fas fa-cart-plus me-2"></i>Agregar
+                                                    <i className="fas fa-cart-plus me-2"></i>
                                                 </button>
                                             </div>
                                         )}

@@ -367,23 +367,24 @@ const AdminProductos = () => {
                       </td>
                       <td>
                         <button 
-                          className={`btn btn-sm ${producto.activo !== false ? 'btn-success' : 'btn-secondary'}`}
+                          className={`btn btn-sm ${producto.activo !== false ? 'btn-outline-warning' : 'btn-outline-success'}`}
                           onClick={() => toggleActivo(producto)}
+                          title={producto.activo !== false ? 'Desactivar' : 'Activar'}
                         >
-                          {producto.activo !== false ? 'Activo' : 'Inactivo'}
+                          <i className={`fas fa-toggle-${producto.activo !== false ? 'on' : 'off'}`}></i>
                         </button>
                       </td>
                       <td>
-                        <div className="btn-group btn-group-sm">
+                        <div className="d-flex gap-1">
                           <button 
-                            className="btn btn-outline-primary"
+                            className="btn btn-outline-primary btn-sm"
                             onClick={() => navigate(`/productos/editar/${producto.id}`)}
                             title="Editar"
                           >
                             <i className="fas fa-edit"></i>
                           </button>
                           <button 
-                            className="btn btn-outline-danger"
+                            className="btn btn-outline-danger btn-sm"
                             onClick={() => handleDelete(producto.id)}
                             title="Eliminar"
                           >

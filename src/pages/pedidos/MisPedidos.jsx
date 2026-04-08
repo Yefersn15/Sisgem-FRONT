@@ -154,7 +154,9 @@ const MisPedidos = () => {
                           )}
                         </td>
                         <td>
-                          <Link to={`/pedidos/${pedido._id || pedido.id}`} className="btn btn-sm btn-info">Ver</Link>
+                          <Link to={`/pedidos/${pedido._id || pedido.id}`} className="btn btn-sm btn-outline-primary" title="Ver detalle">
+                            <i className="fas fa-eye"></i>
+                          </Link>
                         </td>
                       </tr>
                     );

@@ -216,16 +216,16 @@ const ProductosPorCategoria = () => {
                     </div>
 
                     <div className="mt-4 d-flex justify-content-between align-items-center">
-                      <div className="d-flex align-items-center">
-                        <Link to={`/productos/editar/${selectedProducto.id}`} className="btn btn-outline-primary me-2" onClick={() => { setShowModal(false); setSelectedProducto(null); }}>
+                      <div className="d-flex align-items-center gap-1">
+                        <Link to={`/productos/editar/${selectedProducto.id}`} className="btn btn-outline-primary btn-sm" title="Editar" onClick={() => { setShowModal(false); setSelectedProducto(null); }}>
                           <i className="fas fa-edit"></i>
                         </Link>
-                        <button className="btn btn-outline-secondary btn-sm me-2" aria-label={selectedProducto.activo ? 'Desactivar' : 'Activar'} onClick={() => { handleToggleActivo(selectedProducto.id, selectedProducto.activo, selectedProducto.nombre); }}>
-                          <i className={`fas ${selectedProducto.activo ? 'fa-toggle-on' : 'fa-toggle-off'}`}></i>
+                        <button className={`btn btn-sm ${selectedProducto.activo ? 'btn-outline-warning' : 'btn-outline-success'}`} title={selectedProducto.activo ? 'Desactivar' : 'Activar'} onClick={() => { handleToggleActivo(selectedProducto.id, selectedProducto.activo, selectedProducto.nombre); }}>
+                          <i className={`fas fa-toggle-${selectedProducto.activo ? 'on' : 'off'}`}></i>
                         </button>
                         <button
-                          className="btn btn-outline-danger btn-sm me-2"
-                          aria-label="Eliminar"
+                          className="btn btn-outline-danger btn-sm"
+                          title="Eliminar"
                           onClick={() => {
                             handleDelete(selectedProducto.id, selectedProducto.nombre);
                           }}

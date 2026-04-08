@@ -334,7 +334,7 @@ const AdminDomicilios = () => {
                   <div className="d-flex justify-content-between align-items-center mt-2">
                     <span className={`badge bg-${badgeColor}`}>{dom.estado}</span>
                     <div className="d-flex align-items-center gap-2">
-                      <button className="btn btn-sm btn-outline-secondary py-0 px-1" onClick={() => handleEditarTarifa(dom.ventaId, dom.tarifa)} title="Editar tarifa">
+                      <button className="btn btn-sm btn-outline-primary py-0 px-1" onClick={() => handleEditarTarifa(dom.ventaId, dom.tarifa)} title="Editar tarifa">
                         <i className="fas fa-dollar-sign"></i>
                       </button>
                       <span className="fw-bold">${((dom.tarifa_aplicada !== undefined && dom.tarifa_aplicada !== null) ? dom.tarifa_aplicada : (dom.tarifa || 0))}</span>

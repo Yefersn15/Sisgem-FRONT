@@ -360,7 +360,7 @@ const VentasAdmin = () => {
                             <i className="fas fa-eye"></i>
                           </Link>
                           <button 
-                            className="btn btn-sm btn-outline-secondary"
+                            className="btn btn-sm btn-outline-primary"
                             title="Editar"
                             onClick={() => handleEdit(venta)}
                           >
@@ -368,7 +368,7 @@ const VentasAdmin = () => {
                           </button>
                           {venta.estadoVenta !== 'anulada' && venta.estadoVenta !== 'completada' && (
                             <button 
-                              className="btn btn-sm btn-success"
+                              className="btn btn-sm btn-outline-success"
                               title="Aprobar"
                               onClick={() => aprobarVenta(venta.id)}
                             >

@@ -426,7 +426,7 @@ const CatalogoProveedorList = () => {
                                 }}
                               />
                               <button 
-                                className="btn btn-success" 
+                                className="btn btn-outline-primary" 
                                 onClick={() => handleAddToOrder(selectedProducto.refId || detail.id, modalCantidad, selectedProducto.source)}
                               >
                                 <i className="fas fa-shopping-cart me-2"></i>

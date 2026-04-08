@@ -36,6 +36,8 @@
   --success-dim: rgba(16,185,129,0.1);
   --info: #06b6d4;             /* Azul cielo para información */
   --info-dim: rgba(6,182,212,0.1);
+  --primary: #3b82f6;          /* Azul para editar */
+  --primary-dim: rgba(59,130,246,0.1);
 
   /* Efectos y medidas */
   --radius: 8px;
@@ -1168,6 +1170,58 @@ div.text-info {
 .btn-primary:active {
   transform: translateY(1px);
   transition: transform 0.05s linear;
+}
+
+/* ----------------------------   Botones de acción estandarizados
+---------------------------- */
+.btn-action {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.875rem;
+}
+
+.btn-action-view {
+  color: var(--info) !important;
+  background: transparent;
+  border: 1px solid var(--info);
+}
+.btn-action-view:hover {
+  background: var(--info-dim);
+}
+
+.btn-action-edit {
+  color: var(--primary) !important;
+  background: transparent;
+  border: 1px solid var(--primary);
+}
+.btn-action-edit:hover {
+  background: var(--primary-dim);
+}
+
+.btn-action-toggle-on {
+  color: var(--warning) !important;
+  background: transparent;
+  border: 1px solid var(--warning);
+}
+.btn-action-toggle-on:hover {
+  background: var(--warning-dim);
+}
+
+.btn-action-toggle-off {
+  color: var(--success) !important;
+  background: transparent;
+  border: 1px solid var(--success);
+}
+.btn-action-toggle-off:hover {
+  background: var(--success-dim);
+}
+
+.btn-action-delete {
+  color: var(--danger) !important;
+  background: transparent;
+  border: 1px solid var(--danger);
+}
+.btn-action-delete:hover {
+  background: var(--danger-dim);
 }
 
 /* Efecto de escala en iconos de botones */

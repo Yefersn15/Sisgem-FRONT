@@ -183,18 +183,18 @@ const VentaDetails = () => {
           </Link>
             {esPedido && isAdmin && (
               <>
-                <button className="btn btn-success" onClick={handleConvertir}>
+                <button className="btn btn-outline-success" onClick={handleConvertir}>
                   <i className="fas fa-exchange-alt me-1"></i> Convertir a Venta
                 </button>
                 {pedido?.metodoPago === 'Abono' && pedido?.estadoPedido === 'pendiente' && canConfirmPayment && (
                   <>
-                    <button className="btn btn-primary ms-2" onClick={() => handleAceptarAbono(true)}>Aceptar Abono</button>
-                    <button className="btn btn-danger ms-2" onClick={() => handleAceptarAbono(false)}>Rechazar Abono</button>
+                    <button className="btn btn-outline-success ms-2" onClick={() => handleAceptarAbono(true)}>Aceptar Abono</button>
+                    <button className="btn btn-outline-danger ms-2" onClick={() => handleAceptarAbono(false)}>Rechazar Abono</button>
                   </>
                 )}
                 {esPedido && pedido.metodoPago === 'Abono' && canConfirmPayment && (
                   <button 
-                    className="btn btn-info ms-2" 
+                    className="btn btn-outline-primary ms-2" 
                     onClick={() => navigate(`/admin/pagos/nuevo`, { state: { ventaId: id } })}
                   >
                     <i className="fas fa-hand-holding-usd me-1"></i> Registrar Pago
