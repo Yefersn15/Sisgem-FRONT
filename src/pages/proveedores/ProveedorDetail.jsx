@@ -140,7 +140,7 @@ const ProveedorDetail = () => {
               {!editMode ? (
                 <>
                   <button className="btn btn-outline-primary" onClick={() => setEditMode(true)}>
-                    <i className="fas fa-edit me-1"></i>Editar
+                    <i className="fas fa-edit me-1"></i>
                   </button>
                   <button className="btn btn-outline-warning" onClick={handleToggle}>
                     <i className={`fas fa-toggle-${proveedor.estado ? 'on' : 'off'} me-1`}></i>
