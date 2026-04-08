@@ -196,7 +196,7 @@ const Home = () => {
             )}
 
             {/* Marcas */}
-            <h3 className="mb-3"><Link to="/marcas" className="text-decoration-none">Nuestras Marcas</Link></h3>
+            <h3 className="mb-3"><Link to="/productos" className="text-decoration-none">Nuestras Marcas</Link></h3>
             {marcas.length > 0 ? (
                 <div className="infinite-brands-wrapper mb-5">
                     <div ref={trackRef} className="infinite-brands-track" style={{ ['--translate-x']: `${translatePx}px` }}>

@@ -80,8 +80,6 @@ const Header = () => {
       title: 'Tienda',
       items: [
         { label: 'Productos', icon: 'fa-box', path: '/productos', module: null },
-        { label: 'Categorías', icon: 'fa-tags', path: '/categorias', module: null },
-        { label: 'Marcas', icon: 'fa-trademark', path: '/marcas', module: null },
         { label: 'Carrito', icon: 'fa-shopping-cart', path: '/carrito', module: null }
       ]
     },

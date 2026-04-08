@@ -1,11 +1,10 @@
 import { useState, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import useDebounce from '../../hooks/useDebounce';
 import { getProductos, getMarcas, getCategorias, formatPrice } from '../../services/dataService';
 import { useCart } from '../../context/CartContext';
 
 const ProductosList = () => {
-  const navigate = useNavigate();
   const [productos, setProductos] = useState([]);
   const [marcas, setMarcas] = useState([]);
   const [categorias, setCategorias] = useState([]);
@@ -169,12 +168,7 @@ const ProductosList = () => {
           <select
             className="form-select"
             value={sortBy}
-            onChange={(e) => {
-              const val = e.target.value;
-              if (val === 'categorias') navigate('/categorias');
-              else if (val === 'marcas') navigate('/marcas');
-              else setSortBy(val);
-            }}
+            onChange={(e) => setSortBy(e.target.value)}
           >
             <option value="">Ordenar...</option>
             <option value="nombre">Nombre (A-Z)</option>
