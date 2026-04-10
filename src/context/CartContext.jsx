@@ -17,7 +17,7 @@ export const CartProvider = ({ children }) => {
   // Cargar carrito desde la API cuando el usuario esté autenticado
   useEffect(() => {
     const loadCart = async () => {
-      if (user && user.id) {
+      if (user && user.documento) {
         try {
           const cartData = await getCart();
           // Asegurar que cada item tenga producto.id

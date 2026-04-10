@@ -170,8 +170,7 @@ const mapProductoToApi = (p) => ({
   imagen: p.fotoUrl,
   estado: p.activo !== false,
   precio_compra: p.precioCompra,
-  stock_minimo: p.minStock,
-  unidad_medida: p.unidadMedida || 'unidad'
+  stock_minimo: p.minStock
 });
 
 // Producto: API -> Frontend
@@ -209,7 +208,7 @@ const mapApiToCategoria = (api) => ({
   id: api.id,
   nombre: api.nombre,
   descripcion: api.descripcion,
-  imagen: api.foto_url || api.foto_data,
+  imagen: api.fotoUrl || api.foto_url || api.foto_data,
   activo: api.estado
 });
 
@@ -230,7 +229,7 @@ const mapApiToMarca = (api) => ({
   descripcion: api.descripcion,
   logoUrl: api.logo || api.logo_data,
   sitioWeb: api.sitio_web || '',
-  proveedorId: api.proveedor_id,
+  proveedorId: api.proveedor?.id || api.proveedorId || api.proveedor_id,
   activo: api.estado
 });
 
@@ -329,20 +328,38 @@ export const exportProductos = async () => {
 
 export const importProductos = async (file, onSuccess, onError) => {
   try {
-    const formData = new FormData();
-    formData.append('file', file);
-    const response = await fetch(`${API_BASE_URL}/api/productos/import`, {
-      method: 'POST',
-      headers: { Authorization: `Bearer ${getAuthToken()}` },
-      body: formData
-    });
-    if (!response.ok) {
-      throw new Error('Error al importar productos');
+    const data = new Uint8Array(await file.arrayBuffer());
+    const workbook = XLSX.read(data, { type: 'array' });
+    const rows = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]]);
+    for (const row of rows) {
+      const nombre = row.Nombre || row.nombre || '';
+      const descripcion = row.Descripcion || row.descripcion || '';
+      const precioUnitario = parseFloat(row.PrecioUnitario || row.precioUnitario || row.Precio || row.precio || 0);
+      const stockDisponible = parseInt(row.StockDisponible || row.stockDisponible || row.Stock || row.stock || 0);
+      const fotoUrl = row.FotoUrl || row.fotoUrl || row.Imagen || row.imagen || '';
+      const categoriaId = row.CategoriaId || row.categoriaId || row.categoria || '';
+      const marcaId = row.MarcaId || row.marcaId || row.marca || '';
+      const proveedorId = row.ProveedorId || row.proveedorId || row.proveedor || '';
+      const barcode = row.CodigoBarras || row.codigoBarras || row.barcode || '';
+      const activo = parseBooleanCell(row.Activo || row.activo);
+      if (nombre && precioUnitario > 0) {
+        await createProducto({
+          nombre,
+          descripcion,
+          precioUnitario,
+          stockDisponible,
+          fotoUrl,
+          categoriaId,
+          marcaId,
+          proveedorId,
+          barcode,
+          activo
+        });
+      }
     }
-    const result = await response.json();
-    if (onSuccess) onSuccess(result.exitosos || 0);
+    onSuccess && onSuccess(rows.length);
   } catch (err) {
-    if (onError) onError(err);
+    onError && onError(err);
     console.error('Error importando productos:', err);
   }
 };
@@ -408,20 +425,20 @@ export const exportCategorias = async () => {
 
 export const importCategorias = async (file, onSuccess, onError) => {
   try {
-    const formData = new FormData();
-    formData.append('file', file);
-    const response = await fetch(`${API_BASE_URL}/api/categorias/import`, {
-      method: 'POST',
-      headers: { Authorization: `Bearer ${getAuthToken()}` },
-      body: formData
-    });
-    if (!response.ok) {
-      throw new Error('Error al importar categorías');
+    const data = new Uint8Array(await file.arrayBuffer());
+    const workbook = XLSX.read(data, { type: 'array' });
+    const rows = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]]);
+    for (const row of rows) {
+      const nombre = row.Nombre || row.nombre || '';
+      const descripcion = row.Descripcion || row.descripcion || '';
+      const activo = parseBooleanCell(row.Activo || row.activo);
+      if (nombre) {
+        await createCategoria({ nombre, descripcion, activo });
+      }
     }
-    const result = await response.json();
-    if (onSuccess) onSuccess(result.exitosos || 0);
+    onSuccess && onSuccess(rows.length);
   } catch (err) {
-    if (onError) onError(err);
+    onError && onError(err);
     console.error('Error importando categorías:', err);
   }
 };

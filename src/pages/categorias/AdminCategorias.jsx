@@ -288,7 +288,6 @@ const AdminCategorias = () => {
                   <th>ID</th>
                   <th>Nombre</th>
                   <th>Descripción</th>
-                  <th>Código Único</th>
                   <th>Productos</th>
                   <th>Estado</th>
                   <th>Acciones</th>
