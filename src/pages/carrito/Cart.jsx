@@ -22,7 +22,7 @@ const Cart = () => {
   };
 
   const subtotal = cartItemsWithDetails.reduce(
-    (sum, item) => sum + (item.producto.precio || 0) * item.cantidad,
+    (sum, item) => sum + (item.producto?.precio || 0) * (item.cantidad || 0),
     0
   );
 

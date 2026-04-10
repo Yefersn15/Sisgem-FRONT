@@ -61,7 +61,7 @@ const MisPedidos = () => {
         if (estadoFilter && estadoEfectivo !== estadoFilter) return false;
         if (metodoFilter && p.metodo_pago !== metodoFilter) return false;
         if (!q) return true;
-        const fields = [p._id, p.direccion?.direccion, p.telefono_contacto, p.metodo_pago, estadoEfectivo]
+        const fields = [p.id, p.direccion?.direccion, p.telefono_contacto, p.metodo_pago, estadoEfectivo]
           .filter(Boolean).join(' ').toLowerCase();
         return fields.includes(q);
       })

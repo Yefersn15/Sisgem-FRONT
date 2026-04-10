@@ -33,7 +33,7 @@ const Checkout = () => {
   // Cargar direcciones del usuario
   useEffect(() => {
     const loadDirecciones = async () => {
-      if (user && user.id) {
+      if (user && user.documento) {
         try {
           const dirs = await getDirecciones();
           setDirecciones(dirs || []);
@@ -221,7 +221,6 @@ const Checkout = () => {
       const telefonoCompleto = `${prefix}${cleanedPhone}`;
 
       const payload = {
-        usuarioId: user.id, // <-- cambio: usar usuarioId
         telefono_contacto: telefonoCompleto,
         subtotal,
         shipping,
@@ -239,11 +238,11 @@ const Checkout = () => {
       };
 
       const pedidoCreado = await createPedido(payload);
-      if (!pedidoCreado || !pedidoCreado._id) {
+      if (!pedidoCreado || !pedidoCreado.id) {
         throw new Error('No se pudo crear el pedido correctamente');
       }
       clearCart();
-      navigate(`/pedidos/${pedidoCreado._id}`);
+      navigate(`/pedidos/${pedidoCreado.id}`);
     } catch (error) {
       console.error('Error al crear la venta:', error);
       alert('Error al procesar el pedido: ' + error.message);

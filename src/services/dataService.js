@@ -331,35 +331,54 @@ export const importProductos = async (file, onSuccess, onError) => {
     const data = new Uint8Array(await file.arrayBuffer());
     const workbook = XLSX.read(data, { type: 'array' });
     const rows = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]]);
+    
+    const categorias = await getCategorias();
+    const marcas = await getMarcas();
+    const categoriasIds = new Set(categorias.map(c => String(c.id)));
+    const marcasIds = new Set(marcas.map(m => String(m.id)));
+
+    let importados = 0;
+    let errores = [];
+
     for (const row of rows) {
-      const nombre = row.Nombre || row.nombre || '';
-      const descripcion = row.Descripcion || row.descripcion || '';
-      const precioUnitario = parseFloat(row.PrecioUnitario || row.precioUnitario || row.Precio || row.precio || 0);
-      const stockDisponible = parseInt(row.StockDisponible || row.stockDisponible || row.Stock || row.stock || 0);
-      const fotoUrl = row.FotoUrl || row.fotoUrl || row.Imagen || row.imagen || '';
-      const categoriaId = row.CategoriaId || row.categoriaId || row.categoria || '';
-      const marcaId = row.MarcaId || row.marcaId || row.marca || '';
-      const proveedorId = row.ProveedorId || row.proveedorId || row.proveedor || '';
-      const barcode = row.CodigoBarras || row.codigoBarras || row.barcode || '';
-      const activo = parseBooleanCell(row.Activo || row.activo);
-      if (nombre && precioUnitario > 0) {
+      try {
+        const nombre = row.Nombre || row.nombre || '';
+        const descripcion = row.Descripcion || row.descripcion || '';
+        const precioUnitario = parseFloat(String(row.PrecioUnitario || row.precioUnitario || row.Precio || row.precio || 0).replace(',', '.'));
+        const stockDisponible = parseInt(row.StockDisponible || row.stockDisponible || row.Stock || row.stock || 0, 10);
+        const fotoUrl = row.FotoUrl || row.fotoUrl || row.Imagen || row.imagen || '';
+        const categoriaId = String(row.CategoriaId || row.categoriaId || row.categoria || '');
+        const marcaId = String(row.MarcaId || row.marcaId || row.marca || '');
+        const barcode = row.CodigoBarras || row.codigoBarras || row.barcode || '';
+        const activo = parseBooleanCell(row.Activo || row.activo);
+
+        if (!nombre) throw new Error('Nombre vacío');
+        if (isNaN(precioUnitario) || precioUnitario <= 0) throw new Error('Precio inválido');
+        if (isNaN(stockDisponible) || stockDisponible < 0) throw new Error('Stock inválido');
+        if (!categoriaId || !categoriasIds.has(categoriaId)) throw new Error(`Categoría ID ${categoriaId} no existe`);
+        if (!marcaId || !marcasIds.has(marcaId)) throw new Error(`Marca ID ${marcaId} no existe`);
+
         await createProducto({
           nombre,
           descripcion,
           precioUnitario,
           stockDisponible,
           fotoUrl,
-          categoriaId,
-          marcaId,
-          proveedorId,
+          categoriaId: parseInt(categoriaId, 10),
+          marcaId: parseInt(marcaId, 10),
           barcode,
           activo
         });
+        importados++;
+      } catch (err) {
+        errores.push(`Fila ${rows.indexOf(row) + 2}: ${err.message}`);
       }
     }
-    onSuccess && onSuccess(rows.length);
+
+    if (onSuccess) onSuccess(importados, errores);
+    if (errores.length > 0 && onError) onError(errores);
   } catch (err) {
-    onError && onError(err);
+    if (onError) onError([err.message]);
     console.error('Error importando productos:', err);
   }
 };
@@ -633,9 +652,9 @@ export const importProveedores = async (file, onSuccess, onError) => {
 
 // Mapeo interno
 const mapPedidoToFront = (pedido) => ({
-  id: pedido._id,
+  id: pedido.id,
   fecha: pedido.fecha_pedido,
-  usuarioId: typeof pedido.usuario === 'object' ? pedido.usuario?._id : pedido.usuario,
+  usuarioId: typeof pedido.usuario === 'object' ? pedido.usuario?.id : pedido.usuario,
   usuarioNombre: typeof pedido.usuario === 'object' ? pedido.usuario?.nombre : undefined,
   telefono: pedido.telefono_contacto,
   metodoPago: pedido.metodo_pago,
@@ -782,11 +801,11 @@ export const getPagos = async () => {
   try {
     const data = await request('/api/pagos');
     return Array.isArray(data) ? data.map(pago => {
-      const ventaId = typeof pago.pedido === 'object' ? pago.pedido?._id : pago.pedido;
-      const usuarioId = typeof pago.pedido?.usuario === 'object' ? pago.pedido?.usuario?._id : pago.pedido?.usuario;
+      const ventaId = typeof pago.pedido === 'object' ? pago.pedido?.id : pago.pedido;
+      const usuarioId = typeof pago.pedido?.usuario === 'object' ? pago.pedido?.usuario?.id : pago.pedido?.usuario;
       const usuarioNombre = typeof pago.pedido?.usuario === 'object' ? pago.pedido?.usuario?.nombre : undefined;
       return {
-        id: pago._id,
+        id: pago.id,
         ventaId,
         usuarioId,
         usuarioNombre,
@@ -832,9 +851,9 @@ export const createPago = async (pago) => {
     pedido: pago.ventaId,
     monto: parseFloat(pago.monto) || 0,
     metodo: metodoNormalizado,
-    estado: 'aplicado',
+    estado: pago.estado || (pago.tipo === 'abono' ? 'pendiente' : 'aplicado'),
     observaciones: pago.notas,
-    tipo: 'abono'
+    tipo: pago.tipo || 'pago_total'
   };
   const data = await request('/api/pagos', { method: 'POST', body: payload });
   return data;
@@ -867,7 +886,7 @@ export const getDomicilios = async () => {
       let ventaIdRaw = null;
       if (dom.pedido) {
         if (typeof dom.pedido === 'object') {
-          ventaIdRaw = dom.pedido._id || dom.pedido.id || dom.pedido;
+          ventaIdRaw = dom.pedido.id || dom.pedido._id || dom.pedido;
         } else {
           ventaIdRaw = dom.pedido;
         }
@@ -890,7 +909,7 @@ export const getDomicilios = async () => {
       }
 
       return ({
-        id: dom._id,
+        id: dom.id,
         ventaId,
         direccion: dom.direccion?.direccion || '',
         ciudad: dom.direccion?.ciudad || '',
