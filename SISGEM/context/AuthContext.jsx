@@ -1,0 +1,128 @@
+import React, { createContext, useContext, useState, useEffect } from 'react';
+import { request } from '../services/dataService';
+
+const AuthContext = createContext();
+
+export const useAuth = () => useContext(AuthContext);
+
+export const AuthProvider = ({ children }) => {
+  const [user, setUser] = useState(null);
+  const [role, setRole] = useState(null);
+  const [modules, setModules] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const init = async () => {
+      const token = localStorage.getItem('auth_token');
+      if (token) {
+        try {
+          // Obtener usuario actual desde la API
+          const userData = await request('/api/auth/me');
+          setUser(userData);
+          localStorage.setItem('auth_user', JSON.stringify(userData));
+          
+          // Cargar rol y módulos si existen
+          if (userData.rol) {
+            try {
+              const roleData = await request(`/api/roles/nombre/${userData.rol}`);
+              setRole(roleData);
+              // Los permisos del rol
+              if (roleData && roleData.permisos) {
+                setModules(roleData.permisos);
+              }
+            } catch (e) {
+              console.warn('Error cargando rol:', e);
+            }
+          }
+        } catch (e) {
+          console.warn('Error obteniendo usuario desde API:', e.message || e);
+          localStorage.removeItem('auth_token');
+          localStorage.removeItem('auth_user');
+        }
+      }
+      setLoading(false);
+    };
+    init();
+  }, []);
+
+  const login = async (email, password) => {
+    try {
+      // Usamos request para tener manejo unificado de errores y respuestas
+      const data = await request('/api/auth/login', {
+        method: 'POST',
+        body: { email, password }
+      });
+
+      // La API devuelve { token, usuario } dentro de data
+      const token = data.token;
+      const userObj = data.usuario;
+
+      if (!token) throw new Error('No se recibió token');
+
+      localStorage.setItem('auth_token', token);
+      localStorage.setItem('auth_user', JSON.stringify(userObj));
+      setUser(userObj);
+
+      // Cargar rol
+      if (userObj.rol) {
+        try {
+          const roleData = await request(`/api/roles/nombre/${userObj.rol}`);
+          setRole(roleData);
+          setModules(roleData.permisos || []);
+        } catch (e) {
+          console.warn('Error cargando rol:', e);
+        }
+      }
+
+      return { success: true, user: userObj };
+    } catch (err) {
+      console.error('Login error:', err);
+      return { success: false, message: err.message || 'Error al iniciar sesión' };
+    }
+  };
+
+  const logout = () => {
+    setUser(null);
+    setRole(null);
+    setModules([]);
+    localStorage.removeItem('auth_token');
+    localStorage.removeItem('auth_user');
+  };
+
+  const hasPermission = (moduleName) => {
+    if (!user) return false;
+    // El rol de ADMIN tiene todos los permisos
+    if (role?.nombre === 'Administrador' || role?.nombre === 'ADMIN') return true;
+    // Verificar en módulos/permisos
+    return modules.some(m => m.nombre === moduleName || m === moduleName);
+  };
+
+  const refreshUser = async () => {
+    try {
+      const userData = await request('/api/auth/me');
+      setUser(userData);
+      localStorage.setItem('auth_user', JSON.stringify(userData));
+      return userData;
+    } catch (e) {
+      console.error('Error refreshing user:', e);
+      return null;
+    }
+  };
+
+  return (
+    <AuthContext.Provider value={{ 
+      user, 
+      role, 
+      modules, 
+      login, 
+      logout, 
+      hasPermission, 
+      loading,
+      refreshUser 
+    }}>
+      {children}
+    </AuthContext.Provider>
+  );
+};
+
+export default AuthContext;
