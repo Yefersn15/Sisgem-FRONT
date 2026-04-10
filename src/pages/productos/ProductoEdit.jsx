@@ -49,12 +49,8 @@ const ProductoEdit = () => {
     else if (parseFloat(formData.precioUnitario) <= 0) newErrors.precioUnitario = 'Debe ser mayor a 0';
     if (!formData.stockDisponible && formData.stockDisponible !== 0) newErrors.stockDisponible = 'El stock es obligatorio';
     else if (parseInt(formData.stockDisponible) < 0) newErrors.stockDisponible = 'No puede ser negativo';
-    const codigo = String(formData.codigo_unico || formData.codigoUnico || '').trim();
-    if (!codigo) newErrors.codigo_unico = 'El código único es obligatorio';
-    else if (!/^[A-Z0-9-]+$/.test(codigo)) newErrors.codigo_unico = 'Solo mayúsculas, números y guiones';
     if (!formData.categoriaId) newErrors.categoriaId = 'Selecciona una categoría';
     if (!formData.marcaId) newErrors.marcaId = 'Selecciona una marca';
-    // proveedor opcional
     return newErrors;
   };
 
@@ -109,7 +105,6 @@ const ProductoEdit = () => {
         </div>
         <div className="card-body">
           <form onSubmit={handleSubmit}>
-            {/* Igual que en Create, pero con valores iniciales de formData */}
             <div className="row mb-3">
               <div className="col-md-6">
                 <label className="form-label">Nombre del Producto *</label>
@@ -123,16 +118,16 @@ const ProductoEdit = () => {
                 {errors.nombre && <div className="invalid-feedback">{errors.nombre}</div>}
               </div>
               <div className="col-md-6">
-                <label className="form-label">Código Único *</label>
+                <label className="form-label">Código de Barras</label>
                 <input
                   type="text"
-                  className={`form-control ${errors.codigo_unico ? 'is-invalid' : ''}`}
-                  name="codigo_unico"
-                  value={formData.codigo_unico || formData.codigoUnico || ''}
+                  className={`form-control ${errors.barcode ? 'is-invalid' : ''}`}
+                  name="barcode"
+                  value={formData.barcode || ''}
                   onChange={handleChange}
                   onInput={(e) => e.target.value = e.target.value.toUpperCase()}
                 />
-                {errors.codigo_unico && <div className="invalid-feedback">{errors.codigo_unico}</div>}
+                {errors.barcode && <div className="invalid-feedback">{errors.barcode}</div>}
               </div>
             </div>
 

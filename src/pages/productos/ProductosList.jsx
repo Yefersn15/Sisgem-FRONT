@@ -283,7 +283,7 @@ const ProductosList = () => {
                     </div>
 
                     <div className="mb-3">
-                      <p><strong>Código Único:</strong> <span className="text-muted">{selectedProducto.codigoUnico}</span></p>
+                      <p><strong>Código de Barras:</strong> <span className="text-muted">{selectedProducto.barcode || '-'}</span></p>
                       <p><strong>Precio:</strong> <span className="text-primary h5">{formatPrice(selectedProducto.precioUnitario)}</span></p>
                       <p>
                         <strong>Stock:</strong>{' '}

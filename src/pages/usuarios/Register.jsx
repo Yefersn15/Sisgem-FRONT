@@ -49,7 +49,7 @@ const Register = () => {
       const result = await registerUser({
         nombre: form.nombre,
         apellido: form.apellido,
-        tipo_documento: form.tipoDocumento,
+        tipoDocumento: form.tipoDocumento,
         documento: form.documento,
         genero: form.genero,
         telefono: form.celular,

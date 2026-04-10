@@ -263,7 +263,7 @@ const Home = () => {
                                         </div>
 
                                         <div className="mb-3">
-                                            <p><strong>Código Único:</strong> <span className="text-muted">{modalProducto.codigoUnico || modalProducto.codigo || '-'}</span></p>
+                                            <p><strong>Código de Barras:</strong> <span className="text-muted">{modalProducto.barcode || '-'}</span></p>
                                             <p><strong>Precio:</strong> <span className="text-primary h5">{formatPrice(modalProducto.precioUnitario || modalProducto.precio || 0)}</span></p>
                                             <p>
                                                 <strong>Stock:</strong>{' '}

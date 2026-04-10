@@ -362,7 +362,7 @@ const CatalogoProveedorList = () => {
                           </div>
 
                           <div className="mb-3">
-                            <p><strong>Código Único:</strong> <span className="text-muted">{detail.codigoUnico || 'N/A'}</span></p>
+                            <p><strong>Código de Barras:</strong> <span className="text-muted">{detail.barcode || 'N/A'}</span></p>
                             <p><strong>Precio:</strong> <span className="text-primary h4">{formatPrice(detail.precioUnitario || detail.precioSugerido || 0)}</span></p>
                             
                             {selectedProducto.source === 'producto' ? (

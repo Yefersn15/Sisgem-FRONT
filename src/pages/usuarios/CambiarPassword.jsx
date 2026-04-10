@@ -33,7 +33,7 @@ const CambiarPassword = () => {
     }
 
     try {
-      await changePassword(user.id, pw);
+      await changePassword(pw);
       setSuccess('Contraseña actualizada correctamente');
       setForm({ newPassword: '', confirmPassword: '' });
     } catch (err) {

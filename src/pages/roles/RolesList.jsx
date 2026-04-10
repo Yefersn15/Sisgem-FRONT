@@ -77,7 +77,7 @@ const RolesList = () => {
                       <span className="badge bg-secondary">{getPermisosAsignados(r).length} permisos</span>
                     </td>
                     <td>
-                      {r.es_default ? (
+                      {r.esDefault ? (
                         <span className="badge bg-primary">Por defecto</span>
                       ) : (
                         <span className="text-muted">—</span>

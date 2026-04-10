@@ -101,7 +101,6 @@ const CategoriasList = () => {
                   <i className="fas fa-tags fa-3x text-primary mb-3"></i>
                   <h5 className="card-title">{cat.nombre}</h5>
                   <p className="card-text text-muted small">{cat.descripcion || 'Sin descripción'}</p>
-                  <small className="text-muted">Código: {cat.codigoUnico}</small>
                 </div>
               </div>
             </div>

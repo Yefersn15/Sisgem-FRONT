@@ -20,8 +20,7 @@ const Perfil = () => {
 
   useEffect(() => {
     const fetchPerfil = async () => {
-      if (user && user.id) {
-        // Ya tenemos el usuario en el contexto, podemos usarlo directamente
+      if (user && user.documento) {
         setPerfil(user);
         setForm({
           nombre: user.nombre || '',
@@ -48,7 +47,7 @@ const Perfil = () => {
     try {
       // Actualizar usuario en la API
       // Se permite actualizar: nombre, apellido, telefono, email
-      const updated = await updateUsuario(user.id, {
+      const updated = await updateUsuario(user.documento, {
         nombre: form.nombre,
         apellido: form.apellido,
         telefono: form.telefono,
@@ -90,9 +89,9 @@ const Perfil = () => {
 
           <form onSubmit={handleSubmit}>
             <div className="row">
-              {/* Columna 1: Identificación */}
-              <div className="col-md-4">
-                <h6 className="text-primary mb-3 border-bottom pb-2">Identificación</h6>
+              {/* Columna 1: Información Personal */}
+              <div className="col-md-6">
+                <h6 className="text-primary mb-3 border-bottom pb-2">Información Personal</h6>
                 
                 <div className="mb-3">
                   <label className="form-label">Número de Documento</label>
@@ -102,34 +101,8 @@ const Perfil = () => {
                     value={form.documento}
                     disabled
                   />
-                  <div className="form-text">El documento es tu identificación única</div>
                 </div>
 
-                <div className="mb-3">
-                  <label className="form-label">Rol</label>
-                  <input
-                    type="text"
-                    className="form-control"
-                    value={perfil.rol || 'Sin rol'}
-                    disabled
-                  />
-                </div>
-
-                <div className="mb-3">
-                  <label className="form-label">Estado</label>
-                  <input
-                    type="text"
-                    className="form-control"
-                    value={perfil.estado ? 'Activo' : 'Inactivo'}
-                    disabled
-                  />
-                </div>
-              </div>
-
-              {/* Columna 2: Información Personal */}
-              <div className="col-md-4">
-                <h6 className="text-primary mb-3 border-bottom pb-2">Información Personal</h6>
-                
                 <div className="mb-3">
                   <label className="form-label">Nombre</label>
                   <input
@@ -156,21 +129,6 @@ const Perfil = () => {
                 </div>
 
                 <div className="mb-3">
-                  <label className="form-label">Fecha de Registro</label>
-                  <input
-                    type="text"
-                    className="form-control"
-                    value={perfil.createdAt ? new Date(perfil.createdAt).toLocaleDateString('es-CO') : (perfil.fecha_creacion ? new Date(perfil.fecha_creacion).toLocaleDateString('es-CO') : 'N/A')}
-                    disabled
-                  />
-                </div>
-              </div>
-              
-              {/* Columna 3: Información de Contacto */}
-              <div className="col-md-4">
-                <h6 className="text-primary mb-3 border-bottom pb-2">Información de Contacto</h6>
-                
-                <div className="mb-3">
                   <label className="form-label">Teléfono</label>
                   <input
                     type="text"
@@ -194,16 +152,40 @@ const Perfil = () => {
                     disabled={!editMode}
                   />
                 </div>
+              </div>
 
+              {/* Columna 2: Información de la Cuenta */}
+              <div className="col-md-6">
+                <h6 className="text-primary mb-3 border-bottom pb-2">Información de la Cuenta</h6>
+                
                 <div className="mb-3">
-                  <label className="form-label">ID de Usuario</label>
+                  <label className="form-label">Rol</label>
                   <input
                     type="text"
                     className="form-control"
-                    value={perfil.id || perfil._id || 'N/A'}
+                    value={perfil.rol || 'Sin rol'}
                     disabled
                   />
-                  <div className="form-text">ID interno del sistema</div>
+                </div>
+
+                <div className="mb-3">
+                  <label className="form-label">Estado</label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    value={perfil.estado ? 'Activo' : 'Inactivo'}
+                    disabled
+                  />
+                </div>
+
+                <div className="mb-3">
+                  <label className="form-label">Fecha de Registro</label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    value={perfil.createdAt ? new Date(perfil.createdAt).toLocaleDateString('es-CO') : (perfil.fecha_creacion ? new Date(perfil.fecha_creacion).toLocaleDateString('es-CO') : 'N/A')}
+                    disabled
+                  />
                 </div>
               </div>
             </div>

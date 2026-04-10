@@ -14,7 +14,7 @@ const AuthRouter = () => {
   if (loading) return <div>Cargando...</div>;
   
   // Si es admin, va directamente a /admin
-  if (user && (role?.nombre === 'Administrador' || user.rol_id === 1)) {
+  if (user && (role?.nombre === 'ADMIN' || role?.nombre === 'Administrador' || user.rol_id === 5)) {
     return <Navigate to="/admin" replace />;
   }
   

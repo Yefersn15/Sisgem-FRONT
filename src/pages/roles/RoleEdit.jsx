@@ -22,7 +22,7 @@ const RoleEdit = () => {
         setNombre(rol.nombre || '');
         setDescripcion(rol.descripcion || '');
         setEstado(rol.estado !== false);
-        setEsDefault(rol.es_default === true);
+        setEsDefault(rol.esDefault === true);
         setPermisos(rol.permisos || []);
       }
       setLoadingData(false);
@@ -48,7 +48,7 @@ const RoleEdit = () => {
 
     setLoading(true);
     try {
-      await updateRol(id, { nombre, descripcion, estado, permisos, es_default: esDefault });
+      await updateRol(id, { nombre, descripcion, estado, permisos, esDefault });
       navigate('/admin/roles');
     } catch (err) {
       alert('Error al actualizar rol: ' + (err.message || err));

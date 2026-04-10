@@ -80,8 +80,7 @@ const AdminCategorias = () => {
       lista = lista.filter(c => 
         c.nombre.toLowerCase().includes(q) ||
         c.descripcion?.toLowerCase().includes(q) ||
-        String(c.id).includes(q) ||
-        (c.codigoUnico || '').toLowerCase().includes(q)
+        String(c.id).includes(q)
       );
     }
 
@@ -308,7 +307,6 @@ const AdminCategorias = () => {
                       <td><small className="text-muted">{categoria.id}</small></td>
                       <td className="fw-medium">{categoria.nombre}</td>
                       <td><small>{categoria.descripcion || '-'}</small></td>
-                      <td><small>{categoria.codigoUnico || '-'}</small></td>
                       <td>
                         <span className="badge bg-secondary">{categoria.productoCount}</span>
                       </td>

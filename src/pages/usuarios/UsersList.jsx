@@ -51,7 +51,7 @@ const UsersList = ({ source = 'usuarios' }) => {
 
   const handleRoleChange = async (userId, newRoleId) => {
     try {
-      await updateUsuario(userId, { rol: newRoleId });
+      await updateUsuario(userId, { rolId: newRoleId });
       await loadData();
       setShowRoleModal(null);
     } catch (err) {
@@ -85,13 +85,14 @@ const UsersList = ({ source = 'usuarios' }) => {
     const matchSearch = !search ||
       (u.nombre || '').toLowerCase().includes(search.toLowerCase()) ||
       (u.email || '').toLowerCase().includes(search.toLowerCase());
-    const matchRol = source === 'usuarios' ? (!filterRol || u.rol_id === filterRol) : true;
+    const matchRol = source === 'usuarios' ? (!filterRol || String(u.rol_id) === String(filterRol)) : true;
     return matchSearch && matchRol;
   });
 
   const getRoleName = (rolId, fallbackName) => {
     if (!rolId && fallbackName) return fallbackName;
-    const rol = roles.find(r => r.id === rolId);
+    if (!rolId) return 'Sin rol';
+    const rol = roles.find(r => String(r.id) === String(rolId));
     return rol ? rol.nombre : (fallbackName || 'Sin rol');
   };
 
@@ -232,7 +233,7 @@ const UsersList = ({ source = 'usuarios' }) => {
                   {roles.map(r => (
                     <button
                       key={r.id}
-                      className={`btn ${usuarios.find(u => u.id === showRoleModal)?.rol_id === r.id ? 'btn-primary' : 'btn-outline-secondary'}`}
+                      className={`btn ${String(usuarios.find(u => u.id === showRoleModal)?.rol_id) === String(r.id) ? 'btn-primary' : 'btn-outline-secondary'}`}
                       onClick={() => handleRoleChange(showRoleModal, r.id)}
                     >
                       {r.nombre}

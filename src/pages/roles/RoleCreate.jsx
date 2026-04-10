@@ -35,7 +35,7 @@ const RoleCreate = () => {
 
     setLoading(true);
     try {
-      await createRol({ nombre, descripcion, permisos, es_default: esDefault });
+      await createRol({ nombre, descripcion, permisos, esDefault });
       navigate('/admin/roles');
     } catch (err) {
       alert('Error al crear rol: ' + (err.message || err));

@@ -35,9 +35,6 @@ const CategoriaEdit = () => {
     if (!String(formData.nombre || '').trim()) newErrors.nombre = 'El nombre es obligatorio';
     else if (String(formData.nombre).length > 100) newErrors.nombre = 'Máximo 100 caracteres';
     if (formData.descripcion && String(formData.descripcion).length > 500) newErrors.descripcion = 'Máximo 500 caracteres';
-    const codigo = String(formData.codigoUnico || '').trim();
-    if (!codigo) newErrors.codigoUnico = 'El código único es obligatorio';
-    else if (codigo.length > 50) newErrors.codigoUnico = 'Máximo 50 caracteres';
     return newErrors;
   };
 
@@ -85,7 +82,7 @@ const CategoriaEdit = () => {
         </div>
         <div className="card-body">
           <form onSubmit={handleSubmit}>
-            <div className="row mb-3">
+            <div className="mb-3">
               <div className="col-md-6">
                 <label className="form-label">Nombre de la Categoría *</label>
                 <input
@@ -96,17 +93,6 @@ const CategoriaEdit = () => {
                   onChange={handleChange}
                 />
                 {errors.nombre && <div className="invalid-feedback">{errors.nombre}</div>}
-              </div>
-              <div className="col-md-6">
-                <label className="form-label">Código Único *</label>
-                <input
-                  type="text"
-                  className={`form-control ${errors.codigoUnico ? 'is-invalid' : ''}`}
-                  name="codigoUnico"
-                  value={formData.codigoUnico}
-                  onChange={handleChange}
-                />
-                {errors.codigoUnico && <div className="invalid-feedback">{errors.codigoUnico}</div>}
               </div>
             </div>
 

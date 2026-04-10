@@ -11,7 +11,7 @@ const PrivateRoute = ({ children, module, requireGuest }) => {
   if (requireGuest) {
     if (user) {
       // Ya está logueado, redirigir según el rol
-      if (role?.nombre === 'Administrador' || user.rol_id === 1) {
+      if (role?.nombre === 'ADMIN' || role?.nombre === 'Administrador' || user.rol_id === 5) {
         return <Navigate to="/admin" replace />;
       }
       return <Navigate to="/" replace />;
@@ -25,7 +25,7 @@ const PrivateRoute = ({ children, module, requireGuest }) => {
   }
   
   // Verificar si es administrador
-  const isAdmin = role?.nombre === 'Administrador' || user.rol_id === 1;
+  const isAdmin = role?.nombre === 'ADMIN' || role?.nombre === 'Administrador' || user.rol_id === 5;
   
   // Si es admin, permitir acceso a todo
   if (isAdmin) {

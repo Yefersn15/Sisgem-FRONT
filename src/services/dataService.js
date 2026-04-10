@@ -164,8 +164,7 @@ const mapProductoToApi = (p) => ({
   proveedor: p.proveedorId,
   nombre: p.nombre,
   descripcion: p.descripcion,
-  codigo_barras: p.barcode || p.codigoUnico,
-  codigo_unico: p.codigo_unico || p.codigoUnico,
+  codigo_barras: p.barcode || '',
   precio: p.precioUnitario,
   stock: p.stockDisponible,
   imagen: p.fotoUrl,
@@ -177,19 +176,17 @@ const mapProductoToApi = (p) => ({
 
 // Producto: API -> Frontend
 const mapApiToProducto = (api) => ({
-  id: api._id,
+  id: api.id,
   nombre: api.nombre,
   descripcion: api.descripcion,
   precioUnitario: api.precio,
   stockDisponible: api.stock,
-  codigoUnico: api.codigo_unico || api.codigo_barras,
-  codigo_unico: api.codigo_unico || '',
   barcode: api.codigo_barras || '',
-  fotoUrl: api.imagen,
+  fotoUrl: api.imagen || api.imagen_data,
   activo: api.estado,
-  categoriaId: api.categoria?._id || api.categoria,
-  marcaId: api.marca?._id || api.marca,
-  proveedorId: api.proveedor?._id || api.proveedor,
+  categoriaId: api.categoria?.id || api.categoria,
+  marcaId: api.marca?.id || api.marca,
+  proveedorId: api.proveedor?.id || api.proveedor,
   precioCompra: api.precio_compra,
   minStock: api.stock_minimo,
   unidadMedida: api.unidad_medida,
@@ -203,18 +200,16 @@ const mapApiToProducto = (api) => ({
 const mapCategoriaToApi = (c) => ({
   nombre: c.nombre,
   descripcion: c.descripcion,
-  codigo_unico: c.codigoUnico,
-  imagen: c.imagen,
-  estado: c.activa !== undefined ? c.activa : (c.activo !== undefined ? c.activo : true)
+  foto_url: c.imagen,
+  estado: c.activa !== undefined ? c.activa : true
 });
 
 // Categoría: API -> Frontend
 const mapApiToCategoria = (api) => ({
-  id: api._id,
+  id: api.id,
   nombre: api.nombre,
   descripcion: api.descripcion,
-  codigoUnico: api.codigo_unico || '',
-  imagen: api.imagen,
+  imagen: api.foto_url || api.foto_data,
   activo: api.estado
 });
 
@@ -222,20 +217,20 @@ const mapApiToCategoria = (api) => ({
 const mapMarcaToApi = (m) => ({
   nombre: m.nombre,
   descripcion: m.descripcion,
-  codigo_unico: m.codigoUnico,
-  imagen: m.logoUrl,
+  logo: m.logoUrl,
   sitio_web: m.sitioWeb,
+  proveedor_id: m.proveedorId,
   estado: m.activo !== undefined ? m.activo : true
 });
 
 // Marca: API -> Frontend
 const mapApiToMarca = (api) => ({
-  id: api._id,
+  id: api.id,
   nombre: api.nombre,
   descripcion: api.descripcion,
-  codigoUnico: api.codigo_unico || '',
-  logoUrl: api.imagen,
+  logoUrl: api.logo || api.logo_data,
   sitioWeb: api.sitio_web || '',
+  proveedorId: api.proveedor_id,
   activo: api.estado
 });
 
@@ -496,15 +491,14 @@ export const importMarcas = async (file, onSuccess, onError) => {
     const workbook = XLSX.read(data, { type: 'array' });
     const rows = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]]);
     for (const row of rows) {
-      // Campos del Excel: Id, Nombre, Descripcion, CodigoUnico, LogoUrl, Activo, SitioWeb
+      // Campos del Excel: Id, Nombre, Descripcion, LogoUrl, Activo, SitioWeb
       const nombre = row.Nombre || row.nombre || '';
       const descripcion = row.Descripcion || row.descripcion || '';
-      const codigoUnico = row.CodigoUnico || row.codigoUnico || '';
       const logoUrl = row.LogoUrl || row.logoUrl || row.Logo || row.logo || row.Imagen || row.imagen || '';
       const sitioWeb = row.SitioWeb || row.sitioWeb || '';
       const activo = parseBooleanCell(row.Activo || row.activo);
       if (nombre) {
-        await createMarca({ nombre, descripcion, codigoUnico, logoUrl, sitioWeb, activo });
+        await createMarca({ nombre, descripcion, logoUrl, sitioWeb, activo });
       }
     }
     onSuccess && onSuccess(rows.length);
@@ -641,14 +635,14 @@ const mapPedidoToFront = (pedido) => ({
   barrio: typeof pedido.direccion === 'object' ? pedido.direccion?.barrio : undefined,
   telefonoContacto: pedido.telefono_contacto,
   productos: pedido.productos?.map(item => ({
-    productoId: typeof item.producto === 'object' ? item.producto?._id : item.producto,
+    productoId: typeof item.producto === 'object' ? item.producto?.id : item.producto,
     cantidad: item.cantidad,
     precioUnitario: item.precio_unitario,
     subtotal: item.subtotal,
     productoSnapshot: item.producto ? {
       nombre: item.producto.nombre,
       fotoUrl: item.producto.imagen,
-      codigoUnico: item.producto.codigo_unico
+      codigoBarras: item.producto.codigo_barras
     } : null
   })) || []
 });
@@ -943,13 +937,11 @@ export const updateDomicilioEstado = async (ventaId, estado) => {
 // ----------------------------------------------------------------------
 
 // ----------------------------------------------------------------//
-// USUARIOS - Cambio de contraseña (usando endpoint PUT)
+// USUARIOS - Cambio de contraseña (usando endpoint dedicado)
 // ----------------------------------------------------------------//
-export const changePassword = async (userId, newPassword) => {
-  // Se envía la nueva contraseña directamente al endpoint de actualización
-  // El API se encargará de hashearla antes de guardar
-  const data = await request(`/api/usuarios/${userId}`, {
-    method: 'PUT',
+export const changePassword = async (newPassword) => {
+  const data = await request('/api/auth/change-password', {
+    method: 'POST',
     body: { password: newPassword }
   });
   return data;
@@ -961,7 +953,7 @@ export const changePassword = async (userId, newPassword) => {
 export const getUsuarios = async () => {
   const data = await request('/api/usuarios');
   return Array.isArray(data) ? data.map(u => ({
-    id: u._id,
+    id: u.documento || u.id || u._id,
     documento: u.documento,
     nombre: u.nombre,
     apellido: u.apellido,
@@ -969,9 +961,10 @@ export const getUsuarios = async () => {
     telefono: u.telefono,
     tipoVehiculo: u.tipoVehiculo || u.tipo_vehiculo || '',
     placa: u.placa || '',
-    rol_id: u.rol?._id,
+    rol: u.rol ? { id: u.rol.id, nombre: u.rol.nombre } : (u.rolId ? { id: u.rolId } : null),
+    rol_id: u.rol?.id || u.rolId,
     rol_nombre: u.rol?.nombre,
-    proveedor_id: u.proveedor?._id,
+    proveedor_id: u.proveedor?._id || u.proveedorId,
     proveedor_nombre: u.proveedor?.nombre,
     estado: u.estado,
     fecha_creacion: u.createdAt
@@ -1010,12 +1003,12 @@ export const toggleUsuarioEstado = async (id, nuevoEstado) => {
 export const getRoles = async () => {
   const data = await request('/api/roles');
   return Array.isArray(data) ? data.map(r => ({
-    id: r._id,
+    id: r._id || r.id,
     nombre: r.nombre,
     descripcion: r.descripcion,
     estado: r.estado,
     permisos: r.permisos || [],
-    es_default: r.es_default || false
+    esDefault: r.esDefault || false
   })) : [];
 };
 

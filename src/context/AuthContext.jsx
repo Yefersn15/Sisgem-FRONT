@@ -21,18 +21,9 @@ export const AuthProvider = ({ children }) => {
           setUser(userData);
           localStorage.setItem('auth_user', JSON.stringify(userData));
           
-          // Cargar rol y módulos si existen
-          if (userData.rol) {
-            try {
-              const roleData = await request(`/api/roles/nombre/${userData.rol}`);
-              setRole(roleData);
-              // Los permisos del rol
-              if (roleData && roleData.permisos) {
-                setModules(roleData.permisos);
-              }
-            } catch (e) {
-              console.warn('Error cargando rol:', e);
-            }
+          // Usar permisos del usuario directamente
+          if (userData.permisos) {
+            setModules(userData.permisos);
           }
         } catch (e) {
           console.warn('Error obteniendo usuario desde API:', e.message || e);
@@ -63,15 +54,9 @@ export const AuthProvider = ({ children }) => {
       localStorage.setItem('auth_user', JSON.stringify(userObj));
       setUser(userObj);
 
-      // Cargar rol
-      if (userObj.rol) {
-        try {
-          const roleData = await request(`/api/roles/nombre/${userObj.rol}`);
-          setRole(roleData);
-          setModules(roleData.permisos || []);
-        } catch (e) {
-          console.warn('Error cargando rol:', e);
-        }
+      // Usar permisos del usuario directamente
+      if (userObj.permisos) {
+        setModules(userObj.permisos);
       }
 
       return { success: true, user: userObj };
@@ -91,8 +76,8 @@ export const AuthProvider = ({ children }) => {
 
   const hasPermission = (moduleName) => {
     if (!user) return false;
-    // El rol de ADMIN tiene todos los permisos
-    if (role?.nombre === 'Administrador' || role?.nombre === 'ADMIN') return true;
+    // El rol de ADMIN/Administrador tiene todos los permisos
+    if (role?.nombre === 'ADMIN' || role?.nombre === 'Administrador' || user?.rol_id === 5) return true;
     // Verificar en módulos/permisos
     return modules.some(m => m.nombre === moduleName || m === moduleName);
   };

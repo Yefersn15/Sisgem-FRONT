@@ -15,7 +15,7 @@ const VentaDetails = () => {
   const [productos, setProductos] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const isAdmin = role?.nombre === 'Administrador' || user?.rol_id === 1;
+  const isAdmin = role?.nombre === 'ADMIN' || role?.nombre === 'Administrador' || user?.rol_id === 5;
   const canConfirmPayment = isAdmin || hasPermission('Ventas');
 
   useEffect(() => {
@@ -264,8 +264,8 @@ const VentaDetails = () => {
                               <div className="fw-medium">
                                 {item.productoSnapshot?.nombre || getProductoNombre(item.productoId)}
                               </div>
-                              {item.productoSnapshot?.codigoUnico && (
-                                <small className="text-muted">{item.productoSnapshot.codigoUnico}</small>
+                              {item.productoSnapshot?.codigoBarras && (
+                                <small className="text-muted">{item.productoSnapshot.codigoBarras}</small>
                               )}
                             </div>
                           </div>

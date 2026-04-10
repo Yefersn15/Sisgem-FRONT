@@ -72,7 +72,7 @@ const Header = () => {
   };
 
   // Verificar si es administrador
-  const isAdmin = role?.nombre === 'Administrador' || user?.rol_id === 1;
+  const isAdmin = role?.nombre === 'ADMIN' || role?.nombre === 'Administrador' || user?.rol_id === 5;
 
   // Definición de los elementos del menú - solo rutas que el usuario puede usar
   const menuSections = [
