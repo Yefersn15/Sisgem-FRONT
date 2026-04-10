@@ -691,22 +691,21 @@ const mapPedidoToFront = (pedido) => {
     observaciones: pedido.observaciones,
     direccion,
     barrio,
-    telefonoDir
+    telefonoDir,
+    telefonoContacto: pedido.telefono_contacto,
+    productos: (pedido.productos || []).map(item => ({
+      productoId: typeof item.producto === 'object' ? item.producto?.id : item.producto,
+      cantidad: item.cantidad,
+      precioUnitario: item.precio_unitario,
+      subtotal: item.subtotal,
+      productoSnapshot: item.producto ? {
+        nombre: item.producto.nombre,
+        fotoUrl: item.producto.imagen,
+        codigoBarras: item.producto.codigo_barras
+      } : null
+    }))
   };
 };
-  telefonoContacto: pedido.telefono_contacto,
-  productos: (pedido.productos || []).map(item => ({
-    productoId: typeof item.producto === 'object' ? item.producto?.id : item.producto,
-    cantidad: item.cantidad,
-    precioUnitario: item.precio_unitario,
-    subtotal: item.subtotal,
-    productoSnapshot: item.producto ? {
-      nombre: item.producto.nombre,
-      fotoUrl: item.producto.imagen,
-      codigoBarras: item.producto.codigo_barras
-    } : null
-  }))
-});
 
 // Obtener pedidos activos (no ventas)
 export const getPedidos = async () => {
