@@ -651,26 +651,51 @@ export const importProveedores = async (file, onSuccess, onError) => {
 // ----------------------------------------------------------------------
 
 // Mapeo interno
-const mapPedidoToFront = (pedido) => ({
-  id: pedido.id,
-  fecha: pedido.fecha_pedido,
-  usuarioId: typeof pedido.usuario === 'object' ? pedido.usuario?.id : pedido.usuario,
-  usuarioNombre: typeof pedido.usuario === 'object' ? pedido.usuario?.nombre : undefined,
-  telefono: pedido.telefono_contacto,
-  metodoPago: pedido.metodo_pago,
-  subtotal: pedido.subtotal,
-  shipping: (parseFloat(pedido.total) || 0) - (parseFloat(pedido.subtotal) || 0),
-  total: pedido.total,
-  estadoPedido: pedido.estado_pedido,
-  estadoVenta: pedido.estado_venta,
-  esVenta: pedido.es_venta,
-  tipo_venta: pedido.tipo_venta,
-  delivery: pedido.tipo_venta === 'domicilio',
-  observaciones: pedido.observaciones,
-  direccion: typeof pedido.direccion === 'object' ? pedido.direccion?.direccion : pedido.direccion,
-  barrio: typeof pedido.direccion === 'object' ? pedido.direccion?.barrio : undefined,
+const mapPedidoToFront = (pedido) => {
+  let direccion = '';
+  let barrio = '';
+  let telefonoDir = '';
+  
+  if (pedido.direccion) {
+    if (typeof pedido.direccion === 'object') {
+      direccion = pedido.direccion.direccion || '';
+      barrio = pedido.direccion.barrio || '';
+      telefonoDir = pedido.direccion.telefono || '';
+    } else if (typeof pedido.direccion === 'string') {
+      try {
+        const dirObj = JSON.parse(pedido.direccion);
+        direccion = dirObj.direccion || '';
+        barrio = dirObj.barrio || '';
+        telefonoDir = dirObj.telefono || '';
+      } catch {
+        direccion = pedido.direccion;
+      }
+    }
+  }
+  
+  return {
+    id: pedido.id,
+    fecha: pedido.createdAt || pedido.fecha_pedido,
+    usuarioId: typeof pedido.usuario === 'object' ? pedido.usuario?.id : (pedido.usuarioId || pedido.usuario),
+    usuarioNombre: typeof pedido.usuario === 'object' ? pedido.usuario?.nombre : undefined,
+    telefono: pedido.telefono_contacto,
+    metodoPago: pedido.metodo_pago || pedido.metodoPago || 'Efectivo',
+    subtotal: parseFloat(pedido.subtotal) || 0,
+    shipping: (parseFloat(pedido.total) || 0) - (parseFloat(pedido.subtotal) || 0),
+    total: parseFloat(pedido.total) || 0,
+    estadoPedido: pedido.estado_pedido || pedido.estadoPedido || 'Pendiente',
+    estadoVenta: pedido.estado_venta || pedido.estadoVenta || null,
+    esVenta: pedido.es_venta,
+    tipo_venta: pedido.tipo_venta || 'mostrador',
+    delivery: pedido.tipo_venta === 'domicilio',
+    observaciones: pedido.observaciones,
+    direccion,
+    barrio,
+    telefonoDir
+  };
+};
   telefonoContacto: pedido.telefono_contacto,
-  productos: pedido.productos?.map(item => ({
+  productos: (pedido.productos || []).map(item => ({
     productoId: typeof item.producto === 'object' ? item.producto?.id : item.producto,
     cantidad: item.cantidad,
     precioUnitario: item.precio_unitario,
@@ -680,7 +705,7 @@ const mapPedidoToFront = (pedido) => ({
       fotoUrl: item.producto.imagen,
       codigoBarras: item.producto.codigo_barras
     } : null
-  })) || []
+  }))
 });
 
 // Obtener pedidos activos (no ventas)

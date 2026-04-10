@@ -231,9 +231,12 @@ const Checkout = () => {
         notasDomicilio: formData.notasDomicilio || '',
         notasAutor: formData.delivery ? 'usuario' : undefined,
         delivery: formData.delivery,
-        direccion: formData.direccion,
-        direccion2: formData.direccion2,
-        barrio: formData.barrio,
+        direccion: formData.delivery ? {
+          direccion: formData.direccion,
+          direccion2: formData.direccion2 || '',
+          barrio: formData.barrio,
+          telefono: telefonoCompleto
+        } : null,
         tipo_venta: formData.delivery ? 'domicilio' : 'mostrador'
       };
 
