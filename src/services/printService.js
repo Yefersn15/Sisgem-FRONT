@@ -20,12 +20,19 @@ export const openPrintVoucher = async (venta, domicilio, options = {}) => {
         <td style="padding:6px;border:1px solid #ddd;text-align:right">${formatPrice(d.subtotal||0)}</td>
       </tr>`).join('');
 
+    const resTipo = domicilio?.tipo ? `[${domicilio.tipo}]` : '';
     const domicilioHtml = domicilio ? `
-      <h4>Domicilio</h4>
-      <p>${domicilio.direccion || ''} ${domicilio.direccion2 || ''}</p>
-      <p>${domicilio.ciudad || ''} ${domicilio.provincia || ''}</p>
-      <p>Tel: ${domicilio.telefono || ''}</p>
-      <p>Estado: ${domicilio.estado || ''}</p>
+      <div style="margin:8px 0; padding:8px; background:#f9f9f9;">
+        <h4 style="margin:0 0 4px">Domicilio</h4>
+        <p style="margin:2px 0"><strong>Dirección:</strong> ${domicilio.direccion || ''} ${domicilio.direccion2 || ''} ${resTipo}</p>
+        <p style="margin:2px 0"><strong>Barrio:</strong> ${domicilio.barrio || ''}</p>
+        <p style="margin:2px 0"><strong>Teléfono:</strong> ${domicilio.telefono || ''}</p>
+        ${domicilio.repartidor ? `
+          <p style="margin:2px 0"><strong>Repartidor:</strong> ${domicilio.repartidor.nombre || ''} (${domicilio.repartidor.telefono || ''})</p>
+          <p style="margin:2px 0"><strong>Vehículo:</strong> ${domicilio.repartidor.tipoVehiculo || ''} - ${domicilio.repartidor.placa || ''}</p>
+        ` : ''}
+        <p style="margin:2px 0"><strong>Estado:</strong> ${domicilio.estado || ''}</p>
+      </div>
     ` : '';
 
     const html = `

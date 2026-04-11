@@ -936,6 +936,9 @@ export const getDomicilios = async () => {
       const domDir = dom.direccion ? (typeof dom.direccion === 'object' ? dom.direccion : { direccion: dom.direccion, direccion2: dom.direccion2, barrio: dom.barrio }) : { direccion: '', direccion2: '', barrio: '' };
     const pedidoDir = dom.pedido?.direccion ? (typeof dom.pedido.direccion === 'object' ? dom.pedido.direccion : { tipo: '' }) : { direccion: '', tipo: '' };
     const resTipo = domDir.tipo || pedidoDir.tipo || '';
+    const pedidoEstado = dom.pedido?.estado_pedido || dom.pedido?.estadoPedido || 'pendiente';
+    const pedidoMetodo = dom.pedido?.metodo_pago || dom.pedido?.metodoPago || 'Efectivo';
+    const pedidoUsuario = dom.pedido?.usuario?.nombre || dom.pedido?.usuarioNombre || '';
     
     return ({
         id: dom.id,
@@ -950,7 +953,15 @@ export const getDomicilios = async () => {
         tipo: resTipo,
         tarifa: (dom.tarifaAplicada ?? dom.tarifa_aplicada ?? dom.tarifa) ?? 0,
         repartidor: repartidorObj,
-        notas: dom.notas || ''
+        notas: dom.notas || '',
+        venta: {
+          id: dom.pedido?.id,
+          estadoPedido: pedidoEstado,
+          metodoPago: pedidoMetodo,
+          usuarioNombre: pedidoUsuario,
+          direccion: dom.pedido?.direccion,
+          telefono: dom.pedido?.telefono_contacto
+        }
       });
     }) : [];
 

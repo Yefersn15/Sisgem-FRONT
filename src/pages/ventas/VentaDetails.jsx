@@ -100,6 +100,44 @@ const VentaDetails = () => {
     return metodos[metodo] || 'bg-secondary';
   };
 
+  const getDeliveryStatusBadge = (estado) => {
+    const estados = {
+      'pendiente': 'bg-warning text-dark',
+      'aprobado': 'bg-info',
+      'en_preparacion': 'bg-primary',
+      'asignado': 'bg-info',
+      'en_camino': 'bg-primary',
+      'entregado': 'bg-success',
+      'cancelado': 'bg-danger'
+    };
+    return estados[estado] || 'bg-secondary';
+  };
+
+  const estadoOrden = pedido?.estadoPedido || pedido?.estado || 'pendiente';
+  const esDomicilio = (pedido?.delivery === true || String(pedido?.tipo_venta || '').toLowerCase() === 'domicilio');
+  
+  const pasosEntrega = [
+    { estado: 'pendiente', label: 'Recibido', icon: 'fa-clipboard-list' },
+    { estado: 'aprobado', label: 'Aprobado', icon: 'fa-check' },
+    { estado: 'en_preparacion', label: 'Preparando', icon: 'fa-box' },
+    { estado: 'asignado', label: 'Asignado', icon: 'fa-motorcycle' },
+    { estado: 'en_camino', label: 'En Camino', icon: 'fa-truck' },
+    { estado: 'entregado', label: 'Entregado', icon: 'fa-home' }
+  ];
+  
+  const getPasoIndex = (est) => {
+    const idx = pasosEntrega.findIndex(p => p.estado === est);
+    return idx >= 0 ? idx : 0;
+  };
+  
+  const currentStepIndex = getPasoIndex(estadoOrden);
+  
+  const statusSteps = pasosEntrega.map((paso, idx) => ({
+    ...paso,
+    isActive: idx <= currentStepIndex,
+    isCurrent: idx === currentStepIndex && estadoOrden !== 'cancelado' && estadoOrden !== 'entregado'
+  }));
+
   const handleCambiarEstadoPago = async (pagoId, estado) => {
     if (!canConfirmPayment) { alert('No tiene permisos'); return; }
     try {
@@ -177,34 +215,7 @@ const VentaDetails = () => {
           </Link>
             {esPedido && isAdmin && (
               <>
-                {/* Botones de flujo de domicilio - solo para efectivo/transferencia */}
-                {pedido?.estadoPedido === 'Pendiente' && pedido?.metodoPago !== 'Abono' && (
-                  <button className="btn btn-success ms-2" onClick={() => handleAvanzarEstado('aprobado')}>
-                    Aprobar y Preparar
-                  </button>
-                )}
-                {pedido?.estadoPedido === 'aprobado' && (
-                  <button className="btn btn-warning ms-2" onClick={() => handleAvanzarEstado('en_preparacion')}>
-                    En Preparación
-                  </button>
-                )}
-                {pedido?.estadoPedido === 'en_preparacion' && pedido.tipo_venta === 'domicilio' && (
-                  <button className="btn btn-info ms-2" onClick={() => handleAvanzarEstado('asignado')}>
-                    Asignar Repartidor
-                  </button>
-                )}
-                {pedido?.estadoPedido === 'asignado' && (
-                  <button className="btn btn-primary ms-2" onClick={() => handleAvanzarEstado('en_camino')}>
-                    En Camino
-                  </button>
-                )}
-                {pedido?.estadoPedido === 'en_camino' && (
-                  <button className="btn btn-success ms-2" onClick={() => handleAvanzarEstado('entregado')}>
-                    Entregado
-                  </button>
-                )}
-                
-                {/* Botones de abono */}
+                {/* Botones de abono - solo desde la página de Domicilios */}
                 {pedido?.metodoPago === 'Abono' && pedido?.estadoPedido === 'Pendiente' && canConfirmPayment && (
                   <>
                     <button className="btn btn-outline-success ms-2" onClick={() => handleAceptarAbono(true)}>Aprobar Abono</button>
@@ -244,6 +255,52 @@ const VentaDetails = () => {
           </span>
         </div>
       </div>
+
+{/* Status Timeline para Domicilio */}
+      {esDomicilio && estadoOrden !== 'cancelado' && (
+        <div className="card mb-4">
+          <div className="card-body">
+            <h5 className="mb-4">
+              <i className="fas fa-shipping-fast me-2"></i>
+              Estado del domicilio
+            </h5>
+            <div className="position-relative">
+              {/* Barra de progreso */}
+              <div className="position-absolute top-0 start-0 end-0" style={{ height: 4, background: '#e5e7eb' }}>
+                <div
+                  className="h-100 bg-success transition-all"
+                  style={{
+                    width: `${Math.max(0, (statusSteps.filter(s => s.isActive).length - 1) * 20)}%`,
+                  }}
+                />
+              </div>
+              {/* Pasos */}
+              <div className="position-relative d-flex justify-content-between">
+                {statusSteps.map((step, idx) => (
+                  <div key={idx} className="d-flex flex-column align-items-center" style={{ width: '80px' }}>
+                    <div
+                      className={`rounded-circle d-flex align-items-center justify-content-center border-4 transition ${
+                        step.isActive
+                          ? 'bg-success border-white text-white'
+                          : 'bg-white border-secondary text-secondary'
+                      }`}
+                      style={{ width: 48, height: 48, ...(step.isCurrent && { boxShadow: '0 0 0 4px rgba(34, 197, 94, 0.3)' }) }}
+                    >
+                      <i className={`fas ${step.icon}`} style={{ fontSize: '1.25rem' }} />
+                    </div>
+                    <p
+                      className={`mt-2 text-center ${step.isActive ? 'fw-medium text-dark' : 'text-muted'}`}
+                      style={{ fontSize: '0.75rem', maxWidth: '80px' }}
+                    >
+                      {step.label}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="row">
         <div className="col-lg-8">

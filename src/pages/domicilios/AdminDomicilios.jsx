@@ -160,8 +160,8 @@ const AdminDomicilios = () => {
     cargarDatos();
   };
 
-  const handleCambiarEstado = (ventaId, nextState) => {
-    const dom = domicilios.find(d => String(d.ventaId) === String(ventaId));
+const handleCambiarEstado = async (ventaId, nextState) => {
+    const dom = domicilio.find(d => String(d.ventaId) === String(ventaId));
     const estadoActual = dom?.estado;
     
     // Verificar si el estado es final
@@ -173,7 +173,7 @@ const AdminDomicilios = () => {
     // Verificar si la transición es válida
     const siguientes = getSiguientesEstadosDomicilio(estadoActual);
     if (estadoActual && !siguientes.includes(nextState)) {
-      alert(`No se puede cambiar de "${estadoActual}" a "${nextState}".\n\nEstados válidos siguientes: ${siguientes.join(', ') || 'Ninguno'}`);
+      alert(`No se puede cambiar de "${estadoActual}" a "${nextState}".\n\nEstados válido siguientes: ${siguientes.join(', ') || 'Ninguno'}`);
       return;
     }
     
@@ -183,12 +183,12 @@ const AdminDomicilios = () => {
       return;
     }
     
-    const res = updateDomicilioEstado(ventaId, nextState);
-    if (!res) {
-      alert('No se puede cambiar el estado del domicilio.');
-      return;
+    try {
+      await updateDomicilioEstado(ventaId, nextState);
+      await cargarDatos();
+    } catch (error) {
+      alert('Error al cambiar estado: ' + error.message);
     }
-    cargarDatos();
   };
 
   const handleEditarTarifa = async (ventaId, tarifaActual) => {
@@ -339,9 +339,11 @@ const handleExportar = () => {
                   <div className="d-flex justify-content-between align-items-center mt-2">
                     <span className={`badge bg-${badgeColor}`}>{dom.estado || dom.venta?.estadoPedido || 'Pendiente'}</span>
                     <div className="d-flex align-items-center gap-2">
-                      <button className="btn btn-sm btn-outline-primary py-0 px-1" onClick={() => handleEditarTarifa(dom.pedidoId, dom.tarifa)} title="Editar tarifa">
-                        <i className="fas fa-dollar-sign"></i>
-                      </button>
+                      {dom.estado !== 'entregado' && (
+                        <button className="btn btn-sm btn-outline-primary py-0 px-1" onClick={() => handleEditarTarifa(dom.pedidoId, dom.tarifa)} title="Editar tarifa">
+                          <i className="fas fa-dollar-sign"></i>
+                        </button>
+                      )}
                       <span className="fw-bold">{formatPrice((dom.tarifaAplicada ?? dom.tarifa_aplicada) ?? dom.tarifa ?? 0)}</span>
                     </div>
                   </div>
@@ -387,15 +389,10 @@ const handleExportar = () => {
                       </select>
                     )}
                   </div>
-                  {/* Estado del pedido */}
-                  <div className="mt-1 mb-2">
-                    <small className="text-muted">Estado Pedido: </small>
-                    <span className={`badge ${dom.venta?.estadoPedido === 'Entregado' ? 'bg-success' : dom.venta?.estadoPedido === 'Cancelado' ? 'bg-danger' : 'bg-secondary'}`}>
-                      {dom.venta?.estadoPedido || 'Pendiente'}
-                    </span>
-                  </div>
                   <div className="mt-2 d-flex gap-2">
-                    <button className="btn btn-sm btn-outline-primary" onClick={() => openRepartidorModal(dom.pedidoId)}>{dom.repartidor ? 'Editar' : 'Asignar'} Repartidor</button>
+                    {dom.estado !== 'entregado' && (
+                      <button className="btn btn-sm btn-outline-primary" onClick={() => openRepartidorModal(dom.pedidoId)}>{dom.repartidor ? 'Editar' : 'Asignar'} Repartidor</button>
+                    )}
                     <button className="btn btn-sm btn-outline-dark" onClick={() => dom.venta && openPrintVoucher(dom.venta, dom)}><i className="fas fa-print"></i></button>
                     <button className="btn btn-sm btn-success" onClick={() => { const target = dom.repartidor?.telefono ? normalizeNumber(dom.repartidor.telefono) : normalizeNumber(dom.telefono); if (target) window.open(`https://wa.me/${target}`, '_blank'); else alert('Teléfono inválido para WhatsApp'); }}><i className="fab fa-whatsapp"></i></button>
                     <button className="btn btn-sm btn-info" onClick={() => handleNotas(dom.pedidoId, dom.notas)}><i className="fas fa-sticky-note"></i></button>
