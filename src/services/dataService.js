@@ -936,6 +936,7 @@ export const getDomicilios = async () => {
       return ({
         id: dom.id,
         pedidoId: pedidoId,
+        ventaId: pedidoId,
         direccion: dom.direccion || '',
         direccion2: dom.direccion2 || '',
         barrio: dom.barrio || '',
@@ -962,6 +963,7 @@ export const getDomicilios = async () => {
         return ({
           id: `pedido-${p.id}`,
           pedidoId: p.id,
+          ventaId: p.id,
           direccion: direccionStr,
           barrio: barrioStr,
           ciudad: ciudadStr,
