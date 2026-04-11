@@ -881,10 +881,10 @@ export const createPago = async (pago) => {
   }
 
   const payload = {
-    pedido: pago.ventaId,
+    pedidoId: parseInt(pago.ventaId) || 0,
     monto: parseFloat(pago.monto) || 0,
     metodo: metodoNormalizado,
-    estado: pago.estado || (pago.tipo === 'abono' ? 'pendiente' : 'aplicado'),
+    estado: pago.estado || (pago.tipo === 'abono' ? 'Pendiente' : 'aplicado'),
     observaciones: pago.notas,
     tipo: pago.tipo || 'pago_total'
   };

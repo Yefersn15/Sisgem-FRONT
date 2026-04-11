@@ -334,7 +334,7 @@ const handleExportar = () => {
                   {dom.venta?.usuarioNombre && (
                     <p className="mb-1"><i className="fas fa-user me-2"></i>{dom.venta.usuarioNombre}</p>
                   )}
-                  <p className="mb-1"><i className="fas fa-map-marker-alt me-2"></i>{dom.direccion || dom.venta?.direccion}{dom.barrio ? ` (${dom.barrio})` : ''}{dom.tipo ? ` [${dom.tipo}]` : ''}</p>
+                  <p className="mb-1"><i className="fas fa-map-marker-alt me-2"></i>{dom.direccion || dom.venta?.direccion}{dom.barrio ? ` (${dom.barrio})` : ''}{dom.tipo ? ` [${dom.tipo.charAt(0).toUpperCase() + dom.tipo.slice(1)}]` : ''}</p>
                   <p className="mb-1"><i className="fas fa-phone me-2"></i>{dom.telefono || dom.venta?.telefono || dom.venta?.telefonoContacto || 'Sin teléfono'}</p>
                   <div className="d-flex justify-content-between align-items-center mt-2">
                     <span className={`badge bg-${badgeColor}`}>{dom.estado || dom.venta?.estadoPedido || 'Pendiente'}</span>

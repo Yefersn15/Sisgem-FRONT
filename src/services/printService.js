@@ -20,7 +20,7 @@ export const openPrintVoucher = async (venta, domicilio, options = {}) => {
         <td style="padding:6px;border:1px solid #ddd;text-align:right">${formatPrice(d.subtotal||0)}</td>
       </tr>`).join('');
 
-    const resTipo = domicilio?.tipo ? `[${domicilio.tipo}]` : '';
+    const resTipo = domicilio?.tipo ? `[${domicilio.tipo.charAt(0).toUpperCase() + domicilio.tipo.slice(1)}]` : '';
     const domicilioHtml = domicilio ? `
       <div style="margin:8px 0; padding:8px; background:#f9f9f9;">
         <h4 style="margin:0 0 4px">Domicilio</h4>

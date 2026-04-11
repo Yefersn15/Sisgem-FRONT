@@ -222,7 +222,7 @@ const VentaDetails = () => {
                     <button className="btn btn-outline-danger ms-2" onClick={() => handleAceptarAbono(false)}>Rechazar Abono</button>
                   </>
                 )}
-                {esPedido && pedido.metodoPago === 'Abono' && pedido.estadoPedido === 'entregado' && canConfirmPayment && (
+                {esPedido && pedido.metodoPago === 'Abono' && ['aprobado', 'en_preparacion', 'asignado', 'en_camino', 'entregado'].includes(pedido.estadoPedido) && canConfirmPayment && (
                   <button 
                     className="btn btn-outline-primary ms-2" 
                     onClick={() => navigate(`/admin/pagos/nuevo`, { state: { ventaId: id } })}
