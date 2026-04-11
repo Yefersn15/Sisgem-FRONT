@@ -859,16 +859,16 @@ export const getPagos = async () => {
 export const getPagoById = async (id) => {
   const data = await request(`/api/pagos/${id}`);
   if (!data) return null;
-  const ventaId = typeof data.pedido === 'object' ? data.pedido?._id : data.pedido;
+  const ventaId = typeof data.pedido === 'object' ? (data.pedido?.id || data.pedido?._id) : data.pedido;
   const usuarioNombre = typeof data.pedido?.usuario === 'object' ? data.pedido?.usuario?.nombre : undefined;
   return {
-    id: data._id,
+    id: data.id || data._id,
     ventaId,
     usuarioNombre,
-    monto: data.monto,
+    monto: parseFloat(data.monto) || 0,
     metodo: data.metodo,
     estado: data.estado,
-    fecha: data.fecha_pago,
+    fecha: data.fecha_pago || data.createdAt,
     notas: data.observaciones
   };
 };
