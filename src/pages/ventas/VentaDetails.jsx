@@ -386,7 +386,8 @@ const VentaDetails = () => {
                   <p className="mb-1"><strong>Teléfono:</strong> {pedido.telefono || pedido.telefonoContacto || '-'}</p>
                   {pedido.direccion && (
                     <>
-                      <p className="mb-1"><strong>Dirección:</strong> {pedido.direccion}</p>
+                      {pedido.tipo && <p className="mb-1"><strong>Tipo:</strong> {pedido.tipo === 'casa' ? 'Casa' : pedido.tipo === 'apartamento' ? 'Apartamento' : pedido.tipo === 'oficina' ? 'Oficina' : pedido.tipo}</p>}
+                      <p className="mb-1"><strong>Dirección:</strong> {pedido.direccion}{pedido.direccion2 ? `, ${pedido.direccion2}` : ''}</p>
                       {pedido.barrio && <p className="mb-1"><strong>Barrio:</strong> {pedido.barrio}</p>}
                     </>
                   )}

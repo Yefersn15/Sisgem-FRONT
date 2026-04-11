@@ -398,7 +398,7 @@ const Checkout = () => {
                     </div>
 
                     <div className="mb-3">
-                      <label htmlFor="direccion2" className="form-label">Apartamento / Suite (opcional)</label>
+                      <label htmlFor="direccion2" className="form-label">Tipo de residencia (opcional)</label>
                       <input
                         type="text"
                         className="form-control"

@@ -333,10 +333,10 @@ const AdminDomicilios = () => {
                   {dom.venta?.usuarioNombre && (
                     <p className="mb-1"><i className="fas fa-user me-2"></i>{dom.venta.usuarioNombre}</p>
                   )}
-                  <p className="mb-1"><i className="fas fa-map-marker-alt me-2"></i>{dom.direccion}{dom.direccion2 ? `, ${dom.direccion2}` : ''}{dom.barrio ? ` (${dom.barrio})` : ''}</p>
-                  <p className="mb-1"><i className="fas fa-phone me-2"></i>{dom.venta?.telefono || dom.venta?.telefonoContacto || dom.telefono || 'Sin teléfono'}</p>
+                  <p className="mb-1"><i className="fas fa-map-marker-alt me-2"></i>{dom.direccion || dom.venta?.direccion}{dom.barrio ? ` (${dom.barrio})` : ''}</p>
+                  <p className="mb-1"><i className="fas fa-phone me-2"></i>{dom.telefono || dom.venta?.telefono || dom.venta?.telefonoContacto || 'Sin teléfono'}</p>
                   <div className="d-flex justify-content-between align-items-center mt-2">
-                    <span className={`badge bg-${badgeColor}`}>{dom.estado}</span>
+                    <span className={`badge bg-${badgeColor}`}>{dom.estado || dom.venta?.estadoPedido || 'Pendiente'}</span>
                     <div className="d-flex align-items-center gap-2">
                       <button className="btn btn-sm btn-outline-primary py-0 px-1" onClick={() => handleEditarTarifa(dom.pedidoId, dom.tarifa)} title="Editar tarifa">
                         <i className="fas fa-dollar-sign"></i>

@@ -667,8 +667,18 @@ const mapPedidoToFront = (pedido) => {
         direccion = dirObj.direccion || '';
         barrio = dirObj.barrio || '';
         telefonoDir = dirObj.telefono || '';
+        tipoDir = dirObj.tipo || '';
       } catch {
         direccion = pedido.direccion;
+      }
+    }
+    let tipoDir = '';
+    if (pedido.direccion) {
+      try {
+        const dirObj = JSON.parse(pedido.direccion);
+        tipoDir = dirObj.tipo || '';
+      } catch {
+        // ignore
       }
     }
   }
@@ -691,6 +701,7 @@ const mapPedidoToFront = (pedido) => {
     observaciones: pedido.observaciones,
     direccion,
     barrio,
+    tipo: tipoDir,
     telefonoDir,
     telefonoContacto: pedido.telefono_contacto,
     productos: (pedido.productos || []).map(item => ({
@@ -911,16 +922,8 @@ export const getDomicilios = async () => {
     const pedidosData = await request('/api/pedidos');
 
     const domicilios = Array.isArray(domiciliosData) ? domiciliosData.map(dom => {
-      // normalizar id de venta/pedido (puede venir como objeto poblado o como id)
-      let ventaIdRaw = null;
-      if (dom.pedido) {
-        if (typeof dom.pedido === 'object') {
-          ventaIdRaw = dom.pedido.id || dom.pedido._id || dom.pedido;
-        } else {
-          ventaIdRaw = dom.pedido;
-        }
-      }
-      const ventaId = ventaIdRaw !== null && ventaIdRaw !== undefined ? String(ventaIdRaw) : ventaIdRaw;
+      // normalizar id de pedido
+      const pedidoId = dom.pedido?.id || dom.pedido || dom.pedidoId || null;
 
       // normalizar repartidor (puede ser string o objeto)
       let repartidorObj = null;
@@ -939,14 +942,16 @@ export const getDomicilios = async () => {
 
       return ({
         id: dom.id,
-        ventaId,
-        direccion: dom.direccion?.direccion || '',
-        ciudad: dom.direccion?.ciudad || '',
-        telefono: dom.direccion?.telefono || '',
-        estado: dom.estado,
+        pedidoId: pedidoId,
+        direccion: dom.direccion || '',
+        direccion2: dom.direccion2 || '',
+        barrio: dom.barrio || '',
+        ciudad: dom.ciudad || '',
+        telefono: dom.telefono || '',
+        estado: dom.estado || 'Pendiente',
         tarifa: dom.tarifa_aplicada !== undefined ? dom.tarifa_aplicada : (dom.tarifa || 0),
         repartidor: repartidorObj,
-        notas: dom.observaciones
+        notas: dom.notas || ''
       });
     }) : [];
 
@@ -955,18 +960,20 @@ export const getDomicilios = async () => {
     // Añadir pedidos de tipo domicilio que no tengan Domicilio creado
     const pedidosDomicilio = pedidos
       .filter(p => p.tipo_venta === 'domicilio')
-      .filter(p => !domicilios.find(d => String(d.ventaId) === String(p._id)))
+      .filter(p => !domicilios.find(d => String(d.pedidoId) === String(p.id)))
       .map(p => {
         const direccionStr = (typeof p.direccion === 'string') ? p.direccion : (p.direccion && typeof p.direccion === 'object' ? (p.direccion.direccion || '') : '');
+        const barrioStr = (p.direccion && typeof p.direccion === 'object') ? (p.direccion.barrio || '') : '';
         const ciudadStr = (p.direccion && typeof p.direccion === 'object') ? (p.direccion.ciudad || '') : '';
-        const telefonoStr = p.telefono_contacto || p.telefono || (p.direccion && p.direccion.telefono) || '';
+        const telefonoStr = p.telefono_contacto || (p.direccion && p.direccion.telefono) || '';
         return ({
-          id: `pedido-${p._id}`,
-          ventaId: p._id,
+          id: `pedido-${p.id}`,
+          pedidoId: p.id,
           direccion: direccionStr,
+          barrio: barrioStr,
           ciudad: ciudadStr,
           telefono: telefonoStr,
-          estado: p.estadoPedido || 'Pendiente',
+          estado: p.estado_pedido || 'Pendiente',
           tarifa: 0,
           repartidor: null,
           notas: p.observaciones || ''
