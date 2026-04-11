@@ -1,7 +1,7 @@
 // src/pages/pedidos/PedidosAdmin.jsx
 import React, { useEffect, useState, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { getPedidos, cambiarEstadoPedido, convertirPedidoAVenta, formatPrice } from '../../services/dataService';
+import { getPedidos, cambiarEstadoPedido, formatPrice } from '../../services/dataService';
 import { aprobarSolicitudAbono, rechazarAbono } from '../../services/dataService';
 
 const PedidosAdmin = () => {
@@ -25,22 +25,17 @@ const PedidosAdmin = () => {
     cargarPedidos();
   };
 
-  const handleConvertir = async (id) => {
-    if (window.confirm('Convertir este pedido a venta?')) {
-      await convertirPedidoAVenta(id);
-      cargarPedidos();
-    }
-  };
-
-  // payment actions moved to VentaDetails
-
-  const handleAprobarSolicitudAbono = async (pedidoId) => {
-    if (!window.confirm('¿Aprobar la solicitud de abono para este pedido?\n\nEsto confirmará el pago y reducirá el stock.')) return;
+  const handleAprobarSolicitudAbono = async (pedidoId, metodoPago) => {
+    const esAbono = metodoPago === 'Abono';
+    const mensaje = esAbono 
+      ? '¿Aprobar este pedido por Abono?\n\nEl cliente podrá hacer pagos parciales.\nEl stock se reducirá al entregar.'
+      : '¿Aprobar este pedido para envío?\n\nEl stock se reducirá al entregar.';
+    if (!window.confirm(mensaje)) return;
     try {
       await aprobarSolicitudAbono(pedidoId);
       cargarPedidos();
     } catch (e) {
-      alert('Error aprobando solicitud: ' + (e?.message || e));
+      alert('Error aprobando: ' + (e?.message || e));
     }
   };
 
@@ -62,16 +57,8 @@ const PedidosAdmin = () => {
       const q = busqueda.toLowerCase();
       list = list.filter(p => String(p.id).includes(q) || p.usuarioNombre?.toLowerCase().includes(q));
     }
-    return list.sort((a,b) => new Date(b.fecha) - new Date(a.fecha));
+return list.sort((a,b) => new Date(b.fecha) - new Date(a.fecha));
   }, [pedidos, filterEstado, busqueda]);
-
-const puedeConvertir = (pedido) => {
-    // Convertir solo para Abono en estado Pendiente (convierte sin confirmar pago)
-    if (pedido.metodoPago === 'Abono') {
-      return pedido.estadoPedido === 'Pendiente' && !pedido.esVenta;
-    }
-    return pedido.estadoPedido === 'Pendiente' && pedido.metodoPago !== 'Abono';
-  };
 
   return (
     <div className="container-fluid mt-4">
@@ -150,19 +137,21 @@ const puedeConvertir = (pedido) => {
                     <td>{pedido.metodoPago}</td>
                     <td>
                       <div className="d-flex gap-1">
+                        {pedido.estadoPedido === 'Pendiente' && (
+                          <>
+                            <button className="btn btn-sm btn-outline-success" onClick={() => handleAprobarSolicitudAbono(pedido.id, pedido.metodoPago)} title="Aprobar">
+                              <i className="fas fa-check"></i>
+                            </button>
+                            {pedido.metodoPago === 'Abono' && (
+                              <button className="btn btn-sm btn-outline-danger" onClick={() => handleRechazarAbono(pedido.id)} title="Rechazar">
+                                <i className="fas fa-times"></i>
+                              </button>
+                            )}
+                          </>
+                        )}
                         <button className="btn btn-sm btn-outline-primary" onClick={() => navigate(`/pedidos/${pedido.id}`)} title="Ver detalle">
                           <i className="fas fa-eye"></i>
                         </button>
-                        {pedido.metodoPago === 'Abono' && pedido.estadoPedido === 'pendiente' && (
-                          <>
-                            {/* Buttons shown in Estado column; no extra action here */}
-                          </>
-                        )}
-                        {puedeConvertir(pedido) && (
-                          <button className="btn btn-sm btn-outline-success" onClick={() => handleConvertir(pedido.id)} title="Convertir a Venta">
-                            <i className="fas fa-exchange-alt"></i>
-                          </button>
-                        )}
                       </div>
                     </td>
                   </tr>

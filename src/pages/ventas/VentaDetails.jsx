@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link, useLocation } from 'react-router-dom';
-import { getVentaById, getProductos, getPagosByVenta, getTotalPagadoByVenta, convertirPedidoAVenta, formatPrice, cambiarEstadoPago, cambiarEstadoPedido, aprobarSolicitudAbono, rechazarAbono } from '../../services/dataService';
+import { getVentaById, getProductos, getPagosByVenta, getTotalPagadoByVenta, formatPrice, cambiarEstadoPago, cambiarEstadoPedido, aprobarSolicitudAbono, rechazarAbono } from '../../services/dataService';
 import { useAuth } from '../../context/AuthContext';
 
 const VentaDetails = () => {
@@ -100,24 +100,6 @@ const VentaDetails = () => {
     return metodos[metodo] || 'bg-secondary';
   };
 
-  const handleConvertir = async () => {
-    if (!isAdmin) {
-      alert('No tiene permisos para convertir pedidos');
-      return;
-    }
-    
-    try {
-      await convertirPedidoAVenta(id);
-      alert('Pedido convertido a venta exitosamente');
-      // Recargar datos
-      const p = await getVentaById(id);
-      setPedido(p);
-    } catch (e) {
-      console.error('Error al convertir pedido:', e);
-      alert('No se pudo convertir el pedido: ' + e.message);
-    }
-  };
-
   const handleCambiarEstadoPago = async (pagoId, estado) => {
     if (!canConfirmPayment) { alert('No tiene permisos'); return; }
     try {
@@ -184,16 +166,13 @@ const VentaDetails = () => {
           </Link>
             {esPedido && isAdmin && (
               <>
-                <button className="btn btn-outline-success" onClick={handleConvertir}>
-                  <i className="fas fa-exchange-alt me-1"></i> Convertir a Venta
-                </button>
-                {pedido?.metodoPago === 'Abono' && pedido?.estadoPedido === 'pendiente' && canConfirmPayment && (
+                {pedido?.metodoPago === 'Abono' && pedido?.estadoPedido === 'Pendiente' && canConfirmPayment && (
                   <>
-                    <button className="btn btn-outline-success ms-2" onClick={() => handleAceptarAbono(true)}>Aceptar Abono</button>
+                    <button className="btn btn-outline-success ms-2" onClick={() => handleAceptarAbono(true)}>Aprobar Abono</button>
                     <button className="btn btn-outline-danger ms-2" onClick={() => handleAceptarAbono(false)}>Rechazar Abono</button>
                   </>
                 )}
-                {esPedido && pedido.metodoPago === 'Abono' && canConfirmPayment && (
+                {esPedido && pedido.metodoPago === 'Abono' && pedido.estadoPedido === 'entregado' && canConfirmPayment && (
                   <button 
                     className="btn btn-outline-primary ms-2" 
                     onClick={() => navigate(`/admin/pagos/nuevo`, { state: { ventaId: id } })}
