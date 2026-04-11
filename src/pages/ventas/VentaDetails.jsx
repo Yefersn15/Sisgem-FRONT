@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link, useLocation } from 'react-router-dom';
-import { getVentaById, getProductos, getPagosByVenta, getTotalPagadoByVenta, formatPrice, cambiarEstadoPago, cambiarEstadoPedido, aprobarSolicitudAbono, rechazarAbono } from '../../services/dataService';
+import { getVentaById, getProductos, getPagosByVenta, getTotalPagadoByVenta, formatPrice, cambiarEstadoPago, cambiarEstadoPedido, aprobarSolicitudAbono, rechazarAbono, cambiarEstado } from '../../services/dataService';
 import { useAuth } from '../../context/AuthContext';
 
 const VentaDetails = () => {
@@ -116,6 +116,17 @@ const VentaDetails = () => {
     }
   };
 
+  const handleAvanzarEstado = async (nuevoEstado) => {
+    if (!isAdmin) { alert('No tiene permisos'); return; }
+    try {
+      await cambiarEstado(id, nuevoEstado);
+      const p = await getVentaById(id);
+      setPedido(p);
+    } catch (e) {
+      alert('Error advancing state: ' + (e.message || e));
+    }
+  };
+
   const handleAceptarAbono = async (aceptar) => {
     if (!canConfirmPayment) { alert('No tiene permisos'); return; }
     try {
@@ -166,6 +177,34 @@ const VentaDetails = () => {
           </Link>
             {esPedido && isAdmin && (
               <>
+                {/* Botones de flujo de domicilio */}
+                {pedido?.estadoPedido === 'Pendiente' && (
+                  <button className="btn btn-success ms-2" onClick={() => handleAvanzarEstado('aprobado')}>
+                    Aprobar y Preparar
+                  </button>
+                )}
+                {pedido?.estadoPedido === 'aprobado' && (
+                  <button className="btn btn-warning ms-2" onClick={() => handleAvanzarEstado('en_preparacion')}>
+                    En Preparación
+                  </button>
+                )}
+                {pedido?.estadoPedido === 'en_preparacion' && pedido.tipo_venta === 'domicilio' && (
+                  <button className="btn btn-info ms-2" onClick={() => handleAvanzarEstado('asignado')}>
+                    Asignar Repartidor
+                  </button>
+                )}
+                {pedido?.estadoPedido === 'asignado' && (
+                  <button className="btn btn-primary ms-2" onClick={() => handleAvanzarEstado('en_camino')}>
+                    En Camino
+                  </button>
+                )}
+                {pedido?.estadoPedido === 'en_camino' && (
+                  <button className="btn btn-success ms-2" onClick={() => handleAvanzarEstado('entregado')}>
+                    Entregado
+                  </button>
+                )}
+                
+                {/* Botones de abono */}
                 {pedido?.metodoPago === 'Abono' && pedido?.estadoPedido === 'Pendiente' && canConfirmPayment && (
                   <>
                     <button className="btn btn-outline-success ms-2" onClick={() => handleAceptarAbono(true)}>Aprobar Abono</button>

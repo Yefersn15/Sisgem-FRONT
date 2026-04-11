@@ -801,6 +801,11 @@ export const cambiarEstadoPedido = async (id, estadoPedido) => {
   return await request(`/api/pedidos/${id}/estado`, { method: 'PATCH', body: { estado_pedido: estadoPedido } });
 };
 
+// Avanzar estado de pedido
+export const cambiarEstado = async (id, estadoPedido) => {
+  return await request(`/api/pedidos/${id}/estado`, { method: 'PATCH', body: { estado_pedido: estadoPedido } });
+};
+
 // Convertir pedido a venta
 export const convertirPedidoAVenta = async (id) => {
   return await request(`/api/pedidos/${id}/convertir-venta`, { method: 'POST' });
