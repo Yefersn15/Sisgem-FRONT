@@ -177,8 +177,8 @@ const VentaDetails = () => {
           </Link>
             {esPedido && isAdmin && (
               <>
-                {/* Botones de flujo de domicilio */}
-                {pedido?.estadoPedido === 'Pendiente' && (
+                {/* Botones de flujo de domicilio - solo para efectivo/transferencia */}
+                {pedido?.estadoPedido === 'Pendiente' && pedido?.metodoPago !== 'Abono' && (
                   <button className="btn btn-success ms-2" onClick={() => handleAvanzarEstado('aprobado')}>
                     Aprobar y Preparar
                   </button>
