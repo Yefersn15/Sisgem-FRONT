@@ -685,7 +685,7 @@ const mapPedidoToFront = (pedido) => {
     total: parseFloat(pedido.total) || 0,
     estadoPedido: pedido.estado_pedido || pedido.estadoPedido || 'Pendiente',
     estadoVenta: pedido.estado_venta || pedido.estadoVenta || null,
-    esVenta: pedido.es_venta,
+    esVenta: pedido.es_venta ?? pedido.esVenta,
     tipo_venta: pedido.tipo_venta || 'mostrador',
     delivery: pedido.tipo_venta === 'domicilio',
     observaciones: pedido.observaciones,
@@ -1794,7 +1794,14 @@ export const getPagosByVenta = async (ventaId) => {
 };
 
 export const aprobarSolicitudAbono = async (pedidoId) => {
-  return await request(`/api/pedidos/${pedidoId}/aprobar-abono`, { method: 'PATCH' });
+  return await request(`/api/pedidos/${pedidoId}/aprobar`, { method: 'PATCH' });
+};
+
+export const rechazarAbono = async (pedidoId, motivo) => {
+  return await request(`/api/pedidos/${pedidoId}/rechazar-abono`, { 
+    method: 'PATCH', 
+    body: { motivo } 
+  });
 };
 
 export const aprobarPedido = async (pedidoId) => {

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link, useLocation } from 'react-router-dom';
-import { getVentaById, getProductos, getPagosByVenta, getTotalPagadoByVenta, convertirPedidoAVenta, formatPrice, cambiarEstadoPago, cambiarEstadoPedido, aprobarSolicitudAbono } from '../../services/dataService';
+import { getVentaById, getProductos, getPagosByVenta, getTotalPagadoByVenta, convertirPedidoAVenta, formatPrice, cambiarEstadoPago, cambiarEstadoPedido, aprobarSolicitudAbono, rechazarAbono } from '../../services/dataService';
 import { useAuth } from '../../context/AuthContext';
 
 const VentaDetails = () => {
@@ -139,10 +139,11 @@ const VentaDetails = () => {
     try {
       if (aceptar) {
         await aprobarSolicitudAbono(id);
-        alert('Solicitud de abono aprobada. Pedido marcado como aprobado.');
+        alert('Solicitud de abono aprobada. Stock reducido.');
       } else {
-        await cambiarEstadoPedido(id, 'cancelado');
-        alert('Abono rechazado. Pedido marcado como cancelado.');
+        const motivo = prompt('Ingrese el motivo del rechazo (opcional):');
+        await rechazarAbono(id, motivo);
+        alert('Abono rechazado.');
       }
       const p = await getVentaById(id);
       setPedido(p);

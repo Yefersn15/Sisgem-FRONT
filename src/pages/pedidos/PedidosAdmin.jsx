@@ -2,7 +2,7 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { getPedidos, cambiarEstadoPedido, convertirPedidoAVenta, formatPrice } from '../../services/dataService';
-import { aprobarSolicitudAbono } from '../../services/dataService';
+import { aprobarSolicitudAbono, rechazarAbono } from '../../services/dataService';
 
 const PedidosAdmin = () => {
   const navigate = useNavigate();
@@ -35,12 +35,23 @@ const PedidosAdmin = () => {
   // payment actions moved to VentaDetails
 
   const handleAprobarSolicitudAbono = async (pedidoId) => {
-    if (!window.confirm('¿Aprobar la solicitud de abono para este pedido?')) return;
+    if (!window.confirm('¿Aprobar la solicitud de abono para este pedido?\n\nEsto confirmará el pago y reducirá el stock.')) return;
     try {
       await aprobarSolicitudAbono(pedidoId);
       cargarPedidos();
     } catch (e) {
       alert('Error aprobando solicitud: ' + (e?.message || e));
+    }
+  };
+
+  const handleRechazarAbono = async (pedidoId) => {
+    const motivo = prompt('Ingrese el motivo del rechazo (opcional):');
+    if (motivo === null) return;
+    try {
+      await rechazarAbono(pedidoId, motivo);
+      cargarPedidos();
+    } catch (e) {
+      alert('Error rechazando solicitud: ' + (e?.message || e));
     }
   };
 
@@ -54,11 +65,12 @@ const PedidosAdmin = () => {
     return list.sort((a,b) => new Date(b.fecha) - new Date(a.fecha));
   }, [pedidos, filterEstado, busqueda]);
 
-  const puedeConvertir = (pedido) => {
+const puedeConvertir = (pedido) => {
+    // Convertir solo para Abono en estado Pendiente (convierte sin confirmar pago)
     if (pedido.metodoPago === 'Abono') {
-      return pedido.estadoPedido === 'entregado' && (pedido.total_pagado >= pedido.total);
+      return pedido.estadoPedido === 'Pendiente' && !pedido.esVenta;
     }
-    return pedido.estadoPedido === 'entregado';
+    return pedido.estadoPedido === 'Pendiente' && pedido.metodoPago !== 'Abono';
   };
 
   return (
@@ -114,10 +126,10 @@ const PedidosAdmin = () => {
                     <td>
                       {pedido.metodoPago === 'Abono' && pedido.estadoPedido === 'pendiente' ? (
                         <div className="d-flex gap-1">
-                          <button className="btn btn-sm btn-outline-success" onClick={() => handleAprobarSolicitudAbono(pedido.id)} title="Aprobar abono">
+                          <button className="btn btn-sm btn-outline-success" onClick={() => handleAprobarSolicitudAbono(pedido.id)} title="Aprobar abono (confirma pago)">
                             <i className="fas fa-check"></i>
                           </button>
-                          <button className="btn btn-sm btn-outline-danger" onClick={() => handleCambiarEstado(pedido.id, 'cancelado')} title="Rechazar">
+                          <button className="btn btn-sm btn-outline-danger" onClick={() => handleRechazarAbono(pedido.id)} title="Rechazar abono">
                             <i className="fas fa-times"></i>
                           </button>
                         </div>
