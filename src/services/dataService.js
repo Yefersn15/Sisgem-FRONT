@@ -652,15 +652,17 @@ export const importProveedores = async (file, onSuccess, onError) => {
 
 // Mapeo interno
 const mapPedidoToFront = (pedido) => {
+  let telefonoDir = '';
   let direccion = '';
   let barrio = '';
-  let telefonoDir = '';
+  let tipoDir = '';
   
   if (pedido.direccion) {
     if (typeof pedido.direccion === 'object') {
       direccion = pedido.direccion.direccion || '';
       barrio = pedido.direccion.barrio || '';
       telefonoDir = pedido.direccion.telefono || '';
+      tipoDir = pedido.direccion.tipo || '';
     } else if (typeof pedido.direccion === 'string') {
       try {
         const dirObj = JSON.parse(pedido.direccion);
@@ -670,15 +672,6 @@ const mapPedidoToFront = (pedido) => {
         tipoDir = dirObj.tipo || '';
       } catch {
         direccion = pedido.direccion;
-      }
-    }
-    let tipoDir = '';
-    if (pedido.direccion) {
-      try {
-        const dirObj = JSON.parse(pedido.direccion);
-        tipoDir = dirObj.tipo || '';
-      } catch {
-        // ignore
       }
     }
   }
@@ -993,7 +986,7 @@ export const getDomicilioByVentaId = async (ventaId) => {
     return todos;
   }
   const domicilios = await getDomicilios();
-  return domicilios.find(d => String(d.ventaId) === String(ventaId));
+  return domicilios.find(d => String(d.pedidoId) === String(ventaId) || String(d.ventaId) === String(ventaId));
 };
 
 export const updateDomicilioEstado = async (ventaId, estado) => {
