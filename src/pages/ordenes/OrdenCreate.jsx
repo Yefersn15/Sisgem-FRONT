@@ -4,7 +4,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { createOrdenCompra, getProveedores, getProviderCartItemsWithDetails, clearProviderCart, getMarcas, getCategorias } from '../../services/dataService';
 import { useCart } from '../../context/CartContext';
 
-const fmtCOP = (n) => `COP$ ${(n || 0).toLocaleString('es-CO', { minimumFractionDigits: 2 })}`;
+const fmtCOP = (n) => `$${(n || 0).toLocaleString('es-CO', { minimumFractionDigits: 0 })}`;
 
 const OrdenCreate = () => {
   const navigate = useNavigate();
@@ -100,9 +100,9 @@ const OrdenCreate = () => {
       msg += `ID orden: ${orden.id}\n\n`;
       msg += `Items:\n`;
       orden.items.forEach(it => {
-        msg += `- ${it.cantidad} x ${it.nombre} @ ${Number(it.precioUnitario).toFixed(2)}\n`;
+        msg += `- ${it.cantidad} x ${it.nombre} @ $${Math.round(it.precioUnitario).toLocaleString('es-CO', { minimumFractionDigits: 0 })}\n`;
       });
-      msg += `\nTotal: $${Number(orden.total).toFixed(2)}\n`;
+      msg += `\nTotal: $${Math.round(orden.total).toLocaleString('es-CO', { minimumFractionDigits: 0 })}\n`;
       if (notas) msg += `Notas: ${notas}\n`;
 
       const waUrl = `https://wa.me/${phoneRaw}?text=${encodeURIComponent(msg)}`;

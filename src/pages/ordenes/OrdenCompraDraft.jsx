@@ -53,9 +53,9 @@ const OrdenCompraDraft = () => {
     msg += `ID orden: ${orden.id}\n\n`;
     msg += `Items:\n`;
     orden.items.forEach(it => {
-      msg += `- ${it.cantidad} x ${it.nombre} @ ${Number(it.precioUnitario).toFixed(2)}\n`;
+      msg += `- ${it.cantidad} x ${it.nombre} @ $${Math.round(it.precioUnitario).toLocaleString('es-CO', { minimumFractionDigits: 0 })}\n`;
     });
-    msg += `\nTotal: $${Number(orden.total).toFixed(2)}\n`;
+    msg += `\nTotal: $${Math.round(orden.total).toLocaleString('es-CO', { minimumFractionDigits: 0 })}\n`;
     if (notas) msg += `Notas: ${notas}\n`;
 
     // Limpiar carrito del proveedor
@@ -85,7 +85,7 @@ const OrdenCompraDraft = () => {
               <li key={idx} className="list-group-item d-flex justify-content-between align-items-center">
                 <div>
                   <div className="fw-bold">{it.source === 'producto' ? it.producto.nombre : it.catalogItem.nombre}</div>
-                  <div className="small text-muted">Precio: ${Number(it.source === 'producto' ? it.producto.precioUnitario : it.catalogItem.precioSugerido).toFixed(2)}</div>
+                  <div className="small text-muted">Precio: ${Math.round(it.source === 'producto' ? it.producto.precioUnitario : it.catalogItem.precioSugerido).toLocaleString('es-CO', { minimumFractionDigits: 0 })}</div>
                 </div>
                 <div className="d-flex align-items-center">
                   <input type="number" className="form-control me-2" style={{ width: '80px' }} min={1} value={it.cantidad} onChange={(e) => updateCantidad(idx, e.target.value)} />
@@ -103,7 +103,7 @@ const OrdenCompraDraft = () => {
       </div>
 
       <div className="d-flex justify-content-between align-items-center">
-        <div><strong>Total:</strong> ${Number(total).toFixed(2)}</div>
+        <div><strong>Total:</strong> ${Math.round(total).toLocaleString('es-CO', { minimumFractionDigits: 0 })}</div>
         <div>
           <button className="btn btn-secondary me-2" onClick={() => navigate(-1)}>Volver</button>
           <button className="btn btn-primary" onClick={handleCreateAndSend}>Crear y Enviar por WhatsApp</button>

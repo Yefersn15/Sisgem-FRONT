@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { getDomicilios, asignarRepartidor, editarRepartidor, saveDomicilio, updateDomicilioEstado, getVentas, editarTarifaDomicilio, exportToExcel, importDomicilios, getUsuarios } from '../../services/dataService';
+import { getDomicilios, asignarRepartidor, editarRepartidor, saveDomicilio, updateDomicilioEstado, getVentas, editarTarifaDomicilio, exportToExcel, importDomicilios, getUsuarios, formatPrice } from '../../services/dataService';
 import { openPrintVoucher } from '../../services/printService';
 import { Link } from 'react-router-dom';
 
@@ -72,7 +72,7 @@ const AdminDomicilios = () => {
       telefono: (typeof rep === 'object' ? rep?.telefono : dom?.telefono_repartidor) || '',
       tipoVehiculo: (typeof rep === 'object' ? rep?.tipoVehiculo : '') || '',
       placa: (typeof rep === 'object' ? rep?.placa : '') || '',
-      tarifa: dom?.tarifa || dom?.tarifa_aplicada || 0
+      tarifa: (dom?.tarifaAplicada ?? dom?.tarifa_aplicada ?? dom?.tarifa) ?? 0
     });
     setSelectedRepartidorId('');
     setShowRepartidorModal(true);
@@ -232,13 +232,14 @@ const AdminDomicilios = () => {
 
   const fileInputRef = useRef(null);
 
-  const handleExportar = () => {
-    const data = domicilios.map(d => ({
+const handleExportar = () => {
+    const data = domicilio.map(d => ({
       Venta: d.ventaId,
       Dirección: `${d.direccion} ${d.direccion2 || ''}, ${d.barrio || ''}`,
+      Tipo: d.tipo || '',
       Teléfono: normalizeNumber(d.telefono) || d.telefono,
       Estado: d.estado,
-      Tarifa: d.tarifa,
+      Tarifa: formatPrice((d.tarifaAplicada ?? d.tarifa_aplicada ?? d.tarifa) ?? 0),
       Repartidor: d.repartidor?.nombre || '',
       TelRepartidor: normalizeNumber(d.repartidor?.telefono) || d.repartidor?.telefono || '',
       TipoVehiculo: d.repartidor?.tipoVehiculo || '',
@@ -333,7 +334,7 @@ const AdminDomicilios = () => {
                   {dom.venta?.usuarioNombre && (
                     <p className="mb-1"><i className="fas fa-user me-2"></i>{dom.venta.usuarioNombre}</p>
                   )}
-                  <p className="mb-1"><i className="fas fa-map-marker-alt me-2"></i>{dom.direccion || dom.venta?.direccion}{dom.barrio ? ` (${dom.barrio})` : ''}</p>
+                  <p className="mb-1"><i className="fas fa-map-marker-alt me-2"></i>{dom.direccion || dom.venta?.direccion}{dom.barrio ? ` (${dom.barrio})` : ''}{dom.tipo ? ` [${dom.tipo}]` : ''}</p>
                   <p className="mb-1"><i className="fas fa-phone me-2"></i>{dom.telefono || dom.venta?.telefono || dom.venta?.telefonoContacto || 'Sin teléfono'}</p>
                   <div className="d-flex justify-content-between align-items-center mt-2">
                     <span className={`badge bg-${badgeColor}`}>{dom.estado || dom.venta?.estadoPedido || 'Pendiente'}</span>
@@ -341,7 +342,7 @@ const AdminDomicilios = () => {
                       <button className="btn btn-sm btn-outline-primary py-0 px-1" onClick={() => handleEditarTarifa(dom.pedidoId, dom.tarifa)} title="Editar tarifa">
                         <i className="fas fa-dollar-sign"></i>
                       </button>
-                      <span className="fw-bold">${((dom.tarifa_aplicada !== undefined && dom.tarifa_aplicada !== null) ? dom.tarifa_aplicada : (dom.tarifa || 0))}</span>
+                      <span className="fw-bold">{formatPrice((dom.tarifaAplicada ?? dom.tarifa_aplicada) ?? dom.tarifa ?? 0)}</span>
                     </div>
                   </div>
                   {dom.repartidor ? (

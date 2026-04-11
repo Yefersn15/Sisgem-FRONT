@@ -176,7 +176,7 @@ const PagosList = () => {
                   </td>
                   <td>
                     <div className="d-flex gap-1">
-                      <Link to={`/admin/pagos/${venta.primerPagoId}`} className="btn btn-sm btn-outline-primary" title="Ver detalle">
+                      <Link to={`/admin/pagos/${venta.id}`} className="btn btn-sm btn-outline-primary" title="Ver detalle">
                         <i className="fas fa-eye"></i>
                       </Link>
                       <button

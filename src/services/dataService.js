@@ -933,17 +933,22 @@ export const getDomicilios = async () => {
         }
       }
 
-      return ({
+      const domDir = dom.direccion ? (typeof dom.direccion === 'object' ? dom.direccion : { direccion: dom.direccion, direccion2: dom.direccion2, barrio: dom.barrio }) : { direccion: '', direccion2: '', barrio: '' };
+    const pedidoDir = dom.pedido?.direccion ? (typeof dom.pedido.direccion === 'object' ? dom.pedido.direccion : { tipo: '' }) : { direccion: '', tipo: '' };
+    const resTipo = domDir.tipo || pedidoDir.tipo || '';
+    
+    return ({
         id: dom.id,
         pedidoId: pedidoId,
         ventaId: pedidoId,
-        direccion: dom.direccion || '',
-        direccion2: dom.direccion2 || '',
-        barrio: dom.barrio || '',
+        direccion: dom.direccion || domDir.direccion || '',
+        direccion2: dom.direccion2 || domDir.direccion2 || '',
+        barrio: dom.barrio || domDir.barrio || '',
         ciudad: dom.ciudad || '',
         telefono: dom.telefono || '',
         estado: dom.estado || 'Pendiente',
-        tarifa: dom.tarifa_aplicada !== undefined ? dom.tarifa_aplicada : (dom.tarifa || 0),
+        tipo: resTipo,
+        tarifa: (dom.tarifaAplicada ?? dom.tarifa_aplicada ?? dom.tarifa) ?? 0,
         repartidor: repartidorObj,
         notas: dom.notas || ''
       });
@@ -1586,7 +1591,7 @@ export const saveDomicilio = async (domicilio) => {
           barrio: domicilio.barrio || '',
           telefono: domicilio.telefono || ''
         }),
-        tarifa: domicilio.tarifa || domicilio.tarifa_aplicada || null,
+        tarifa: (domicilio.tarifaAplicada ?? domicilio.tarifa_aplicada ?? domicilio.tarifa) ?? 0,
         repartidor: domicilio.repartidor?.nombre || (domicilio.repartidor || ''),
         telefono_repartidor: domicilio.repartidor?.telefono || domicilio.telefono || ''
       };
