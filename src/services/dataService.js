@@ -678,7 +678,7 @@ const mapPedidoToFront = (pedido) => {
     fecha: pedido.createdAt || pedido.fecha_pedido,
     usuarioId: typeof pedido.usuario === 'object' ? pedido.usuario?.id : (pedido.usuarioId || pedido.usuario),
     usuarioNombre: typeof pedido.usuario === 'object' ? pedido.usuario?.nombre : undefined,
-    telefono: pedido.telefono_contacto,
+    telefono: pedido.telefono_contacto || telefonoDir || '',
     metodoPago: pedido.metodo_pago || pedido.metodoPago || 'Efectivo',
     subtotal: parseFloat(pedido.subtotal) || 0,
     shipping: (parseFloat(pedido.total) || 0) - (parseFloat(pedido.subtotal) || 0),

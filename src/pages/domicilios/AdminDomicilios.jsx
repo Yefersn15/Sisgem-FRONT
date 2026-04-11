@@ -272,7 +272,11 @@ const AdminDomicilios = () => {
     });
   }, [domicilios, ventas, filter, search]);
 
-  const domiciliosConVenta = filtered.map(dom => ({ ...dom, venta: ventas.find(v => String(v.id) === String(dom.ventaId)) }));
+  const mapDomicilio = dom => {
+    const pedidoId = dom.pedido?.id || dom.ventaId || dom.pedidoId;
+    return { ...dom, pedidoId, venta: ventas.find(v => String(v.id) === String(pedidoId)) };
+  };
+  const domiciliosConVenta = filtered.map(mapDomicilio);
 
   return (
     <div className="container mt-4">
@@ -308,7 +312,7 @@ const AdminDomicilios = () => {
 
       <div className="row">
           {domiciliosConVenta.map(dom => {
-          const key = String(dom.id || dom.ventaId);
+          const key = String(dom.id || dom.pedidoId);
           const estadoNorm = String(dom.estado || 'pendiente').toLowerCase();
           // Clase visual según estado
           const estadoClass = estadoNorm === 'entregado' ? 'entregado'
@@ -324,7 +328,7 @@ const AdminDomicilios = () => {
             <div className="col-md-6 col-lg-4 mb-3" key={key}>
               <div className={`card domicilioCard ${estadoClass}`}>
                 <div className="card-body">
-                  <h5 className="card-title">Venta #{dom.venta?.numero || String(dom.ventaId).slice(0,8)}</h5>
+                  <h5 className="card-title">Venta #{dom.pedidoId || dom.venta?.id || 'N/A'}</h5>
                   {/* Nombre del usuario - mostrado primero para el domiciliario */}
                   {dom.venta?.usuarioNombre && (
                     <p className="mb-1"><i className="fas fa-user me-2"></i>{dom.venta.usuarioNombre}</p>
@@ -334,7 +338,7 @@ const AdminDomicilios = () => {
                   <div className="d-flex justify-content-between align-items-center mt-2">
                     <span className={`badge bg-${badgeColor}`}>{dom.estado}</span>
                     <div className="d-flex align-items-center gap-2">
-                      <button className="btn btn-sm btn-outline-primary py-0 px-1" onClick={() => handleEditarTarifa(dom.ventaId, dom.tarifa)} title="Editar tarifa">
+                      <button className="btn btn-sm btn-outline-primary py-0 px-1" onClick={() => handleEditarTarifa(dom.pedidoId, dom.tarifa)} title="Editar tarifa">
                         <i className="fas fa-dollar-sign"></i>
                       </button>
                       <span className="fw-bold">${((dom.tarifa_aplicada !== undefined && dom.tarifa_aplicada !== null) ? dom.tarifa_aplicada : (dom.tarifa || 0))}</span>
@@ -371,7 +375,7 @@ const AdminDomicilios = () => {
                       <select 
                         className="form-select form-select-sm mb-2" 
                         value={dom.estado} 
-                        onChange={(e) => handleCambiarEstado(dom.ventaId, e.target.value)}
+                        onChange={(e) => handleCambiarEstado(dom.pedidoId, e.target.value)}
                       >
                         <option value="pendiente">Pendiente</option>
                         <option value="aprobado">Aprobado</option>
@@ -390,10 +394,10 @@ const AdminDomicilios = () => {
                     </span>
                   </div>
                   <div className="mt-2 d-flex gap-2">
-                    <button className="btn btn-sm btn-outline-primary" onClick={() => openRepartidorModal(dom.ventaId)}>{dom.repartidor ? 'Editar' : 'Asignar'} Repartidor</button>
+                    <button className="btn btn-sm btn-outline-primary" onClick={() => openRepartidorModal(dom.pedidoId)}>{dom.repartidor ? 'Editar' : 'Asignar'} Repartidor</button>
                     <button className="btn btn-sm btn-outline-dark" onClick={() => dom.venta && openPrintVoucher(dom.venta, dom)}><i className="fas fa-print"></i></button>
                     <button className="btn btn-sm btn-success" onClick={() => { const target = dom.repartidor?.telefono ? normalizeNumber(dom.repartidor.telefono) : normalizeNumber(dom.telefono); if (target) window.open(`https://wa.me/${target}`, '_blank'); else alert('Teléfono inválido para WhatsApp'); }}><i className="fab fa-whatsapp"></i></button>
-                    <button className="btn btn-sm btn-info" onClick={() => handleNotas(dom.ventaId, dom.notas)}><i className="fas fa-sticky-note"></i></button>
+                    <button className="btn btn-sm btn-info" onClick={() => handleNotas(dom.pedidoId, dom.notas)}><i className="fas fa-sticky-note"></i></button>
                   </div>
                 </div>
               </div>
