@@ -113,8 +113,9 @@ const VentaDetails = () => {
     return estados[estado] || 'bg-secondary';
   };
 
-  const estadoOrden = pedido?.estadoPedido || pedido?.estado || 'pendiente';
+  const estadoOrden = String(pedido?.estadoPedido || pedido?.estado || 'pendiente').toLowerCase();
   const esDomicilio = (pedido?.delivery === true || String(pedido?.tipo_venta || '').toLowerCase() === 'domicilio');
+  console.log('[VentaDetails] pedido:', pedido?.id, 'estadoPedido:', estadoOrden, 'tipo_venta:', pedido?.tipo_venta, 'esDomicilio:', esDomicilio);
   
   const pasosEntrega = [
     { estado: 'pendiente', label: 'Recibido', icon: 'fa-clipboard-list' },
@@ -125,14 +126,26 @@ const VentaDetails = () => {
     { estado: 'entregado', label: 'Entregado', icon: 'fa-home' }
   ];
   
-  const getPasoIndex = (est) => {
-    const idx = pasosEntrega.findIndex(p => p.estado === est);
+  const pasosEntregaSinPrep = [
+    { estado: 'pendiente', label: 'Recibido', icon: 'fa-clipboard-list' },
+    { estado: 'aprobado', label: 'Aprobado', icon: 'fa-check' },
+    { estado: 'asignado', label: 'Asignado', icon: 'fa-motorcycle' },
+    { estado: 'en_camino', label: 'En Camino', icon: 'fa-truck' },
+    { estado: 'entregado', label: 'Entregado', icon: 'fa-home' }
+  ];
+  
+  const estadosConPrep = ['en_preparacion', 'asignado', 'en_camino', 'entregado'];
+  const usarTimelineConPrep = estadosConPrep.includes(estadoOrden);
+  const pasosMostrar = usarTimelineConPrep ? pasosEntrega : pasosEntregaSinPrep;
+  
+  const getPasoIndex = (est, pasos) => {
+    const idx = pasos.findIndex(p => p.estado === est);
     return idx >= 0 ? idx : 0;
   };
   
-  const currentStepIndex = getPasoIndex(estadoOrden);
+  const currentStepIndex = getPasoIndex(estadoOrden, pasosMostrar);
   
-  const statusSteps = pasosEntrega.map((paso, idx) => ({
+  const statusSteps = pasosMostrar.map((paso, idx) => ({
     ...paso,
     isActive: idx <= currentStepIndex,
     isCurrent: idx === currentStepIndex && estadoOrden !== 'cancelado' && estadoOrden !== 'entregado'
@@ -213,25 +226,6 @@ const VentaDetails = () => {
           <Link to={isFromPedidos ? '/admin/pedidos' : '/admin/ventas'} className="btn btn-outline-secondary">
             <i className="fas fa-arrow-left me-1"></i> Volver
           </Link>
-            {esPedido && isAdmin && (
-              <>
-                {/* Botones de abono - solo desde la página de Domicilios */}
-                {pedido?.metodoPago === 'Abono' && pedido?.estadoPedido === 'Pendiente' && canConfirmPayment && (
-                  <>
-                    <button className="btn btn-outline-success ms-2" onClick={() => handleAceptarAbono(true)}>Aprobar Abono</button>
-                    <button className="btn btn-outline-danger ms-2" onClick={() => handleAceptarAbono(false)}>Rechazar Abono</button>
-                  </>
-                )}
-                {esPedido && pedido.metodoPago === 'Abono' && ['aprobado', 'en_preparacion', 'asignado', 'en_camino', 'entregado'].includes(pedido.estadoPedido) && canConfirmPayment && (
-                  <button 
-                    className="btn btn-outline-primary ms-2" 
-                    onClick={() => navigate(`/admin/pagos/nuevo`, { state: { ventaId: id } })}
-                  >
-                    <i className="fas fa-hand-holding-usd me-1"></i> Registrar Pago
-                  </button>
-                )}
-              </>
-            )}
         </div>
       </div>
 
@@ -270,7 +264,7 @@ const VentaDetails = () => {
                 <div
                   className="h-100 bg-success transition-all"
                   style={{
-                    width: `${Math.max(0, (statusSteps.filter(s => s.isActive).length - 1) * 20)}%`,
+                    width: `${Math.max(0, (statusSteps.filter(s => s.isActive).length - 1) * (100 / (pasosMostrar.length - 1)))}%`,
                   }}
                 />
               </div>

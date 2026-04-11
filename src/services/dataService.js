@@ -976,15 +976,18 @@ export const getDomicilios = async () => {
         const barrioStr = (p.direccion && typeof p.direccion === 'object') ? (p.direccion.barrio || '') : '';
         const ciudadStr = (p.direccion && typeof p.direccion === 'object') ? (p.direccion.ciudad || '') : '';
         const telefonoStr = p.telefono_contacto || (p.direccion && p.direccion.telefono) || '';
+        const tipoStr = (p.direccion && typeof p.direccion === 'object') ? (p.direccion.tipo || '') : '';
         return ({
           id: `pedido-${p.id}`,
           pedidoId: p.id,
           ventaId: p.id,
           direccion: direccionStr,
+          direccion2: (p.direccion && typeof p.direccion === 'object') ? (p.direccion.direccion2 || '') : '',
           barrio: barrioStr,
           ciudad: ciudadStr,
           telefono: telefonoStr,
           estado: p.estado_pedido || 'Pendiente',
+          tipo: tipoStr,
           tarifa: 0,
           repartidor: null,
           notas: p.observaciones || ''

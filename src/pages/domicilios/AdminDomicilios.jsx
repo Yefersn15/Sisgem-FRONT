@@ -161,7 +161,7 @@ const AdminDomicilios = () => {
   };
 
 const handleCambiarEstado = async (ventaId, nextState) => {
-    const dom = domicilio.find(d => String(d.ventaId) === String(ventaId));
+    const dom = domicilios.find(d => String(d.ventaId) === String(ventaId));
     const estadoActual = dom?.estado;
     
     // Verificar si el estado es final

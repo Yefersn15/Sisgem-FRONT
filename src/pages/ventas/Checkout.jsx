@@ -140,7 +140,8 @@ const Checkout = () => {
           ...prev,
           direccion: dir.direccion,
           barrio: dir.barrio,
-          telefono: dir.telefono || prev.telefono
+          telefono: dir.telefono || prev.telefono,
+          direccion2: dir.tipo || ''
         }));
       }
     }
@@ -235,7 +236,8 @@ const Checkout = () => {
           direccion: formData.direccion,
           direccion2: formData.direccion2 || '',
           barrio: formData.barrio,
-          telefono: telefonoCompleto
+          telefono: telefonoCompleto,
+          tipo: formData.direccion2 || 'casa'
         } : null,
         tipo_venta: formData.delivery ? 'domicilio' : 'mostrador'
       };
