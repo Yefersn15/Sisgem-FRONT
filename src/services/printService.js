@@ -113,15 +113,15 @@ export const openPrintVoucher = async (venta, domicilio, options = {}) => {
     // Fallback: generar PDF y forzar descarga usando html2pdf
     try {
       const opt = {
-        margin:       forBag ? 4 : 10,
+        margin:       forBag ? 4 : 4,
         filename:     `voucher-${venta.id}${forBag ? '-bolsa' : ''}.pdf`,
         image:        { type: 'jpeg', quality: 0.98 },
-        html2canvas:  { scale: forBag ? 1 : 2 },
-        jsPDF:        { unit: 'mm', format: forBag ? [80, 150] : 'a4', orientation: 'portrait' }
+        html2canvas:  { scale: 2 },
+        jsPDF:        { unit: 'mm', format: [80, 200], orientation: 'portrait' }
       };
       // Crear elemento temporal
       const container = document.createElement('div');
-      container.style.padding = forBag ? '6px' : '10px';
+      container.style.padding = '4px';
       container.innerHTML = html;
       document.body.appendChild(container);
       await html2pdf().from(container).set(opt).save();

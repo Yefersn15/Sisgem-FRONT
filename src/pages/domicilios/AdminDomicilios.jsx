@@ -140,7 +140,7 @@ const AdminDomicilios = () => {
     }
     try {
       const venta = ventas.find(v => String(v.id) === String(currentVentaId));
-      if (venta && res) openPrintVoucher(venta, res);
+      if (venta && res) openPrintVoucher(venta, res, { forBag: true });
     } catch (e) {}
     setShowRepartidorModal(false);
     setCurrentVentaId(null);
@@ -402,7 +402,7 @@ const handleExportar = () => {
                           ventaData = await getVentaById(dom.pedidoId);
                         }
                         if (ventaData && ventaData.id) {
-                          await openPrintVoucher(ventaData, dom);
+                          await openPrintVoucher(ventaData, dom, { forBag: true });
                         } else {
                           alert('No se pudo obtener la información de la venta para imprimir');
                         }
