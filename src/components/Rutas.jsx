@@ -10,7 +10,7 @@ import MarcaEdit from '../pages/marcas/MarcaEdit';
 import CategoriaCreate from '../pages/categorias/CategoriaCreate';
 import CategoriaEdit from '../pages/categorias/CategoriaEdit';
 import Cart from '../pages/carrito/Cart';
-import Checkout from '../pages/ventas/Checkout';
+import Checkout from '../pages/carrito/Checkout';
 import MisPedidos from '../pages/pedidos/MisPedidos';
 import VentaDetails from '../pages/ventas/VentaDetails';
 import AdminDomicilios from '../pages/domicilios/AdminDomicilios';

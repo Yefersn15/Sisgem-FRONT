@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import Layout from './components/Layout';
-import AdminLayout from './pages/admin/AdminLayout';
+import AdminLayout from './components/AdminLayout';
 import RutasPublicas from './components/Rutas';
 import { CartProvider } from './context/CartContext';
 import { AuthProvider, useAuth } from './context/AuthContext';
