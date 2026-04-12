@@ -118,7 +118,7 @@ const Cart = () => {
               <p>Total: <span>{formatCurrency(subtotal)}</span></p>
 
               <button
-                className="btn btn-warning w-100 mb-2"
+                className="btn btn-primary w-100 mb-2"
                 onClick={() => navigate('/checkout')}
               >
                 Proceder al pago

@@ -32,7 +32,8 @@ const PagosList = () => {
   }, [pedidosData, ventasData]);
 
   const ventasConPagos = useMemo(() => {
-    return todasLasVentas.map(venta => {
+    const abonos = todasLasVentas.filter(venta => venta.metodoPago === 'Abono');
+    return abonos.map(venta => {
       const shipping = parseFloat(venta.shipping) || 0;
       const totalVenta = (venta.subtotal || 0) + shipping;
       const pagosVenta = pagos.filter(p => String(p.ventaId) === String(venta.id));

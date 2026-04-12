@@ -25,7 +25,8 @@ const MisPagos = () => {
   }, [user]);
 
   const ventasConPagos = useMemo(() => {
-    return registros.map(registro => {
+    const abonos = registros.filter(r => (r.metodo_pago || r.metodoPago) === 'Abono');
+    return abonos.map(registro => {
       const subtotal = parseFloat(registro.subtotal) || 0;
       const shipping = parseFloat(registro.shipping) || 0;
       const totalVenta = subtotal + shipping;

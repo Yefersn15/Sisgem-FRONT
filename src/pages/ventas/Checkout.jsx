@@ -499,6 +499,7 @@ const handleDireccionSelect = (e) => {
                   <select className="form-select" id="metodoPago" name="metodoPago" value={formData.metodoPago} onChange={handleChange}>
                     {formData.delivery ? (
                       <>
+                        <option key="efectivo" value="Efectivo">Efectivo (contraentrega)</option>
                         <option key="abono" value="Abono">Abono</option>
                         <option key="transferencia" value="Transferencia">Transferencia</option>
                       </>
