@@ -676,32 +676,35 @@ const mapPedidoToFront = (pedido) => {
     }
   }
   
+  // Leer tipo_venta correctamente (puede venir como tipoVenta o tipo_venta)
+  const tipoVenta = pedido.tipoVenta || pedido.tipo_venta || 'mostrador';
+  
   return {
     id: pedido.id,
     fecha: pedido.createdAt || pedido.fecha_pedido,
     usuarioId: typeof pedido.usuario === 'object' ? pedido.usuario?.id : (pedido.usuarioId || pedido.usuario),
     usuarioNombre: typeof pedido.usuario === 'object' ? `${pedido.usuario?.nombre || ''} ${pedido.usuario?.apellido || ''}`.trim() : undefined,
     usuarioDocumento: typeof pedido.usuario === 'object' ? pedido.usuario?.documento : undefined,
-    telefono: pedido.telefono_contacto || telefonoDir || '',
-    metodoPago: pedido.metodo_pago || pedido.metodoPago || 'Efectivo',
+    telefono: pedido.telefonoContacto || pedido.telefono_contacto || telefonoDir || '',
+    metodoPago: pedido.metodoPago || pedido.metodo_pago || 'Efectivo',
     subtotal: parseFloat(pedido.subtotal) || 0,
     shipping: (parseFloat(pedido.total) || 0) - (parseFloat(pedido.subtotal) || 0),
     total: parseFloat(pedido.total) || 0,
-    estadoPedido: pedido.estado_pedido || pedido.estadoPedido || 'Pendiente',
-    estadoVenta: pedido.estado_venta || pedido.estadoVenta || null,
-    esVenta: pedido.es_venta ?? pedido.esVenta,
-    tipo_venta: pedido.tipo_venta || 'mostrador',
-    delivery: pedido.tipo_venta === 'domicilio',
+    estadoPedido: pedido.estadoPedido || pedido.estado_pedido || 'Pendiente',
+    estadoVenta: pedido.estadoVenta || pedido.estado_venta || null,
+    esVenta: pedido.esVenta ?? pedido.es_venta,
+    tipo_venta: tipoVenta,
+    delivery: tipoVenta === 'domicilio',
     observaciones: pedido.observaciones,
     direccion,
     barrio,
     tipo: tipoDir,
     telefonoDir,
-    telefonoContacto: pedido.telefono_contacto,
+    telefonoContacto: pedido.telefonoContacto || pedido.telefono_contacto,
     productos: (pedido.productos || []).map(item => ({
       productoId: typeof item.producto === 'object' ? item.producto?.id : item.producto,
       cantidad: item.cantidad,
-      precioUnitario: item.precio_unitario,
+      precioUnitario: item.precio_unitario || item.precioUnitario,
       subtotal: item.subtotal,
       productoSnapshot: item.producto ? {
         nombre: item.producto.nombre,

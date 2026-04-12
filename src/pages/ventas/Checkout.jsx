@@ -173,12 +173,18 @@ const handleDireccionSelect = (e) => {
     
     console.log('Guardando dirección:', dirData);
     try {
-      const nuevaDir = await createDireccion(dirData);
+      const respuesta = await createDireccion(dirData);
+      // Si la respuesta es un array (caso de backend mal implementado), tomamos el último elemento
+      let nuevaDir = respuesta;
+      if (Array.isArray(respuesta) && respuesta.length > 0) {
+        nuevaDir = respuesta[respuesta.length - 1];
+        console.warn('La API devolvió un array, usando el último elemento como dirección creada');
+      }
       console.log('Dirección guardada:', nuevaDir);
       
-      if (nuevaDir && nuevaDir.id) {
+      if (nuevaDir && (nuevaDir.id || nuevaDir._id)) {
         setDirecciones(prev => [...prev, nuevaDir]);
-        setSelectedDireccionId(nuevaDir.id);
+        setSelectedDireccionId(nuevaDir.id || nuevaDir._id);
         setFormData(prev => ({
           ...prev,
           direccion: nuevaDir.direccion,
@@ -187,6 +193,7 @@ const handleDireccionSelect = (e) => {
         }));
         alert('Dirección guardada correctamente');
       } else {
+        // Fallback: usar los datos ingresados sin guardar en el perfil
         setFormData(prev => ({
           ...prev,
           direccion: newAddress.direccion,

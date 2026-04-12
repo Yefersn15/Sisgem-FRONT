@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { getDomicilios, asignarRepartidor, editarRepartidor, saveDomicilio, updateDomicilioEstado, getVentas, editarTarifaDomicilio, exportToExcel, importDomicilios, getUsuarios, formatPrice } from '../../services/dataService';
+import { getDomicilios, asignarRepartidor, editarRepartidor, saveDomicilio, updateDomicilioEstado, getVentas, getVentaById, editarTarifaDomicilio, exportToExcel, importDomicilios, getUsuarios, formatPrice } from '../../services/dataService';
 import { openPrintVoucher } from '../../services/printService';
 import { Link } from 'react-router-dom';
 
@@ -393,18 +393,22 @@ const handleExportar = () => {
                     {dom.estado !== 'entregado' && (
                       <button className="btn btn-sm btn-outline-primary" onClick={() => openRepartidorModal(dom.pedidoId)}>{dom.repartidor ? 'Editar' : 'Asignar'} Repartidor</button>
                     )}
-                    <button className="btn btn-sm btn-outline-dark" onClick={() => {
-                      if (dom.venta && dom.venta.id) {
-                        openPrintVoucher(dom.venta, dom);
-                      } else if (dom.pedidoId) {
-                        const ventaData = ventas.find(v => String(v.id) === String(dom.pedidoId));
-                        if (ventaData) {
-                          openPrintVoucher(ventaData, dom);
-                        } else {
-                          alert('No se puede imprimir: falta información de la venta');
+                    <button className="btn btn-sm btn-outline-dark" onClick={async () => {
+                      try {
+                        // Buscar la venta completa (podría no estar en dom.venta)
+                        let ventaData = dom.venta;
+                        if (!ventaData || !ventaData.id) {
+                          // Intentar cargar desde el servicio
+                          ventaData = await getVentaById(dom.pedidoId);
                         }
-                      } else {
-                        alert('No se puede imprimir: falta información de la venta');
+                        if (ventaData && ventaData.id) {
+                          await openPrintVoucher(ventaData, dom);
+                        } else {
+                          alert('No se pudo obtener la información de la venta para imprimir');
+                        }
+                      } catch (err) {
+                        console.error('Error al imprimir:', err);
+                        alert('Error al generar el voucher: ' + (err.message || err));
                       }
                     }}><i className="fas fa-print"></i></button>
                     <button className="btn btn-sm btn-success" onClick={() => { const target = dom.repartidor?.telefono ? normalizeNumber(dom.repartidor.telefono) : normalizeNumber(dom.telefono); if (target) window.open(`https://wa.me/${target}`, '_blank'); else alert('Teléfono inválido para WhatsApp'); }}><i className="fab fa-whatsapp"></i></button>

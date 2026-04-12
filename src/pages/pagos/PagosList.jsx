@@ -34,9 +34,8 @@ const PagosList = () => {
 
   const ventasConPagos = useMemo(() => {
     return todasLasVentas.map(venta => {
-      console.log('Venta:', venta.id, 'tipo_venta:', venta.tipo_venta, 'delivery:', venta.delivery);
-      const dom = Array.isArray(domicilios) ? domicilios.find(d => String(d.pedidoId) === String(venta.id)) : null;
-      const shipping = dom?.costo ? parseFloat(dom.costo) : 0;
+      // Ya no necesitamos buscar domicilio, porque venta.shipping ya incluye el costo de envío
+      const shipping = parseFloat(venta.shipping) || 0;
       const totalVenta = (venta.subtotal || 0) + shipping;
       const pagosVenta = pagos.filter(p => String(p.ventaId) === String(venta.id));
       const totalPagado = pagosVenta
@@ -44,7 +43,6 @@ const PagosList = () => {
         .reduce((sum, p) => sum + (parseFloat(p.monto) || 0), 0);
       const saldoPendiente = Math.max(0, totalVenta - totalPagado);
       const estadoPago = saldoPendiente <= 0 ? 'Pagado' : 'Pendiente';
-      // Obtener el ID del primer pago (para ir al detalle)
       const primerPagoId = pagosVenta.length > 0 ? pagosVenta[0].id : null;
       return {
         ...venta,
@@ -57,7 +55,7 @@ const PagosList = () => {
         shipping
       };
     });
-  }, [todasLasVentas, pagos, domicilios]);
+  }, [todasLasVentas, pagos]);
 
   const filtered = useMemo(() => {
     let lista = ventasConPagos;
@@ -175,7 +173,7 @@ const PagosList = () => {
                     </span>
                   </td>
                   <td>
-                    {venta.tipo_venta === 'domicilio' || venta.delivery ? (
+                    {venta.tipo_venta === 'domicilio' ? (
                       <span className="badge bg-info">Domicilio</span>
                     ) : (
                       <span className="text-muted">Tienda</span>
