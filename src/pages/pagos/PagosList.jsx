@@ -1,11 +1,12 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { getPedidos, getVentas, getPagos, exportPagos, importPagos, formatPrice } from '../../services/dataService';
+import { getPedidos, getVentas, getPagos, getDomicilios, exportPagos, importPagos, formatPrice } from '../../services/dataService';
 
 const PagosList = () => {
   const [pedidosData, setPedidosData] = useState([]);
   const [ventasData, setVentasData] = useState([]);
   const [pagos, setPagos] = useState([]);
+  const [domicilios, setDomicilios] = useState([]);
   const [search, setSearch] = useState('');
   const [filterEstadoPago, setFilterEstadoPago] = useState('Todos');
   const [importStatus, setImportStatus] = useState({});
@@ -17,9 +18,11 @@ const PagosList = () => {
       const pedidos = await getPedidos();
       const ventas = await getVentas();
       const pagosData = await getPagos();
+      const domiciliosData = await getDomicilios();
       setPedidosData(pedidos);
       setVentasData(ventas);
       setPagos(pagosData);
+      setDomicilios(domiciliosData);
     };
     cargarDatos();
   }, []);
@@ -31,7 +34,9 @@ const PagosList = () => {
 
   const ventasConPagos = useMemo(() => {
     return todasLasVentas.map(venta => {
-      const totalVenta = (venta.total || 0);
+      const dom = Array.isArray(domicilios) ? domicilios.find(d => String(d.pedidoId) === String(venta.id)) : null;
+      const shipping = dom?.costo ? parseFloat(dom.costo) : 0;
+      const totalVenta = (venta.subtotal || 0) + shipping;
       const pagosVenta = pagos.filter(p => String(p.ventaId) === String(venta.id));
       const totalPagado = pagosVenta
         .filter(p => String(p.estado).toLowerCase() === 'aplicado')
@@ -47,10 +52,11 @@ const PagosList = () => {
         saldoPendiente,
         estadoPago,
         primerPagoId,
-        ultimoPago: pagosVenta.length > 0 ? pagosVenta[0].fecha : venta.fecha
+        ultimoPago: pagosVenta.length > 0 ? pagosVenta[0].fecha : venta.fecha,
+        shipping
       };
     });
-  }, [todasLasVentas, pagos]);
+  }, [todasLasVentas, pagos, domicilios]);
 
   const filtered = useMemo(() => {
     let lista = ventasConPagos;
@@ -168,7 +174,7 @@ const PagosList = () => {
                     </span>
                   </td>
                   <td>
-                    {(venta.tipoVenta || venta.tipo_venta) === 'domicilio' ? (
+                    {venta.delivery ? (
                       <span className="badge bg-info">Domicilio</span>
                     ) : (
                       <span className="text-muted">Tienda</span>

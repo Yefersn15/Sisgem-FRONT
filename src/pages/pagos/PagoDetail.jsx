@@ -13,27 +13,43 @@ const PagoDetail = () => {
 
   useEffect(() => {
     (async () => {
+      let p = null;
+      let ventaId = id;
+      
+      // Intentar cargar pago
       try {
-        // Intentar cargar pago
-        const p = await getPagoById(id);
+        p = await getPagoById(id);
         setPago(p);
-        
-        // Siempre cargar datos del pedido (también funciona si no hay pago)
-        const ventaId = p?.ventaId || id;
+        if (p?.ventaId) {
+          ventaId = p.ventaId;
+        }
+      } catch (e) {
+        console.log('No hay pago registrado para este ID');
+      }
+      
+      // Cargar datos del pedido/venta
+      try {
         const v = await getVentaById(ventaId);
         setVenta(v);
-        
+      } catch (e) {
+        console.log('Error cargando venta');
+      }
+      
+      try {
         const dom = await getDomicilioByVentaId(ventaId);
         setDomicilio(dom);
-        
+      } catch (e) {
+        console.log('No hay domicilio');
+      }
+      
+      try {
         const pagos = await getPagosByVenta(ventaId);
         setPagosVenta(pagos);
-      } catch (err) {
-        console.error('Error loading:', err);
-        setPago(null);
-      } finally {
-        setLoading(false);
+      } catch (e) {
+        console.log('Error cargando pagos');
       }
+      
+      setLoading(false);
     })();
   }, [id]);
 
@@ -48,7 +64,8 @@ const PagoDetail = () => {
     }
   };
 
-  const totalVenta = (venta?.subtotal || 0) + (venta?.shipping || 0);
+  const shipping = domicilio?.costo ? parseFloat(domicilio.costo) : (venta?.shipping || 0);
+  const totalVenta = (venta?.subtotal || 0) + shipping;
   const totalPagado = pagosVenta
     .filter(p => String(p.estado)?.toLowerCase() === 'aplicado')
     .reduce((sum, p) => sum + (parseFloat(p.monto) || 0), 0);
@@ -112,7 +129,7 @@ const PagoDetail = () => {
             {venta && (
               <>
                 <p><strong>Subtotal productos:</strong> {formatPrice(venta.subtotal || 0)}</p>
-                {venta.shipping > 0 && <p><strong>Costo envío:</strong> {formatPrice(venta.shipping)}</p>}
+                {shipping > 0 && <p><strong>Costo envío:</strong> {formatPrice(shipping)}</p>}
               </>
             )}
           </div>
