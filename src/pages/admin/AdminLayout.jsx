@@ -59,8 +59,11 @@ const AdminHeader = () => {
     if (location.pathname === '/admin/pagos') return 'Gestión de Pagos';
     if (location.pathname === '/admin/usuarios') return 'Gestión de Usuarios';
     if (location.pathname === '/admin/roles') return 'Gestión de Roles';
+    if (location.pathname === '/admin/productos') return 'Inventario';
+    if (location.pathname === '/admin/marcas') return 'Inventario';
+    if (location.pathname === '/admin/categorias') return 'Inventario';
     // analytics removed from menu
-    return 'Administración';
+    return 'Gestión';
   };
 
   return (
@@ -296,20 +299,6 @@ const AdminLayout = () => {
       <div className="d-flex">
         <AdminSidebar />
         <div className="flex-grow-1 p-4 admin-main-content">
-          {/* Page Header */}
-          <div className="d-flex justify-content-between align-items-center mb-4">
-            <div>
-              <h4 className="mb-0">{getPageTitle()}</h4>
-              <small className="text-muted">Panel de Administración</small>
-            </div>
-            <nav aria-label="breadcrumb">
-              <ol className="breadcrumb mb-0">
-                <li className="breadcrumb-item"><Link to="/admin">Admin</Link></li>
-                <li className="breadcrumb-item active" aria-current="page">{getPageTitle()}</li>
-              </ol>
-            </nav>
-          </div>
-
           {/* Admin child routes rendered here (centralizadas) */}
           <Routes>
             <Route index element={<PrivateRoute module="Ventas"><AdminDashboard /></PrivateRoute>} />

@@ -172,61 +172,7 @@ const AdminCategorias = () => {
         </div>
       )}
 
-      {/* Stats Cards */}
-      <div className="row g-3 mb-4">
-        <div className="col-md-3">
-          <div className="card bg-primary text-white">
-            <div className="card-body">
-              <div className="d-flex justify-content-between align-items-center">
-                <div>
-                  <p className="mb-0 opacity-75">Total Categorías</p>
-                  <h3 className="mb-0">{totalCategorias}</h3>
-                </div>
-                <i className="fas fa-folder fs-1 opacity-50"></i>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div className="col-md-3">
-          <div className="card bg-success text-white">
-            <div className="card-body">
-              <div className="d-flex justify-content-between align-items-center">
-                <div>
-                  <p className="mb-0 opacity-75">Categorías Activas</p>
-                  <h3 className="mb-0">{categoriasActivas}</h3>
-                </div>
-                <i className="fas fa-check-circle fs-1 opacity-50"></i>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div className="col-md-3">
-          <div className="card bg-warning text-dark">
-            <div className="card-body">
-              <div className="d-flex justify-content-between align-items-center">
-                <div>
-                  <p className="mb-0 opacity-75">Productos</p>
-                  <h3 className="mb-0">{totalProductos}</h3>
-                </div>
-                <i className="fas fa-boxes fs-1 opacity-50"></i>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div className="col-md-3">
-          <div className="card bg-info text-white">
-            <div className="card-body">
-              <div className="d-flex justify-content-between align-items-center">
-                <div>
-                  <p className="mb-0 opacity-75">Marcas</p>
-                  <h3 className="mb-0">{totalMarcas}</h3>
-                </div>
-                <i className="fas fa-tags fs-1 opacity-50"></i>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+      
 
       {/* Filtros */}
       <div className="card mb-4">
@@ -285,7 +231,6 @@ const AdminCategorias = () => {
             <table className="table table-hover">
               <thead>
                 <tr>
-                  <th>ID</th>
                   <th>Nombre</th>
                   <th>Descripción</th>
                   <th>Productos</th>
@@ -296,14 +241,13 @@ const AdminCategorias = () => {
               <tbody>
                 {paginatedItems.length === 0 ? (
                   <tr>
-                    <td colSpan="8" className="text-center text-muted py-4">
+                    <td colSpan="5" className="text-center text-muted py-4">
                       No hay categorías que mostrar
                     </td>
                   </tr>
                 ) : (
                   paginatedItems.map(categoria => (
                     <tr key={categoria.id}>
-                      <td><small className="text-muted">{categoria.id}</small></td>
                       <td className="fw-medium">{categoria.nombre}</td>
                       <td><small>{categoria.descripcion || '-'}</small></td>
                       <td>

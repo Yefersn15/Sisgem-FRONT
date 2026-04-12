@@ -189,61 +189,7 @@ const AdminMarcas = () => {
         </div>
       )}
 
-      {/* Stats Cards */}
-      <div className="row g-3 mb-4">
-        <div className="col-md-3">
-          <div className="card bg-primary text-white">
-            <div className="card-body">
-              <div className="d-flex justify-content-between align-items-center">
-                <div>
-                  <p className="mb-0 opacity-75">Total Marcas</p>
-                  <h3 className="mb-0">{totalMarcas}</h3>
-                </div>
-                <i className="fas fa-tags fs-1 opacity-50"></i>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div className="col-md-3">
-          <div className="card bg-success text-white">
-            <div className="card-body">
-              <div className="d-flex justify-content-between align-items-center">
-                <div>
-                  <p className="mb-0 opacity-75">Marcas Activas</p>
-                  <h3 className="mb-0">{marcasActivas}</h3>
-                </div>
-                <i className="fas fa-check-circle fs-1 opacity-50"></i>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div className="col-md-3">
-          <div className="card bg-warning text-dark">
-            <div className="card-body">
-              <div className="d-flex justify-content-between align-items-center">
-                <div>
-                  <p className="mb-0 opacity-75">Marcas Inactivas</p>
-                  <h3 className="mb-0">{marcasInactivas}</h3>
-                </div>
-                <i className="fas fa-times-circle fs-1 opacity-50"></i>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div className="col-md-3">
-          <div className="card bg-info text-white">
-            <div className="card-body">
-              <div className="d-flex justify-content-between align-items-center">
-                <div>
-                  <p className="mb-0 opacity-75">Productos</p>
-                  <h3 className="mb-0">{totalProductos}</h3>
-                </div>
-                <i className="fas fa-boxes fs-1 opacity-50"></i>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+      
 
       {/* Filtros */}
       <div className="card mb-4">
@@ -312,11 +258,11 @@ const AdminMarcas = () => {
         <div className="card-body">
           <div className="table-responsive">
             <table className="table table-hover">
-              <thead>
+<thead>
                 <tr>
-                  <th>ID</th>
                   <th>Nombre</th>
                   <th>Descripción</th>
+                  <th>Categoría</th>
                   <th>Productos</th>
                   <th>Estado</th>
                   <th>Acciones</th>
@@ -325,16 +271,16 @@ const AdminMarcas = () => {
               <tbody>
                 {paginatedItems.length === 0 ? (
                   <tr>
-                    <td colSpan="7" className="text-center text-muted py-4">
+                    <td colSpan="6" className="text-center text-muted py-4">
                       No hay marcas que mostrar
                     </td>
                   </tr>
                 ) : (
                   paginatedItems.map(marca => (
                     <tr key={marca.id}>
-                      <td><small className="text-muted">{marca.id}</small></td>
                       <td className="fw-medium">{marca.nombre}</td>
                       <td><small>{marca.descripcion || '-'}</small></td>
+                      <td>{marca.categoriaNombre}</td>
                       <td>
                         <span className="badge bg-secondary">{marca.productoCount}</span>
                       </td>

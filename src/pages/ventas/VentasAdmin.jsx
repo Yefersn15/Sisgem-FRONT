@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { getVentas, createVenta, updateVenta, formatPrice, exportToExcel, getTotalPagadoByVenta } from '../../services/dataService';
+import { getVentas, createVenta, updateVenta, formatPrice, exportToExcel } from '../../services/dataService';
 import useDebounce from '../../hooks/useDebounce';
 
 const METODOS_PAGO = ['Efectivo', 'Transferencia', 'Abono'];
@@ -14,7 +14,7 @@ const VentasAdmin = () => {
   const debounced = useDebounce(query, 300);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 20;
-  const [modal, setModal] = useState(null); // null, 'crear', 'editar'
+  const [modal, setModal] = useState(null);
   const [ventaSeleccionada, setVentaSeleccionada] = useState(null);
   const [form, setForm] = useState({ metodoPago: 'Efectivo', items: [], notas: '', delivery: false, direccion: '', telefono: '' });
   const [item, setItem] = useState({ nombre: '', cantidad: '', precio: '', productoId: '' });
@@ -71,15 +71,12 @@ const VentasAdmin = () => {
     return metodos[metodo] || 'bg-secondary';
   };
 
-  // Paginación
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentVentas = ventas.slice(indexOfFirstItem, indexOfLastItem);
   const totalPages = Math.ceil(ventas.length / itemsPerPage);
-
   const getTotalVentas = () => ventas.reduce((sum, v) => sum + (v.total || 0), 0);
 
-  // Funciones para crear/editar ventas
   const handleCreate = () => {
     setForm({ metodoPago: 'Efectivo', items: [], notas: '', delivery: false, direccion: '', telefono: '' });
     setModal('crear');
@@ -123,7 +120,7 @@ const VentasAdmin = () => {
   const guardarVenta = async () => {
     if (form.items.length === 0) return alert('Agregue al menos un producto');
     try {
-      const nueva = await createVenta({
+      await createVenta({
         usuarioId: ventaSeleccionada?.usuarioId || null,
         metodoPago: form.metodoPago,
         detalleVenta: form.items.map(i => ({
@@ -210,79 +207,36 @@ const VentasAdmin = () => {
   };
 
   return (
-    <div>
-      {/* Resumen */}
-      <div className="row g-3 mb-4">
-        <div className="col-md-4">
-          <div className="card bg-primary text-white">
-            <div className="card-body">
-              <div className="d-flex justify-content-between align-items-center">
-                <div>
-                  <p className="mb-0 opacity-75">Total Ventas</p>
-                  <h3 className="mb-0">{formatPrice(getTotalVentas())}</h3>
-                </div>
-                <i className="fas fa-dollar-sign fs-1 opacity-50"></i>
-              </div>
-            </div>
-          </div>
+    <div className="container-fluid py-4">
+      <div className="d-flex justify-content-between align-items-center mb-4">
+        <div>
+          <h2>Gestión de Ventas</h2>
+          <p className="text-muted mb-0">Administra las ventas y pedidos</p>
         </div>
-        <div className="col-md-4">
-          <div className="card bg-success text-white">
-            <div className="card-body">
-              <div className="d-flex justify-content-between align-items-center">
-                <div>
-                  <p className="mb-0 opacity-75">Ventas Completadas</p>
-                  <h3 className="mb-0">{ventas.filter(v => v.estadoVenta === 'completada').length}</h3>
-                </div>
-                <i className="fas fa-check-circle fs-1 opacity-50"></i>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div className="col-md-4">
-          <div className="card bg-warning text-dark">
-            <div className="card-body">
-              <div className="d-flex justify-content-between align-items-center">
-                <div>
-                  <p className="mb-0 opacity-75">Ventas Pendientes</p>
-                  <h3 className="mb-0">{ventas.filter(v => v.estadoVenta === 'pendiente' || v.estadoVenta === 'por_validar').length}</h3>
-                </div>
-                <i className="fas fa-clock fs-1 opacity-50"></i>
-              </div>
-            </div>
-          </div>
+        <div className="d-flex gap-2">
+          <button className="btn btn-primary" onClick={handleCreate}>
+            <i className="fas fa-plus me-1"></i>Nueva Venta
+          </button>
+          <button className="btn btn-outline-secondary" onClick={generarReporte}>
+            <i className="fas fa-file-export me-1"></i>Exportar
+          </button>
         </div>
       </div>
 
-      {/* Filtros y acciones */}
+      {/* Filtros */}
       <div className="card mb-4">
         <div className="card-body">
           <div className="row g-3">
             <div className="col-md-3">
-              <select 
-                className="form-select" 
-                value={filterEstado} 
-                onChange={(e) => setFilterEstado(e.target.value)}
-              >
+              <select className="form-select" value={filterEstado} onChange={(e) => setFilterEstado(e.target.value)}>
                 <option value="">Todos los estados</option>
-                <option value="pendiente">Pendiente</option>
-                <option value="por_validar">Por Validar</option>
-                <option value="completada">Completada</option>
-                <option value="anulada">Anulada</option>
-                <option value="rechazada">Rechazada</option>
-                <option value="cancelado">Cancelado</option>
+                {ESTADOS_VENTA.map(est => <option key={est} value={est}>{est}</option>)}
               </select>
             </div>
             <div className="col-md-3">
-              <select 
-                className="form-select" 
-                value={filterMetodo} 
-                onChange={(e) => setFilterMetodo(e.target.value)}
-              >
+              <select className="form-select" value={filterMetodo} onChange={(e) => setFilterMetodo(e.target.value)}>
                 <option value="">Todos los métodos</option>
-                <option value="Efectivo">Efectivo</option>
-                <option value="Transferencia">Transferencia</option>
-                <option value="Abono">Abono</option>
+                {METODOS_PAGO.map(m => <option key={m} value={m}>{m}</option>)}
               </select>
             </div>
             <div className="col-md-4">
@@ -293,31 +247,25 @@ const VentasAdmin = () => {
                 onChange={(e) => setQuery(e.target.value)}
               />
             </div>
+            <div className="col-md-2 d-flex align-items-end">
+              <span className="badge bg-secondary fs-6 w-100 py-2">{ventas.length} resultados</span>
+            </div>
             <div className="col-md-2">
-              <span className="badge bg-secondary fs-6 w-100 py-2">
-                {ventas.length} resultados
-              </span>
-            </div>
-          </div>
-          <div className="row mt-3">
-            <div className="col-12">
-              <button className="btn btn-primary me-2" onClick={handleCreate}>
-                <i className="fas fa-plus me-1"></i>Nueva Venta
-              </button>
-              <button className="btn btn-outline-secondary" onClick={generarReporte}>
-                <i className="fas fa-file-export me-1"></i>Exportar
+              <button className="btn btn-secondary w-100" onClick={() => { setFilterEstado(''); setFilterMetodo(''); setQuery(''); }}>
+                <i className="fas fa-eraser me-1"></i>Limpiar
               </button>
             </div>
           </div>
+</div>
         </div>
       </div>
 
-      {/* Tabla de ventas */}
+      {/* Tabla */}
       <div className="card">
-        <div className="card-body p-0">
+        <div className="card-body">
           <div className="table-responsive">
-            <table className="table table-hover mb-0">
-              <thead className="table-light">
+            <table className="table table-hover">
+              <thead>
                 <tr>
                   <th>ID</th>
                   <th>Fecha</th>
@@ -352,35 +300,19 @@ const VentasAdmin = () => {
                       </td>
                       <td>
                         <div className="d-flex gap-1">
-                          <Link 
-                            to={`/ventas/${venta.id}`} 
-                            className="btn btn-sm btn-outline-primary"
-                            title="Ver detalle"
-                          >
+                          <Link to={`/ventas/${venta.id}`} className="btn btn-sm btn-outline-info" title="Ver detalle">
                             <i className="fas fa-eye"></i>
                           </Link>
-                          <button 
-                            className="btn btn-sm btn-outline-primary"
-                            title="Editar"
-                            onClick={() => handleEdit(venta)}
-                          >
+                          <button className="btn btn-sm btn-outline-primary" title="Editar" onClick={() => handleEdit(venta)}>
                             <i className="fas fa-edit"></i>
                           </button>
                           {venta.estadoVenta !== 'anulada' && venta.estadoVenta !== 'completada' && (
-                            <button 
-                              className="btn btn-sm btn-outline-success"
-                              title="Aprobar"
-                              onClick={() => aprobarVenta(venta.id)}
-                            >
+                            <button className="btn btn-sm btn-outline-success" title="Aprobar" onClick={() => aprobarVenta(venta.id)}>
                               <i className="fas fa-check"></i>
                             </button>
                           )}
                           {venta.estadoVenta !== 'anulada' && (
-                            <button 
-                              className="btn btn-sm btn-outline-danger"
-                              title="Anular"
-                              onClick={() => anularVenta(venta.id)}
-                            >
+                            <button className="btn btn-sm btn-outline-danger" title="Anular" onClick={() => anularVenta(venta.id)}>
                               <i className="fas fa-ban"></i>
                             </button>
                           )}
@@ -399,39 +331,20 @@ const VentasAdmin = () => {
             </table>
           </div>
         </div>
-        
-        {/* Paginación */}
         {totalPages > 1 && (
           <div className="card-footer">
             <nav>
               <ul className="pagination justify-content-center mb-0">
                 <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
-                  <button 
-                    className="page-link" 
-                    onClick={() => setCurrentPage(currentPage - 1)}
-                    disabled={currentPage === 1}
-                  >
-                    Anterior
-                  </button>
+                  <button className="page-link" onClick={() => setCurrentPage(currentPage - 1)} disabled={currentPage === 1}>Anterior</button>
                 </li>
                 {Array.from({ length: totalPages }, (_, i) => (
                   <li key={i + 1} className={`page-item ${currentPage === i + 1 ? 'active' : ''}`}>
-                    <button 
-                      className="page-link" 
-                      onClick={() => setCurrentPage(i + 1)}
-                    >
-                      {i + 1}
-                    </button>
+                    <button className="page-link" onClick={() => setCurrentPage(i + 1)}>{i + 1}</button>
                   </li>
                 ))}
                 <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
-                  <button 
-                    className="page-link" 
-                    onClick={() => setCurrentPage(currentPage + 1)}
-                    disabled={currentPage === totalPages}
-                  >
-                    Siguiente
-                  </button>
+                  <button className="page-link" onClick={() => setCurrentPage(currentPage + 1)} disabled={currentPage === totalPages}>Siguiente</button>
                 </li>
               </ul>
             </nav>
@@ -449,24 +362,20 @@ const VentasAdmin = () => {
                 <button type="button" className="btn-close" onClick={() => setModal(null)}></button>
               </div>
               <div className="modal-body">
+                {/* ... mismo contenido del formulario ... */}
                 <div className="row g-3">
-                  {/* Método de pago */}
                   <div className="col-md-4">
                     <label className="form-label">Método de Pago</label>
                     <select className="form-select" value={form.metodoPago} onChange={(e) => setForm({ ...form, metodoPago: e.target.value })}>
                       {METODOS_PAGO.map(m => <option key={m} value={m}>{m}</option>)}
                     </select>
                   </div>
-
-                  {/* Delivery */}
                   <div className="col-md-4">
                     <div className="form-check mt-4">
                       <input type="checkbox" className="form-check-input" id="delivery" checked={!!form.delivery} onChange={(e) => setForm({ ...form, delivery: e.target.checked })} />
                       <label className="form-check-label" htmlFor="delivery">Delivery</label>
                     </div>
                   </div>
-
-                  {/* Datos de delivery */}
                   {form.delivery && (
                     <>
                       <div className="col-md-6">
@@ -479,8 +388,6 @@ const VentasAdmin = () => {
                       </div>
                     </>
                   )}
-
-                  {/* Items */}
                   <div className="col-12">
                     <label className="form-label">Productos</label>
                     <div className="card mb-2">
@@ -496,7 +403,7 @@ const VentasAdmin = () => {
                             <input className="form-control form-control-sm" type="number" placeholder="Precio" value={item.precio} onChange={(e) => setItem({ ...item, precio: e.target.value })} />
                           </div>
                           <div className="col-md-2">
-                            <button className="btn btn-sm btn-success w-100" onClick={addItem}>
+                            <button className="btn btn-sm btn-primary w-100" onClick={addItem}>
                               <i className="fas fa-plus"></i> Agregar
                             </button>
                           </div>
@@ -541,8 +448,6 @@ const VentasAdmin = () => {
                       </div>
                     )}
                   </div>
-
-                  {/* Notas */}
                   <div className="col-12">
                     <label className="form-label">Notas</label>
                     <textarea className="form-control" value={form.notas} onChange={(e) => setForm({ ...form, notas: e.target.value })} />

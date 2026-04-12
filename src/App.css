@@ -37,7 +37,7 @@
   --header-text: #ffffff;
   --header-overlay: rgba(0, 0, 0, 0.06);
 
-  /* Estados */
+  /* Estados/botones */
   /* PRIMARY (Azul) → Acciones principales de gestión */
   --primary: #3b82f6;
   /* Ver, Editar, Crear, Guardar, Agregar */
@@ -60,7 +60,52 @@
 
   /* INFO (Azul cielo) → Información (opcional para “Ver” si se separa de primary) */
   --info: #06b6d4;
-  --info-dim: rgba(6, 182, 212, 0.1);
+--info-dim: rgba(6, 182, 212, 0.1);
+
+  /* SECONDARY (Gris) → Acciones neutrales */
+  --secondary: #64748b;
+  /* Cancelar, Limpiar, Volver */
+  --secondary-dim: rgba(100, 116, 139, 0.1);
+
+  /* ================================
+     GUÍA DE ICONOS POR COLOR DE BOTÓN
+     ================================
+     Iconos FontAwesome estandarizados para cada acción:
+
+     PRIMARY (Azul) → Acciones principales de gestión
+       - fa-eye       → Ver (ver detalles)
+       - fa-edit    → Editar (modificar registro)
+       - fa-plus    → Crear / Agregar (nuevo elemento)
+       - fa-save    → Guardar (persistir cambios)
+       - fa-file-export → Exportar (descargar datos)
+       - fa-file-import → Importar (cargar datos)
+
+     SUCCESS (Verde) → Acciones positivas / confirmaciones
+       - fa-check     → Aprobar (confirmar acción)
+       - fa-toggle-on → Activar (habilitar algo)
+
+     DANGER (Rojo) → Acciones destructivas
+       - fa-trash     → Eliminar (borrar registro)
+       - fa-ban      → Anular (cancelar proceso)
+       - fa-times    → Rechazar (rechazar solicitud)
+
+     WARNING (Naranja) → Cambios de estado
+       - fa-toggle-off → Desactivar (deshabilitar algo)
+
+     INFO (Celeste) → Información adicional
+       - fa-eye       → Ver detalle (alternativa a primary)
+       - fa-sticky-note → Notas (observaciones)
+       - fa-key      → Permisos (gestión de accesos)
+
+     SECONDARY (Gris) → Acciones neutrales
+       - fa-times      → Cancelar (abortar acción)
+       - fa-eraser    → Limpiar (borrar filtros/formulario)
+       - fa-arrow-left → Volver (regresar)
+       - fa-sync-alt  → Actualizar (recargar datos)
+
+     Tamaño recomendado: btn-sm para acciones dentro de tablas
+     Clases: btn-outline-* para acciones secundarias, btn-* para principales
+     ================================*/
 
 
   /* Efectos y medidas */

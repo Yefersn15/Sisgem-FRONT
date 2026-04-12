@@ -139,7 +139,7 @@ const PagosList = () => {
         </div>
         <div className="col-md-5 mb-2 text-end">
           <button className="btn btn-secondary" onClick={() => { setSearch(''); setFilterEstadoPago('Todos'); }}>
-            Limpiar
+            <i className="fas fa-eraser me-1"></i>Limpiar
           </button>
         </div>
       </div>
@@ -183,7 +183,7 @@ const PagosList = () => {
                   </td>
                   <td>
                     <div className="d-flex gap-1">
-                      <Link to={`/admin/pagos/${venta.id}`} className="btn btn-sm btn-outline-primary" title="Ver detalle">
+                      <Link to={`/admin/pagos/${venta.id}`} className="btn btn-sm btn-outline-info" title="Ver detalle">
                         <i className="fas fa-eye"></i>
                       </Link>
                       <button

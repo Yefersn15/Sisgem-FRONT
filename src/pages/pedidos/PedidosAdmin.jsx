@@ -8,6 +8,7 @@ const PedidosAdmin = () => {
   const navigate = useNavigate();
   const [pedidos, setPedidos] = useState([]);
   const [filterEstado, setFilterEstado] = useState('');
+  const [filterMetodo, setFilterMetodo] = useState('');
   const [busqueda, setBusqueda] = useState('');
   // pagos modal removed: payment management is on VentaDetails
 
@@ -50,28 +51,36 @@ const PedidosAdmin = () => {
     }
   };
 
-  const filtered = useMemo(() => {
+const filtered = useMemo(() => {
     let list = pedidos;
     if (filterEstado) list = list.filter(p => p.estadoPedido === filterEstado);
+    if (filterMetodo) list = list.filter(p => p.metodoPago === filterMetodo);
     if (busqueda) {
       const q = busqueda.toLowerCase();
       list = list.filter(p => String(p.id).includes(q) || p.usuarioNombre?.toLowerCase().includes(q));
     }
-return list.sort((a,b) => new Date(b.fecha) - new Date(a.fecha));
-  }, [pedidos, filterEstado, busqueda]);
+  return list.sort((a,b) => new Date(b.fecha) - new Date(a.fecha));
+}, [pedidos, filterEstado, filterMetodo, busqueda]);
 
   return (
-    <div className="container-fluid mt-4">
-      <h2>Gestión de Pedidos</h2>
+    <div className="container-fluid py-4">
+      <div className="d-flex justify-content-between align-items-center mb-4">
+        <div>
+          <h2>Gestión de Pedidos</h2>
+          <p className="text-muted mb-0">Administra los pedidos y solicitudes</p>
+        </div>
+      </div>
+
+      {/* Filtros */}
       <div className="card mb-4">
         <div className="card-body">
-          <div className="row">
-            <div className="col-md-4">
+          <div className="row g-3">
+            <div className="col-md-3">
               <input className="form-control" placeholder="Buscar por ID o usuario" value={busqueda} onChange={e => setBusqueda(e.target.value)} />
             </div>
             <div className="col-md-3">
               <select className="form-select" value={filterEstado} onChange={e => setFilterEstado(e.target.value)}>
-                <option value="">Todos</option>
+                <option value="">Todos los estados</option>
                 <option value="pendiente">Pendiente</option>
                 <option value="aprobado">Aprobado</option>
                 <option value="enviado">Enviado</option>
@@ -80,16 +89,28 @@ return list.sort((a,b) => new Date(b.fecha) - new Date(a.fecha));
                 <option value="anulado">Anulado</option>
               </select>
             </div>
+            <div className="col-md-3">
+              <select className="form-select" value={filterMetodo} onChange={e => setFilterMetodo(e.target.value)}>
+                <option value="">Todos los métodos</option>
+                <option value="Efectivo">Efectivo</option>
+                <option value="Transferencia">Transferencia</option>
+                <option value="Abono">Abono</option>
+              </select>
+            </div>
             <div className="col-md-2">
-              <button className="btn btn-secondary" onClick={() => { setBusqueda(''); setFilterEstado(''); }}>Limpiar</button>
+              <button className="btn btn-secondary w-100" onClick={() => { setBusqueda(''); setFilterEstado(''); setFilterMetodo(''); }}>
+                <i className="fas fa-eraser me-1"></i>Limpiar
+              </button>
             </div>
           </div>
         </div>
       </div>
+
+      {/* Tabla */}
       <div className="card">
-        <div className="card-body p-0">
+        <div className="card-body">
           <div className="table-responsive">
-            <table className="table table-hover mb-0">
+            <table className="table table-hover">
               <thead>
                 <tr>
                   <th>Tipo</th>
@@ -149,7 +170,7 @@ return list.sort((a,b) => new Date(b.fecha) - new Date(a.fecha));
                             )}
                           </>
                         )}
-                        <button className="btn btn-sm btn-outline-primary" onClick={() => navigate(`/pedidos/${pedido.id}`)} title="Ver detalle">
+                        <button className="btn btn-sm btn-outline-info" onClick={() => navigate(`/pedidos/${pedido.id}`)} title="Ver detalle">
                           <i className="fas fa-eye"></i>
                         </button>
                       </div>
@@ -161,7 +182,6 @@ return list.sort((a,b) => new Date(b.fecha) - new Date(a.fecha));
           </div>
         </div>
       </div>
-      {/* Payment modal removed: use VentaDetails for payment approvals */}
     </div>
   );
 };
