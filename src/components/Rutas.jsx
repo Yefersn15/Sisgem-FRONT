@@ -9,10 +9,6 @@ import MarcaCreate from '../pages/marcas/MarcaCreate';
 import MarcaEdit from '../pages/marcas/MarcaEdit';
 import CategoriaCreate from '../pages/categorias/CategoriaCreate';
 import CategoriaEdit from '../pages/categorias/CategoriaEdit';
-import ProveedoresList from '../pages/proveedores/ProveedoresList';
-import ProveedorCreate from '../pages/proveedores/ProveedorCreate';
-import ProveedorEdit from '../pages/proveedores/ProveedorEdit';
-import ProveedorDetail from '../pages/proveedores/ProveedorDetail';
 import Cart from '../pages/carrito/Cart';
 import Checkout from '../pages/ventas/Checkout';
 import MisPedidos from '../pages/pedidos/MisPedidos';
@@ -78,11 +74,7 @@ const Rutas = () => {
       <Route path="/categorias/nueva" element={<PrivateRoute module="Categorías"><CategoriaCreate /></PrivateRoute>} />
       <Route path="/categorias/editar/:id" element={<PrivateRoute module="Categorías"><CategoriaEdit /></PrivateRoute>} />
 
-      {/* === PROVEEDORES === */}
-      <Route path="/proveedores" element={<PrivateRoute module="Proveedores"><ProveedoresList /></PrivateRoute>} />
-      <Route path="/proveedores/nuevo" element={<PrivateRoute module="Proveedores"><ProveedorCreate /></PrivateRoute>} />
-      <Route path="/proveedores/editar/:id" element={<PrivateRoute module="Proveedores"><ProveedorEdit /></PrivateRoute>} />
-      <Route path="/proveedores/:id" element={<PrivateRoute module="Proveedores"><ProveedorDetail /></PrivateRoute>} />
+      {/* === PROVEEDORES - ahora en /admin/proveedores === */}
 
       {/* === ÓRDENES DE COMPRA === */}
       <Route path="/ordenes" element={<PrivateRoute module="Compras"><OrdenesList /></PrivateRoute>} />

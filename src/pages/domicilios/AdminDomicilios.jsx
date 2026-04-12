@@ -267,30 +267,34 @@ const AdminDomicilios = () => {
             <i className="fas fa-file-import me-1"></i>Importar
           </button>
           <Link to="/admin/ventas" className="btn btn-secondary">
-            <i className="fas fa-arrow-left me-1"></i>Volver a Ventas
+            <i className="fas fa-arrow-left me-1"></i> Volver a Ventas
           </Link>
         </div>
-      </div>
+      </div> {/* Cierra el header row */}
 
-      <div className="row mb-3 align-items-center">
-        <div className="col-md-5 mb-2">
-          <input className="form-control" placeholder="Buscar por ID, dirección, teléfono, estado o repartidor" value={search} onChange={(e) => setSearch(e.target.value)} />
-        </div>
-        <div className="col-md-3 mb-2">
-          <select className="form-select" value={filter} onChange={(e) => setFilter(e.target.value)}>
-            <option value="Todos">Todos los estados</option>
-            <option value="pendiente">Pendiente</option>
-            <option value="aprobado">Aprobado</option>
-            <option value="asignado">Asignado</option>
-            <option value="en_camino">En Camino</option>
-            <option value="entregado">Entregado</option>
-            <option value="cancelado">Cancelado</option>
-          </select>
-        </div>
-        <div className="col-md-4 mb-2 text-end">
-          <button className="btn btn-secondary" onClick={() => { setSearch(''); setFilter('Todos'); }}>
-            <i className="fas fa-eraser me-1"></i>Limpiar
-          </button>
+      <div className="card mb-4">
+        <div className="card-body">
+          <div className="row g-3">
+            <div className="col-md-5">
+              <input className="form-control" placeholder="Buscar por ID, dirección, teléfono, estado o repartidor" value={search} onChange={(e) => setSearch(e.target.value)} />
+            </div>
+            <div className="col-md-3">
+              <select className="form-select" value={filter} onChange={(e) => setFilter(e.target.value)}>
+                <option value="Todos">Todos los estados</option>
+                <option value="pendiente">Pendiente</option>
+                <option value="aprobado">Aprobado</option>
+                <option value="asignado">Asignado</option>
+                <option value="en_camino">En Camino</option>
+                <option value="entregado">Entregado</option>
+                <option value="cancelado">Cancelado</option>
+              </select>
+            </div>
+            <div className="col-md-4 d-flex align-items-end">
+              <button className="btn btn-secondary w-100" onClick={() => { setSearch(''); setFilter('Todos'); }}>
+                <i className="fas fa-eraser me-1"></i>Limpiar
+              </button>
+            </div>
+          </div>
         </div>
       </div>
 

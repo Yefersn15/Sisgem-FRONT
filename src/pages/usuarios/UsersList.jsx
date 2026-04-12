@@ -180,10 +180,10 @@ const UsersList = ({ source = 'usuarios' }) => {
                       <button
                         className="btn btn-sm btn-outline-secondary"
                         onClick={() => setShowRoleModal(u.id)}
-                        disabled={currentUser && currentUser.id === u.id}
-                        title={currentUser && currentUser.id === u.id ? 'No puedes cambiar tu propio rol' : 'Cambiar rol'}
+                        disabled={currentUser && String(currentUser.id) === String(u.id)}
+                        title={currentUser && String(currentUser.id) === String(u.id) ? 'No puedes cambiar tu propio rol' : 'Cambiar rol'}
                       >
-                        {getRoleName(u.rol_id, u.rol_nombre)} <i className="fas fa-edit ms-1"></i>
+                        {getRoleName(u.rol_id, u.rol_nombre) || 'Sin rol'} <i className="fas fa-edit ms-1"></i>
                       </button>
                     </td>
                   )}
@@ -194,14 +194,16 @@ const UsersList = ({ source = 'usuarios' }) => {
                   </td>
                   <td>
                     <div className="d-flex gap-1">
-                      <Link to={`/admin/usuarios/editar/${u.id}`} className="btn btn-sm btn-outline-primary" title="Editar">
-                        <i className="fas fa-edit"></i>
-                      </Link>
+{currentUser && String(currentUser.id) !== String(u.id) && (
+                        <Link to={`/admin/usuarios/editar/${u.id}`} className="btn btn-sm btn-outline-primary" title="Editar">
+                          <i className="fas fa-edit"></i>
+                        </Link>
+                      )}
                       <button
                         className={`btn btn-sm ${u.estado ? 'btn-outline-warning' : 'btn-outline-success'}`}
                         onClick={() => handleToggle(u.id, u.nombre, u.estado)}
-                        disabled={currentUser && currentUser.id === u.id}
-                        title={currentUser && currentUser.id === u.id ? 'No puedes cambiar tu propio estado' : (u.estado ? 'Desactivar' : 'Activar')}
+                        disabled={currentUser && String(currentUser.id) === String(u.id)}
+                        title={currentUser && String(currentUser.id) === String(u.id) ? 'No puedes cambiar tu propio estado' : (u.estado ? 'Desactivar' : 'Activar')}
                       >
                         <i className={`fas fa-toggle-${u.estado ? 'on' : 'off'}`}></i>
                       </button>
