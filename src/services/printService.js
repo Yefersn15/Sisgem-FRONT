@@ -7,7 +7,7 @@ export const openPrintVoucher = async (venta, domicilio, options = {}) => {
   // Generar HTML del voucher (igual que antes)
   try {
     // Validaciones: no imprimir si la venta o el domicilio están anulados/rechazados/cancelados
-    if (!venta) { alert('Venta no encontrada'); return; }
+    if (!venta || !venta.id) { alert('Venta no encontrada'); return; }
     const blockedVentaStates = ['Anulada', 'Rechazada', 'Cancelado'];
     if (blockedVentaStates.includes(venta.estado)) { alert('No se puede imprimir voucher de una venta anulada o cancelada'); return; }
     if (domicilio && ['Anulada', 'Rechazada', 'Cancelado'].includes(domicilio.estado)) { alert('No se puede imprimir voucher de un domicilio anulado/cancelado'); return; }

@@ -34,6 +34,7 @@ const PagosList = () => {
 
   const ventasConPagos = useMemo(() => {
     return todasLasVentas.map(venta => {
+      console.log('Venta:', venta.id, 'tipo_venta:', venta.tipo_venta, 'delivery:', venta.delivery);
       const dom = Array.isArray(domicilios) ? domicilios.find(d => String(d.pedidoId) === String(venta.id)) : null;
       const shipping = dom?.costo ? parseFloat(dom.costo) : 0;
       const totalVenta = (venta.subtotal || 0) + shipping;
@@ -174,7 +175,7 @@ const PagosList = () => {
                     </span>
                   </td>
                   <td>
-                    {venta.delivery ? (
+                    {venta.tipo_venta === 'domicilio' || venta.delivery ? (
                       <span className="badge bg-info">Domicilio</span>
                     ) : (
                       <span className="text-muted">Tienda</span>

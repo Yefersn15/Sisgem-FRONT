@@ -168,7 +168,7 @@ const MisPagos = () => {
                         </span>
                       </td>
                       <td>
-                        {venta.tipo_venta === 'domicilio' ? (
+                        {venta.tipo_venta === 'domicilio' || venta.delivery ? (
                           <span className="badge bg-info">Domicilio</span>
                         ) : (
                           <span className="text-muted">Tienda</span>

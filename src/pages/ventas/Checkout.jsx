@@ -147,55 +147,66 @@ const handleDireccionSelect = (e) => {
   };
 
   const handleAddAddress = async () => {
+    if (!newAddress.direccion?.trim()) {
+      alert('La dirección es obligatoria');
+      return;
+    }
+    
+    if (!user) {
+      alert('Debe iniciar sesión para guardar una dirección');
+      return;
+    }
+    
+    if (direcciones.length >= 3) {
+      alert('Máximo 3 direcciones guardadas. Por favor elimina una para agregar una nueva.');
+      return;
+    }
+    
+    const dirData = {
+      nombre: `${newAddress.direccion} ${newAddress.barrio || ''}`.trim(),
+      direccion: newAddress.direccion,
+      barrio: newAddress.barrio || '',
+      telefono: newAddress.telefono || user.telefono || user.celular || '',
+      tipo: newAddress.tipo || 'casa',
+      es_predeterminada: direcciones.length === 0
+    };
+    
+    console.log('Guardando dirección:', dirData);
     try {
-      if (!newAddress.direccion?.trim()) {
-        alert('La dirección es obligatoria');
-        return;
-      }
-      if (!user) {
-        alert('Debe iniciar sesión para guardar una dirección');
-        return;
-      }
-      
-      // Verificar límite de 3 direcciones
-      if (direcciones.length >= 3) {
-        alert('Máximo 3 direcciones guardadas. Por favor elimina una para agregar una nueva.');
-        return;
-      }
-      
-      const dirData = {
-        nombre: `${newAddress.direccion} ${newAddress.barrio || ''}`.trim(),
-        direccion: newAddress.direccion,
-        barrio: newAddress.barrio || '',
-        telefono: newAddress.telefono || user.telefono || user.celular || '',
-        tipo: newAddress.tipo || 'casa',
-        es_predeterminada: direcciones.length === 0
-      };
-      
-      console.log('Guardando dirección:', dirData);
       const nuevaDir = await createDireccion(dirData);
       console.log('Dirección guardada:', nuevaDir);
       
-      if (!nuevaDir || !nuevaDir.id) {
-        alert('Error: No se recibió respuesta válida del servidor');
-        return;
+      if (nuevaDir && nuevaDir.id) {
+        setDirecciones(prev => [...prev, nuevaDir]);
+        setSelectedDireccionId(nuevaDir.id);
+        setFormData(prev => ({
+          ...prev,
+          direccion: nuevaDir.direccion,
+          barrio: nuevaDir.barrio,
+          telefono: nuevaDir.telefono
+        }));
+        alert('Dirección guardada correctamente');
+      } else {
+        setFormData(prev => ({
+          ...prev,
+          direccion: newAddress.direccion,
+          barrio: newAddress.barrio,
+          telefono: newAddress.telefono || user.telefono || user.celular || ''
+        }));
+        alert('No se pudo guardar en perfil, pero puede usar esta dirección para el pedido');
       }
-      
-      setDirecciones(prev => [...prev, nuevaDir]);
-      setSelectedDireccionId(nuevaDir.id);
-      setFormData(prev => ({
-        ...prev,
-        direccion: nuevaDir.direccion,
-        barrio: nuevaDir.barrio,
-        telefono: nuevaDir.telefono
-      }));
-      setShowNewAddress(false);
-      setNewAddress({ direccion: '', barrio: '', telefono: '', tipo: 'casa' });
-      alert('Dirección guardada correctamente');
     } catch (e) {
       console.error('Error agregando dirección:', e);
-      alert('No se pudo guardar la dirección: ' + (e.message || e));
+      setFormData(prev => ({
+        ...prev,
+        direccion: newAddress.direccion,
+        barrio: newAddress.barrio,
+        telefono: newAddress.telefono || user.telefono || user.celular || ''
+      }));
+      alert('No se pudo guardar en perfil, pero puede usar esta dirección para el pedido');
     }
+    setShowNewAddress(false);
+    setNewAddress({ direccion: '', barrio: '', telefono: '', tipo: 'casa' });
   };
   
   const validate = () => {
