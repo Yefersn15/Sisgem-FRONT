@@ -14,6 +14,10 @@ import RoleEdit from '../roles/RoleEdit';
 import AdminProductos from '../productos/AdminProductos';
 import AdminMarcas from '../marcas/AdminMarcas';
 import AdminCategorias from '../categorias/AdminCategorias';
+import ProveedoresList from '../proveedores/ProveedoresList';
+import ProveedorCreate from '../proveedores/ProveedorCreate';
+import ProveedorEdit from '../proveedores/ProveedorEdit';
+import ProveedorDetail from '../proveedores/ProveedorDetail';
 import PrivateRoute from '../../components/PrivateRoute';
 import { useAuth } from '../../context/AuthContext';
 
@@ -62,6 +66,7 @@ const AdminHeader = () => {
     if (location.pathname === '/admin/productos') return 'Inventario';
     if (location.pathname === '/admin/marcas') return 'Inventario';
     if (location.pathname === '/admin/categorias') return 'Inventario';
+    if (location.pathname.startsWith('/admin/proveedores')) return 'Proveedores';
     // analytics removed from menu
     return 'Gestión';
   };
@@ -211,8 +216,8 @@ const AdminSidebar = () => {
             </li>
             <li className="nav-item">
               <Link 
-                to="/proveedores" 
-                className={`nav-link ${isActive('/proveedores') ? 'active' : ''}`}
+                to="/admin/proveedores" 
+                className={`nav-link ${isActive('/admin/proveedores') ? 'active' : ''}`}
               >
                 <i className="fas fa-truck-loading me-2"></i> Proveedores
               </Link>
@@ -312,6 +317,10 @@ const AdminLayout = () => {
             <Route path="pagos/nuevo" element={<PrivateRoute module="Ventas"><PagoCreate /></PrivateRoute>} />
             <Route path="pagos/:id" element={<PrivateRoute module="Ventas"><PagoDetail /></PrivateRoute>} />
             <Route path="pedidos" element={<PrivateRoute module="Ventas"><PedidosAdmin /></PrivateRoute>} />
+            <Route path="proveedores" element={<PrivateRoute module="Proveedores"><ProveedoresList /></PrivateRoute>} />
+            <Route path="proveedores/nuevo" element={<PrivateRoute module="Proveedores"><ProveedorCreate /></PrivateRoute>} />
+            <Route path="proveedores/editar/:id" element={<PrivateRoute module="Proveedores"><ProveedorEdit /></PrivateRoute>} />
+            <Route path="proveedores/:id" element={<PrivateRoute module="Proveedores"><ProveedorDetail /></PrivateRoute>} />
 
             <Route path="usuarios" element={<PrivateRoute module="Usuarios"><UsersList /></PrivateRoute>} />
             <Route path="roles" element={<PrivateRoute module="Configuración"><RolesList /></PrivateRoute>} />

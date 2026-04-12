@@ -21,7 +21,7 @@ const ProveedorDetail = () => {
         const p = await getProveedorById(id);
         if (!p) {
           alert('Proveedor no encontrado');
-          navigate('/proveedores');
+          navigate('/admin/proveedores');
           return;
         }
         setProveedor(p);
@@ -43,7 +43,7 @@ const ProveedorDetail = () => {
       } catch (err) {
         console.error('Error cargando proveedor:', err);
         alert('Error al cargar proveedor');
-        navigate('/proveedores');
+        navigate('/admin/proveedores');
       }
     })();
   }, [id]);
@@ -88,7 +88,7 @@ const ProveedorDetail = () => {
   const handleDelete = () => {
     try {
       deleteProveedor(id);
-      navigate('/proveedores');
+      navigate('/admin/proveedores');
     } catch (err) {
       alert(err.message || 'No se pudo eliminar');
     }
@@ -106,7 +106,7 @@ const ProveedorDetail = () => {
   return (
     <div className="container my-4">
       <div className="d-flex align-items-center gap-3 mb-4">
-        <button className="btn btn-outline-secondary" onClick={() => navigate('/proveedores')}>
+        <button className="btn btn-outline-secondary" onClick={() => navigate('/admin/proveedores')}>
           <i className="fas fa-arrow-left"></i>
         </button>
         <h2 className="mb-0">Detalle del Proveedor</h2>

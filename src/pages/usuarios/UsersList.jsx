@@ -104,7 +104,7 @@ const UsersList = ({ source = 'usuarios' }) => {
           <p className="text-muted mb-0">{usuarios.length} registros</p>
         </div>
         <div className="d-flex gap-2">
-          <button className="btn btn-outline-secondary" onClick={loadData} title="Actualizar">
+          <button className="btn btn-secondary" onClick={loadData} title="Actualizar">
             <i className="fas fa-sync-alt"></i>
           </button>
           <button className="btn btn-outline-secondary" onClick={handleExport} title="Exportar">
@@ -115,7 +115,7 @@ const UsersList = ({ source = 'usuarios' }) => {
             <i className="fas fa-file-import me-1"></i>Importar
           </button>
           <Link to={source === 'usuarios' ? '/admin/usuarios/nuevo' : '/register'} className="btn btn-primary">
-            {source === 'usuarios' ? 'Nuevo Usuario' : 'Nuevo Usuario'}
+            <i className="fas fa-plus me-1"></i>{source === 'usuarios' ? 'Nuevo Usuario' : 'Nuevo Usuario'}
           </Link>
         </div>
       </div>
@@ -146,8 +146,8 @@ const UsersList = ({ source = 'usuarios' }) => {
               </div>
             )}
             <div className={`col-md-${source === 'usuarios' ? '2' : '6'}`}>
-              <button className="btn btn-outline-secondary w-100" onClick={() => { setSearch(''); setFilterRol(''); }}>
-                Limpiar
+              <button className="btn btn-secondary w-100" onClick={() => { setSearch(''); setFilterRol(''); }}>
+                <i className="fas fa-eraser me-1"></i>Limpiar
               </button>
             </div>
           </div>

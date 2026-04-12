@@ -10,7 +10,7 @@ const ProveedorCreate = () => {
     try {
       createProveedor(data);
       alert('Proveedor creado exitosamente');
-      navigate('/proveedores');
+      navigate('/admin/proveedores');
     } catch (err) {
       alert(err.message || 'Error creando proveedor');
     }
@@ -19,7 +19,7 @@ const ProveedorCreate = () => {
   return (
     <div className="container my-4">
       <div className="d-flex align-items-center gap-3 mb-4">
-        <button className="btn btn-outline-secondary" onClick={() => navigate('/proveedores')}>
+        <button className="btn btn-outline-secondary" onClick={() => navigate('/admin/proveedores')}>
           <i className="fas fa-arrow-left"></i>
         </button>
         <div>

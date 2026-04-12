@@ -186,7 +186,7 @@ const ProveedorForm = ({ initial = {}, onSubmit, submitLabel = 'Guardar' }) => {
       </div>
 
       <div className="d-flex justify-content-between">
-        <Link to="/proveedores" className="btn btn-secondary">Cancelar</Link>
+        <Link to="/admin/proveedores" className="btn btn-secondary">Cancelar</Link>
         <button type="submit" className="btn btn-primary">
           <i className="fas fa-save me-1"></i>
           {submitLabel}

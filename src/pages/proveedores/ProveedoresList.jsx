@@ -18,7 +18,7 @@ const ProveedoresList = () => {
   const canManageProveedores = hasPermission('Proveedores');
 
   useEffect(() => {
-    const init = async () => { await cargar(); };
+    cargar();
   }, [debounced, filterTipo, filterEstado]);
 
   const cargar = async () => {
@@ -59,7 +59,6 @@ const ProveedoresList = () => {
   };
 
   const handleExport = async () => { try { await exportProveedores(); } catch (e) { alert('Error exportando: '+(e.message||e)); } };
-
   const handleImport = (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -79,10 +78,16 @@ const ProveedoresList = () => {
   };
 
   return (
-    <div className="container my-4">
+    <div className="container-fluid py-4">
+      <nav aria-label="breadcrumb" className="mb-3">
+        <ol className="breadcrumb">
+          <li className="breadcrumb-item"><Link to="/admin">Admin</Link></li>
+          <li className="breadcrumb-item active" aria-current="page">Proveedores</li>
+        </ol>
+      </nav>
       <div className="d-flex justify-content-between align-items-center mb-4">
         <div>
-          <h2>Proveedores</h2>
+          <h2>Gestión de Proveedores</h2>
           <p className="text-muted mb-0">
             {proveedores.length} registros · {proveedores.filter(p => p.estado === true).length} activos
           </p>
@@ -93,14 +98,14 @@ const ProveedoresList = () => {
           </button>
           {canManageProveedores && (
             <>
-              <button className="btn btn-outline-secondary" onClick={handleExport} title="Exportar">
+              <button className="btn btn-outline-primary" onClick={handleExport} title="Exportar">
                 <i className="fas fa-file-export me-1"></i>Exportar
               </button>
               <input type="file" ref={fileRef} accept=".xlsx,.xls" style={{ display: 'none' }} onChange={handleImport} />
-              <button className="btn btn-outline-secondary" onClick={() => fileRef.current && fileRef.current.click()} title="Importar">
+              <button className="btn btn-outline-primary" onClick={() => fileRef.current && fileRef.current.click()} title="Importar">
                 <i className="fas fa-file-import me-1"></i>Importar
               </button>
-              <Link to="/proveedores/nuevo" className="btn btn-primary">
+              <Link to="/admin/proveedores/nuevo" className="btn btn-primary">
                 <i className="fas fa-plus me-1"></i>Nuevo Proveedor
               </Link>
             </>
@@ -108,11 +113,10 @@ const ProveedoresList = () => {
         </div>
       </div>
 
-      {/* Filtros */}
       <div className="card mb-4">
         <div className="card-body">
           <div className="row g-3">
-            <div className="col-md-3">
+            <div className="col-md-4">
               <label className="form-label small text-muted text-uppercase fw-bold">Buscar</label>
               <input
                 className="form-control"
@@ -121,7 +125,7 @@ const ProveedoresList = () => {
                 onChange={(e) => setQuery(e.target.value)}
               />
             </div>
-            <div className="col-md-2">
+            <div className="col-md-3">
               <label className="form-label small text-muted text-uppercase fw-bold">Tipo Persona</label>
               <select className="form-select" value={filterTipo} onChange={(e) => setFilterTipo(e.target.value)}>
                 <option value="">Todos</option>
@@ -129,7 +133,7 @@ const ProveedoresList = () => {
                 <option value="Jurídica">Jurídica</option>
               </select>
             </div>
-            <div className="col-md-2">
+            <div className="col-md-3">
               <label className="form-label small text-muted text-uppercase fw-bold">Estado</label>
               <select className="form-select" value={filterEstado} onChange={(e) => setFilterEstado(e.target.value)}>
                 <option value="">Todos</option>
@@ -138,8 +142,8 @@ const ProveedoresList = () => {
               </select>
             </div>
             <div className="col-md-2 d-flex align-items-end">
-              <button className="btn btn-outline-secondary w-100" onClick={() => { setQuery(''); setFilterTipo(''); setFilterEstado(''); }}>
-                <i className="fas fa-times me-1"></i>Limpiar
+              <button className="btn btn-secondary w-100" onClick={() => { setQuery(''); setFilterTipo(''); setFilterEstado(''); }}>
+                <i className="fas fa-eraser me-1"></i>Limpiar
               </button>
             </div>
           </div>
@@ -150,60 +154,61 @@ const ProveedoresList = () => {
         <div className={`alert alert-${importStatus.type}`}>{importStatus.message}</div>
       )}
 
-      {/* Tabla */}
       {proveedores.length === 0 ? (
         <div className="alert alert-info text-center">No hay proveedores registrados.</div>
       ) : (
         <div className="card">
-          <div className="table-responsive">
-            <table className="table table-hover mb-0">
-              <thead>
-                <tr>
-                  <th>ID</th>
-                  <th>Proveedor</th>
-                  <th>Documento</th>
-                  <th>Contacto</th>
-                  <th>Teléfono</th>
-                  <th>Email</th>
-                  <th>Rubro</th>
-                  <th>Estado</th>
-                  <th>Acciones</th>
-                </tr>
-              </thead>
-              <tbody>
-                {proveedores.map((p) => (
-                  <tr key={p.id} style={{ cursor: 'pointer' }} onClick={() => navigate(`/proveedores/${p.id}`)}>
-                    <td className="text-muted font-monospace">{p.id}</td>
-                    <td className="fw-bold">{p.nombre}</td>
-                    <td className="font-monospace">{p.tipo_documento} {p.documento}</td>
-                    <td>{p.contacto || '—'}</td>
-                    <td className="font-monospace">{p.telefonoPais ? p.telefonoPais + ' ' : ''}{p.telefono || '—'}</td>
-                    <td>{p.email || '—'}</td>
-                    <td>{p.rubro || '—'}</td>
-                    <td>
-                      <span className={`badge ${p.estado ? 'bg-success' : 'bg-secondary'}`}>
-                        {p.estado ? 'Activo' : 'Inactivo'}
-                      </span>
-                    </td>
-                    <td onClick={(e) => e.stopPropagation()}>
-                      {canManageProveedores && (
-                        <div className="d-flex gap-1">
-                          <button className="btn btn-sm btn-outline-primary" title="Editar" onClick={() => navigate(`/proveedores/editar/${p.id}`)}>
-                            <i className="fas fa-edit"></i>
-                          </button>
-                          <button className={`btn btn-sm ${p.estado ? 'btn-outline-warning' : 'btn-outline-success'}`} title={p.estado ? 'Desactivar' : 'Activar'} onClick={() => handleToggle(p.id, p.estado, p.nombre)}>
-                            <i className={`fas fa-toggle-${p.estado ? 'on' : 'off'}`}></i>
-                          </button>
-                          <button className="btn btn-sm btn-outline-danger" title="Eliminar" onClick={() => handleDelete(p.id, p.nombre)}>
-                            <i className="fas fa-trash"></i>
-                          </button>
-                        </div>
-                      )}
-                    </td>
+          <div className="card-body p-0">
+            <div className="table-responsive">
+              <table className="table table-hover mb-0">
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Proveedor</th>
+                    <th>Documento</th>
+                    <th>Contacto</th>
+                    <th>Teléfono</th>
+                    <th>Email</th>
+                    <th>Rubro</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {proveedores.map((p) => (
+                    <tr key={p.id} style={{ cursor: 'pointer' }} onClick={() => navigate(`/admin/proveedores/${p.id}`)}>
+                      <td className="text-muted font-monospace">{p.id}</td>
+                      <td className="fw-bold">{p.nombre}</td>
+                      <td className="font-monospace">{p.tipo_documento} {p.documento}</td>
+                      <td>{p.contacto || '—'}</td>
+                      <td className="font-monospace">{p.telefonoPais ? p.telefonoPais + ' ' : ''}{p.telefono || '—'}</td>
+                      <td>{p.email || '—'}</td>
+                      <td>{p.rubro || '—'}</td>
+                      <td>
+                        <span className={`badge ${p.estado ? 'bg-success' : 'bg-secondary'}`}>
+                          {p.estado ? 'Activo' : 'Inactivo'}
+                        </span>
+                      </td>
+                      <td onClick={(e) => e.stopPropagation()}>
+                        {canManageProveedores && (
+                          <div className="d-flex gap-1">
+                            <button className="btn btn-sm btn-outline-primary" title="Editar" onClick={() => navigate(`/admin/proveedores/editar/${p.id}`)}>
+                              <i className="fas fa-edit"></i>
+                            </button>
+                            <button className={`btn btn-sm ${p.estado ? 'btn-outline-warning' : 'btn-outline-success'}`} title={p.estado ? 'Desactivar' : 'Activar'} onClick={() => handleToggle(p.id, p.estado, p.nombre)}>
+                              <i className={`fas fa-toggle-${p.estado ? 'on' : 'off'}`}></i>
+                            </button>
+                            <button className="btn btn-sm btn-outline-danger" title="Eliminar" onClick={() => handleDelete(p.id, p.nombre)}>
+                              <i className="fas fa-trash"></i>
+                            </button>
+                          </div>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       )}

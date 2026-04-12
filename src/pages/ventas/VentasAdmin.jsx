@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { getVentas, createVenta, updateVenta, formatPrice, exportToExcel } from '../../services/dataService';
+import { getVentas, createVenta, updateVenta, formatPrice, exportToExcel, getTotalPagadoByVenta } from '../../services/dataService';
 import useDebounce from '../../hooks/useDebounce';
 
 const METODOS_PAGO = ['Efectivo', 'Transferencia', 'Abono'];
@@ -75,6 +75,7 @@ const VentasAdmin = () => {
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentVentas = ventas.slice(indexOfFirstItem, indexOfLastItem);
   const totalPages = Math.ceil(ventas.length / itemsPerPage);
+
   const getTotalVentas = () => ventas.reduce((sum, v) => sum + (v.total || 0), 0);
 
   const handleCreate = () => {
@@ -120,7 +121,7 @@ const VentasAdmin = () => {
   const guardarVenta = async () => {
     if (form.items.length === 0) return alert('Agregue al menos un producto');
     try {
-      await createVenta({
+      const nueva = await createVenta({
         usuarioId: ventaSeleccionada?.usuarioId || null,
         metodoPago: form.metodoPago,
         detalleVenta: form.items.map(i => ({
@@ -214,11 +215,11 @@ const VentasAdmin = () => {
           <p className="text-muted mb-0">Administra las ventas y pedidos</p>
         </div>
         <div className="d-flex gap-2">
+          <button className="btn btn-outline-primary" onClick={generarReporte}>
+            <i className="fas fa-file-export me-1"></i>Exportar
+          </button>
           <button className="btn btn-primary" onClick={handleCreate}>
             <i className="fas fa-plus me-1"></i>Nueva Venta
-          </button>
-          <button className="btn btn-outline-secondary" onClick={generarReporte}>
-            <i className="fas fa-file-export me-1"></i>Exportar
           </button>
         </div>
       </div>
@@ -228,15 +229,30 @@ const VentasAdmin = () => {
         <div className="card-body">
           <div className="row g-3">
             <div className="col-md-3">
-              <select className="form-select" value={filterEstado} onChange={(e) => setFilterEstado(e.target.value)}>
+              <select 
+                className="form-select" 
+                value={filterEstado} 
+                onChange={(e) => setFilterEstado(e.target.value)}
+              >
                 <option value="">Todos los estados</option>
-                {ESTADOS_VENTA.map(est => <option key={est} value={est}>{est}</option>)}
+                <option value="pendiente">Pendiente</option>
+                <option value="por_validar">Por Validar</option>
+                <option value="completada">Completada</option>
+                <option value="anulada">Anulada</option>
+                <option value="rechazada">Rechazada</option>
+                <option value="cancelado">Cancelado</option>
               </select>
             </div>
             <div className="col-md-3">
-              <select className="form-select" value={filterMetodo} onChange={(e) => setFilterMetodo(e.target.value)}>
+              <select 
+                className="form-select" 
+                value={filterMetodo} 
+                onChange={(e) => setFilterMetodo(e.target.value)}
+              >
                 <option value="">Todos los métodos</option>
-                {METODOS_PAGO.map(m => <option key={m} value={m}>{m}</option>)}
+                <option value="Efectivo">Efectivo</option>
+                <option value="Transferencia">Transferencia</option>
+                <option value="Abono">Abono</option>
               </select>
             </div>
             <div className="col-md-4">
@@ -247,16 +263,12 @@ const VentasAdmin = () => {
                 onChange={(e) => setQuery(e.target.value)}
               />
             </div>
-            <div className="col-md-2 d-flex align-items-end">
-              <span className="badge bg-secondary fs-6 w-100 py-2">{ventas.length} resultados</span>
-            </div>
             <div className="col-md-2">
               <button className="btn btn-secondary w-100" onClick={() => { setFilterEstado(''); setFilterMetodo(''); setQuery(''); }}>
                 <i className="fas fa-eraser me-1"></i>Limpiar
               </button>
             </div>
           </div>
-</div>
         </div>
       </div>
 
@@ -300,19 +312,35 @@ const VentasAdmin = () => {
                       </td>
                       <td>
                         <div className="d-flex gap-1">
-                          <Link to={`/ventas/${venta.id}`} className="btn btn-sm btn-outline-info" title="Ver detalle">
+                          <Link 
+                            to={`/ventas/${venta.id}`} 
+                            className="btn btn-sm btn-outline-info"
+                            title="Ver detalle"
+                          >
                             <i className="fas fa-eye"></i>
                           </Link>
-                          <button className="btn btn-sm btn-outline-primary" title="Editar" onClick={() => handleEdit(venta)}>
+                          <button 
+                            className="btn btn-sm btn-outline-primary"
+                            title="Editar"
+                            onClick={() => handleEdit(venta)}
+                          >
                             <i className="fas fa-edit"></i>
                           </button>
                           {venta.estadoVenta !== 'anulada' && venta.estadoVenta !== 'completada' && (
-                            <button className="btn btn-sm btn-outline-success" title="Aprobar" onClick={() => aprobarVenta(venta.id)}>
+                            <button 
+                              className="btn btn-sm btn-outline-success"
+                              title="Aprobar"
+                              onClick={() => aprobarVenta(venta.id)}
+                            >
                               <i className="fas fa-check"></i>
                             </button>
                           )}
                           {venta.estadoVenta !== 'anulada' && (
-                            <button className="btn btn-sm btn-outline-danger" title="Anular" onClick={() => anularVenta(venta.id)}>
+                            <button 
+                              className="btn btn-sm btn-outline-danger"
+                              title="Anular"
+                              onClick={() => anularVenta(venta.id)}
+                            >
                               <i className="fas fa-ban"></i>
                             </button>
                           )}
@@ -331,20 +359,39 @@ const VentasAdmin = () => {
             </table>
           </div>
         </div>
+        
+        {/* Paginación */}
         {totalPages > 1 && (
           <div className="card-footer">
             <nav>
               <ul className="pagination justify-content-center mb-0">
                 <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
-                  <button className="page-link" onClick={() => setCurrentPage(currentPage - 1)} disabled={currentPage === 1}>Anterior</button>
+                  <button 
+                    className="page-link" 
+                    onClick={() => setCurrentPage(currentPage - 1)}
+                    disabled={currentPage === 1}
+                  >
+                    Anterior
+                  </button>
                 </li>
                 {Array.from({ length: totalPages }, (_, i) => (
                   <li key={i + 1} className={`page-item ${currentPage === i + 1 ? 'active' : ''}`}>
-                    <button className="page-link" onClick={() => setCurrentPage(i + 1)}>{i + 1}</button>
+                    <button 
+                      className="page-link" 
+                      onClick={() => setCurrentPage(i + 1)}
+                    >
+                      {i + 1}
+                    </button>
                   </li>
                 ))}
                 <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
-                  <button className="page-link" onClick={() => setCurrentPage(currentPage + 1)} disabled={currentPage === totalPages}>Siguiente</button>
+                  <button 
+                    className="page-link" 
+                    onClick={() => setCurrentPage(currentPage + 1)}
+                    disabled={currentPage === totalPages}
+                  >
+                    Siguiente
+                  </button>
                 </li>
               </ul>
             </nav>
@@ -362,7 +409,6 @@ const VentasAdmin = () => {
                 <button type="button" className="btn-close" onClick={() => setModal(null)}></button>
               </div>
               <div className="modal-body">
-                {/* ... mismo contenido del formulario ... */}
                 <div className="row g-3">
                   <div className="col-md-4">
                     <label className="form-label">Método de Pago</label>
@@ -370,12 +416,14 @@ const VentasAdmin = () => {
                       {METODOS_PAGO.map(m => <option key={m} value={m}>{m}</option>)}
                     </select>
                   </div>
+
                   <div className="col-md-4">
                     <div className="form-check mt-4">
                       <input type="checkbox" className="form-check-input" id="delivery" checked={!!form.delivery} onChange={(e) => setForm({ ...form, delivery: e.target.checked })} />
                       <label className="form-check-label" htmlFor="delivery">Delivery</label>
                     </div>
                   </div>
+
                   {form.delivery && (
                     <>
                       <div className="col-md-6">
@@ -388,6 +436,7 @@ const VentasAdmin = () => {
                       </div>
                     </>
                   )}
+
                   <div className="col-12">
                     <label className="form-label">Productos</label>
                     <div className="card mb-2">
@@ -448,6 +497,7 @@ const VentasAdmin = () => {
                       </div>
                     )}
                   </div>
+
                   <div className="col-12">
                     <label className="form-label">Notas</label>
                     <textarea className="form-control" value={form.notas} onChange={(e) => setForm({ ...form, notas: e.target.value })} />
@@ -455,8 +505,11 @@ const VentasAdmin = () => {
                 </div>
               </div>
               <div className="modal-footer">
-                <button type="button" className="btn btn-secondary" onClick={() => setModal(null)}>Cancelar</button>
+                <button type="button" className="btn btn-secondary" onClick={() => setModal(null)}>
+                  <i className="fas fa-times me-1"></i>Cancelar
+                </button>
                 <button type="button" className="btn btn-primary" onClick={modal === 'crear' ? guardarVenta : actualizarVenta}>
+                  <i className="fas fa-save me-1"></i>
                   {modal === 'crear' ? 'Crear' : 'Actualizar'}
                 </button>
               </div>

@@ -1,11 +1,10 @@
+// src/pages/domicilios/AdminDomicilios.jsx
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { getDomicilios, asignarRepartidor, editarRepartidor, saveDomicilio, updateDomicilioEstado, getVentas, getVentaById, editarTarifaDomicilio, exportToExcel, importDomicilios, getUsuarios, formatPrice } from '../../services/dataService';
 import { openPrintVoucher } from '../../services/printService';
 import { Link } from 'react-router-dom';
 
-// Estados alineados con `estado_pedido` del backend
 const ESTADOS_DOMICILIO = ['pendiente', 'aprobado', 'asignado', 'en_camino', 'entregado', 'cancelado'];
-
 const TRANSICIONES_DOMICILIO = {
   'pendiente': ['aprobado', 'cancelado'],
   'aprobado': ['asignado', 'cancelado'],
@@ -14,11 +13,9 @@ const TRANSICIONES_DOMICILIO = {
   'entregado': [],
   'cancelado': []
 };
-
 const ESTADOS_DOMICILIO_FINALES = ['entregado', 'cancelado'];
 
 const getSiguientesEstadosDomicilio = (estadoActual) => TRANSICIONES_DOMICILIO[String(estadoActual || '').toLowerCase()] || [];
-
 const isEstadoFinalDomicilio = (estado) => ESTADOS_DOMICILIO_FINALES.includes(String(estado || '').toLowerCase());
 
 const AdminDomicilios = () => {
@@ -40,7 +37,6 @@ const AdminDomicilios = () => {
     const doms = (await getDomicilios()) || [];
     setDomicilios(doms);
     setVentas((await getVentas()) || []);
-    // Cargar lista de usuarios que pueden ser repartidores (filtrar por rol)
     try {
       const users = await getUsuarios();
       const reps = Array.isArray(users) ? users.filter(u => {
@@ -56,9 +52,7 @@ const AdminDomicilios = () => {
   const normalizeNumber = (num, defaultCountry = '57') => {
     if (!num) return '';
     let s = String(num).replace(/\D/g, '');
-    // remove leading zeros
     s = s.replace(/^0+/, '');
-    // if length looks like local (<=10) prefix default country
     if (s.length <= 10) s = `${defaultCountry}${s}`;
     return s;
   };
@@ -90,7 +84,7 @@ const AdminDomicilios = () => {
       setRepartidorForm({ nombre: '', telefono: '', tipoVehiculo: '', placa: '', tarifa: repartidorForm.tarifa });
       return;
     }
-    const user = repartidoresList.find(r => String(r.id || r._id) === String(id) || String(r.id) === String(id));
+    const user = repartidoresList.find(r => String(r.id || r._id) === String(id));
     if (user) {
       setRepartidorForm({ nombre: user.nombre || '', telefono: user.telefono || '', tipoVehiculo: user.tipoVehiculo || '', placa: user.placa || '', tarifa: repartidorForm.tarifa });
     }
@@ -108,8 +102,6 @@ const AdminDomicilios = () => {
     
     const dom = domicilios.find(d => String(d.ventaId) === String(currentVentaId));
     let res = null;
-    
-    // Enviar en el formato que espera el backend
     const payload = {
       repartidor: {
         nombre,
@@ -131,7 +123,7 @@ const AdminDomicilios = () => {
       console.log('Respuesta asignarRepartidor:', res);
     } catch (err) {
       console.error('Error asignando repartidor:', err);
-      alert('No se puede asignar/editar repartidor: ' + (err?.message || err) + '\nDetalles: ' + JSON.stringify(err));
+      alert('No se puede asignar/editar repartidor: ' + (err?.message || err));
       return;
     }
     if (!res) {
@@ -147,42 +139,23 @@ const AdminDomicilios = () => {
     cargarDatos();
   };
 
-  const handleEditarRepartidor = (ventaId, repartidorActual = {}) => {
-    const nombre = prompt('Nombre del repartidor:', repartidorActual.nombre || '');
-    if (nombre === null) return;
-    const telefono = prompt('Teléfono del repartidor:', repartidorActual.telefono || '');
-    if (telefono === null) return;
-    const tipoVehiculo = prompt('Tipo de vehículo (opcional):', repartidorActual.tipoVehiculo || '');
-    if (tipoVehiculo === null) return;
-    const placa = prompt('Placa (opcional):', repartidorActual.placa || '');
-    if (placa === null) return;
-    editarRepartidor(ventaId, { nombre, telefono, tipoVehiculo: tipoVehiculo || '', placa: placa || '' });
-    cargarDatos();
-  };
-
-const handleCambiarEstado = async (ventaId, nextState) => {
+  const handleCambiarEstado = async (ventaId, nextState) => {
     const dom = domicilios.find(d => String(d.ventaId) === String(ventaId));
     const estadoActual = dom?.estado;
     
-    // Verificar si el estado es final
     if (estadoActual && isEstadoFinalDomicilio(estadoActual)) {
       alert(`No se puede cambiar el estado: El domicilio ya está en estado "${estadoActual}" que es un estado final.`);
       return;
     }
-    
-    // Verificar si la transición es válida
     const siguientes = getSiguientesEstadosDomicilio(estadoActual);
     if (estadoActual && !siguientes.includes(nextState)) {
-      alert(`No se puede cambiar de "${estadoActual}" a "${nextState}".\n\nEstados válido siguientes: ${siguientes.join(', ') || 'Ninguno'}`);
+      alert(`No se puede cambiar de "${estadoActual}" a "${nextState}".\n\nEstados válidos siguientes: ${siguientes.join(', ') || 'Ninguno'}`);
       return;
     }
-    
-    // Validar que no se pueda poner 'en_preparacion' o 'asignado' sin tener repartidor
     if ((nextState === 'en_preparacion' || nextState === 'asignado') && (!dom?.repartidor || !dom.repartidor.nombre)) {
       alert('Debe asignar un repartidor antes de cambiar el estado a En Preparación o Asignado.');
       return;
     }
-    
     try {
       await updateDomicilioEstado(ventaId, nextState);
       await cargarDatos();
@@ -205,11 +178,9 @@ const handleCambiarEstado = async (ventaId, nextState) => {
       return;
     }
     try {
-      // Setear tarifa en el objeto y esperar a que se guarde en el backend
       dom.tarifa = tarifaNum;
       const res = await saveDomicilio(dom);
       alert('Tarifa guardada correctamente');
-      // recargar datos desde la API para reflejar cambios (incluye tarifa_aplicada)
       await cargarDatos();
       return res;
     } catch (err) {
@@ -232,8 +203,8 @@ const handleCambiarEstado = async (ventaId, nextState) => {
 
   const fileInputRef = useRef(null);
 
-const handleExportar = () => {
-    const data = domicilio.map(d => ({
+  const handleExportar = () => {
+    const data = domicilios.map(d => ({
       Venta: d.ventaId,
       Dirección: `${d.direccion} ${d.direccion2 || ''}, ${d.barrio || ''}`,
       Tipo: d.tipo || '',
@@ -249,6 +220,7 @@ const handleExportar = () => {
     }));
     exportToExcel(data, 'domicilios.xlsx');
   };
+
   const handleImport = (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -280,14 +252,23 @@ const handleExportar = () => {
   const domiciliosConVenta = filtered.map(mapDomicilio);
 
   return (
-    <div className="container mt-4">
-      <div className="d-flex justify-content-between align-items-center mb-3">
-        <h2>Administración de Domicilios</h2>
+    <div className="container-fluid py-4">
+      <div className="d-flex justify-content-between align-items-center mb-4">
         <div>
+          <h2>Administración de Domicilios</h2>
+          <p className="text-muted mb-0">Gestiona los envíos y repartidores</p>
+        </div>
+        <div className="d-flex gap-2">
           <input type="file" ref={fileInputRef} accept=".xlsx, .xls" style={{ display: 'none' }} onChange={handleImport} />
-          <Link to="/admin/ventas" className="btn btn-outline-secondary me-2">Volver a Ventas</Link>
-          <button className="btn btn-outline-secondary me-2" onClick={handleExportar}>Exportar</button>
-          <button className="btn btn-outline-secondary me-2" onClick={() => fileInputRef.current && fileInputRef.current.click()}>Importar</button>
+          <button className="btn btn-outline-primary" onClick={handleExportar}>
+            <i className="fas fa-file-export me-1"></i>Exportar
+          </button>
+          <button className="btn btn-outline-primary" onClick={() => fileInputRef.current && fileInputRef.current.click()}>
+            <i className="fas fa-file-import me-1"></i>Importar
+          </button>
+          <Link to="/admin/ventas" className="btn btn-secondary">
+            <i className="fas fa-arrow-left me-1"></i>Volver a Ventas
+          </Link>
         </div>
       </div>
 
@@ -307,30 +288,24 @@ const handleExportar = () => {
           </select>
         </div>
         <div className="col-md-4 mb-2 text-end">
-          <button className="btn btn-secondary" onClick={() => { setSearch(''); setFilter('Todos'); }}>Limpiar</button>
+          <button className="btn btn-secondary" onClick={() => { setSearch(''); setFilter('Todos'); }}>
+            <i className="fas fa-eraser me-1"></i>Limpiar
+          </button>
         </div>
       </div>
 
       <div className="row">
-          {domiciliosConVenta.map(dom => {
+        {domiciliosConVenta.map(dom => {
           const key = String(dom.id || dom.pedidoId);
           const estadoNorm = String(dom.estado || 'pendiente').toLowerCase();
-          // Clase visual según estado
-          const estadoClass = estadoNorm === 'entregado' ? 'entregado'
-            : estadoNorm === 'en_camino' ? 'en_camino'
-            : estadoNorm === 'asignado' ? 'asignado'
-            : estadoNorm === 'en_preparacion' ? 'en_preparacion'
-            : estadoNorm === 'aprobado' ? 'aprobado'
-            : estadoNorm === 'cancelado' ? 'cancelado' : 'pendiente';
           const badgeColor = estadoNorm === 'entregado' ? 'success'
             : estadoNorm === 'en_camino' || estadoNorm === 'asignado' || estadoNorm === 'en_preparacion' || estadoNorm === 'aprobado' ? 'warning'
             : estadoNorm === 'cancelado' ? 'danger' : 'secondary';
           return (
             <div className="col-md-6 col-lg-4 mb-3" key={key}>
-              <div className={`card domicilioCard ${estadoClass}`}>
+              <div className="card domicilioCard">
                 <div className="card-body">
                   <h5 className="card-title">Venta #{dom.pedidoId || dom.venta?.id || 'N/A'}</h5>
-                  {/* Nombre del usuario - mostrado primero para el domiciliario */}
                   {dom.venta?.usuarioNombre && (
                     <p className="mb-1"><i className="fas fa-user me-2"></i>{dom.venta.usuarioNombre}</p>
                   )}
@@ -340,7 +315,7 @@ const handleExportar = () => {
                     <span className={`badge bg-${badgeColor}`}>{dom.estado || dom.venta?.estadoPedido || 'Pendiente'}</span>
                     <div className="d-flex align-items-center gap-2">
                       {dom.estado !== 'entregado' && (
-                        <button className="btn btn-sm btn-outline-primary py-0 px-1" onClick={() => handleEditarTarifa(dom.pedidoId, dom.tarifa)} title="Editar tarifa">
+                        <button className="btn btn-sm btn-outline-warning py-0 px-1" onClick={() => handleEditarTarifa(dom.pedidoId, dom.tarifa)} title="Editar tarifa">
                           <i className="fas fa-dollar-sign"></i>
                         </button>
                       )}
@@ -348,7 +323,7 @@ const handleExportar = () => {
                     </div>
                   </div>
                   {dom.repartidor ? (
-                    <div className={`mt-2 p-2 repartidorInfo`}>
+                    <div className="mt-2 p-2 repartidorInfo">
                       <div>
                         <i className="fas fa-motorcycle me-1"></i>
                         <strong>{typeof dom.repartidor === 'object' ? (dom.repartidor.nombre ? String(dom.repartidor.nombre).split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ') : '') : String(dom.repartidor)}</strong>
@@ -369,7 +344,6 @@ const handleExportar = () => {
                     </div>
                   )}
                   <div className="mt-3">
-                    {/* Selector de estado del domicilio */}
                     {isEstadoFinalDomicilio(dom.estado) ? (
                       <span className={`badge ${dom.estado === 'entregado' ? 'bg-success' : 'bg-danger'} mb-2`}>
                         Domicilio: {String(dom.estado || '').charAt(0).toUpperCase() + String(dom.estado || '').slice(1)}
@@ -391,14 +365,14 @@ const handleExportar = () => {
                   </div>
                   <div className="mt-2 d-flex gap-2">
                     {dom.estado !== 'entregado' && (
-                      <button className="btn btn-sm btn-outline-primary" onClick={() => openRepartidorModal(dom.pedidoId)}>{dom.repartidor ? 'Editar' : 'Asignar'} Repartidor</button>
+                      <button className="btn btn-sm btn-outline-primary" onClick={() => openRepartidorModal(dom.pedidoId)}>
+                        <i className="fas fa-user-plus me-1"></i>{dom.repartidor ? 'Editar' : 'Asignar'} Repartidor
+                      </button>
                     )}
-                    <button className="btn btn-sm btn-outline-dark" onClick={async () => {
+                    <button className="btn btn-sm btn-outline-secondary" onClick={async () => {
                       try {
-                        // Buscar la venta completa (podría no estar en dom.venta)
                         let ventaData = dom.venta;
                         if (!ventaData || !ventaData.id) {
-                          // Intentar cargar desde el servicio
                           ventaData = await getVentaById(dom.pedidoId);
                         }
                         if (ventaData && ventaData.id) {
@@ -410,11 +384,17 @@ const handleExportar = () => {
                         console.error('Error al imprimir:', err);
                         alert('Error al generar el voucher: ' + (err.message || err));
                       }
-                    }}><i className="fas fa-print"></i></button>
-                    <button className="btn btn-sm btn-success" onClick={() => { const target = dom.repartidor?.telefono ? normalizeNumber(dom.repartidor.telefono) : normalizeNumber(dom.telefono); if (target) window.open(`https://wa.me/${target}`, '_blank'); else alert('Teléfono inválido para WhatsApp'); }}><i className="fab fa-whatsapp"></i></button>
-                    <button className="btn btn-sm btn-info" onClick={() => handleNotas(dom.pedidoId, dom.notas)}><i className="fas fa-sticky-note"></i></button>
+                    }}>
+                      <i className="fas fa-print"></i>
+                    </button>
+                    <button className="btn btn-sm btn-outline-success" onClick={() => { const target = dom.repartidor?.telefono ? normalizeNumber(dom.repartidor.telefono) : normalizeNumber(dom.telefono); if (target) window.open(`https://wa.me/${target}`, '_blank'); else alert('Teléfono inválido para WhatsApp'); }}>
+                      <i className="fab fa-whatsapp"></i>
+                    </button>
+                    <button className="btn btn-sm btn-outline-info" onClick={() => handleNotas(dom.pedidoId, dom.notas)}>
+                      <i className="fas fa-sticky-note"></i>
+                    </button>
                     {dom.estado === 'entregado' && dom.venta?.esVenta === false && (
-                      <button className="btn btn-sm btn-warning" onClick={async () => { if (confirm('¿Convertir pedido a venta?')) { await updateDomicilioEstado(dom.pedidoId, 'entregado', true); cargarDatos(); } }} title="Convertir a venta">
+                      <button className="btn btn-sm btn-outline-success" onClick={async () => { if (confirm('¿Convertir pedido a venta?')) { await updateDomicilioEstado(dom.pedidoId, 'entregado', true); cargarDatos(); } }} title="Convertir a venta">
                         <i className="fas fa-check-circle"></i>
                       </button>
                     )}
@@ -464,8 +444,12 @@ const handleExportar = () => {
               <input className="form-control" name="tarifa" value={repartidorForm.tarifa} onChange={handleRepartidorInput} type="number" step="0.01" />
             </div>
             <div className="d-flex justify-content-end gap-2">
-              <button className="btn btn-secondary" onClick={() => setShowRepartidorModal(false)}>Cancelar</button>
-              <button className="btn btn-primary" onClick={handleSaveRepartidor}>Guardar</button>
+              <button className="btn btn-secondary" onClick={() => setShowRepartidorModal(false)}>
+                <i className="fas fa-times me-1"></i>Cancelar
+              </button>
+              <button className="btn btn-primary" onClick={handleSaveRepartidor}>
+                <i className="fas fa-save me-1"></i>Guardar
+              </button>
             </div>
           </div>
         </div>

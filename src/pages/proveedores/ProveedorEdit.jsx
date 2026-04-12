@@ -13,7 +13,7 @@ const ProveedorEdit = () => {
     const p = getProveedorById(id);
     if (!p) {
       alert('Proveedor no encontrado');
-      navigate('/proveedores');
+      navigate('/admin/proveedores');
       return;
     }
     setProveedor(p);
@@ -23,7 +23,7 @@ const ProveedorEdit = () => {
     try {
       updateProveedor(id, data);
       alert('Proveedor actualizado');
-      navigate('/proveedores');
+      navigate('/admin/proveedores');
     } catch (err) {
       alert(err.message || 'Error actualizando');
     }
@@ -34,7 +34,7 @@ const ProveedorEdit = () => {
   return (
     <div className="container my-4">
       <div className="d-flex align-items-center gap-3 mb-4">
-        <button className="btn btn-outline-secondary" onClick={() => navigate('/proveedores')}>
+        <button className="btn btn-outline-secondary" onClick={() => navigate('/admin/proveedores')}>
           <i className="fas fa-arrow-left"></i>
         </button>
         <div>
