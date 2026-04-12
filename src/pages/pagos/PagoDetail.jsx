@@ -14,23 +14,30 @@ const PagoDetail = () => {
   useEffect(() => {
     (async () => {
       try {
+        // Intentar cargar pago
         const p = await getPagoById(id);
         setPago(p);
-        if (p && p.ventaId) {
-          const v = await getVentaById(p.ventaId);
-          setVenta(v);
-          const dom = await getDomicilioByVentaId(p.ventaId);
-          setDomicilio(dom);
-          const pagos = await getPagosByVenta(p.ventaId);
-          setPagosVenta(pagos);
-        }
+        
+        // Siempre cargar datos del pedido (también funciona si no hay pago)
+        const ventaId = p?.ventaId || id;
+        const v = await getVentaById(ventaId);
+        setVenta(v);
+        
+        const dom = await getDomicilioByVentaId(ventaId);
+        setDomicilio(dom);
+        
+        const pagos = await getPagosByVenta(ventaId);
+        setPagosVenta(pagos);
       } catch (err) {
-        console.error('Error loading pago:', err);
+        console.error('Error loading:', err);
+        setPago(null);
       } finally {
         setLoading(false);
       }
     })();
   }, [id]);
+
+  if (loading) return <div className="container mt-4">Cargando...</div>;
 
   const getBadgeClass = (estado) => {
     switch (estado?.toLowerCase()) {
@@ -48,17 +55,17 @@ const PagoDetail = () => {
   const saldoPendiente = Math.max(0, totalVenta - totalPagado);
 
   const pagosAplicados = pagosVenta.filter(p => String(p.estado)?.toLowerCase() === 'aplicado');
-
-  if (loading) return <div className="container mt-4">Cargando...</div>;
-  if (!pago) return <div className="container mt-4">Pago no encontrado.</div>;
+  const ventaId = venta?.id || id;
 
   return (
     <div className="container mt-4">
       <div className="d-flex justify-content-between align-items-center">
-        <h3>Detalle Pago #{pago.id}</h3>
+        <h3>Detalle {pago ? `Pago #${pago.id}` : `Pedido #${ventaId}`}</h3>
         <div>
           <button className="btn btn-outline-secondary me-2" onClick={() => navigate(-1)}>Volver</button>
-          <button className="btn btn-primary" onClick={() => navigate(`/admin/pagos/nuevo`, { state: { ventaId: pago.ventaId } })}>Registrar Abono</button>
+          {!pago && venta?.metodoPago === 'Abono' && (
+            <button className="btn btn-primary" onClick={() => navigate(`/admin/pagos/nuevo`, { state: { ventaId } })}>Registrar Abono</button>
+          )}
         </div>
       </div>
 
@@ -66,8 +73,8 @@ const PagoDetail = () => {
         <div className="row">
           <div className="col-md-6">
             <h5 className="border-bottom pb-2 mb-3">Información del Pedido</h5>
-            <p><strong>Pedido ID:</strong> <Link to={`/ventas/${pago.ventaId}`}>#{pago.ventaId}</Link></p>
-            <p><strong>Usuario:</strong> {pago.usuarioNombre || venta?.usuarioNombre || 'N/A'}</p>
+            <p><strong>Pedido ID:</strong> <Link to={`/ventas/${ventaId}`}>#{ventaId}</Link></p>
+            <p><strong>Usuario:</strong> {venta?.usuarioNombre || 'N/A'}</p>
             <p><strong>Fecha:</strong> {venta?.fecha ? new Date(venta.fecha).toLocaleString() : 'N/A'}</p>
             <p><strong>Método de Pago:</strong> {venta?.metodoPago || 'N/A'}</p>
             {domicilio && (
@@ -89,8 +96,14 @@ const PagoDetail = () => {
           <div className="col-md-6">
             <h5 className="border-bottom pb-2 mb-3">Información del Pago</h5>
             <p><strong>Total Venta:</strong> {formatPrice(totalVenta)}</p>
-            <p><strong>Método:</strong> {pago.metodo || 'N/A'}</p>
-            <p><strong>Tipo:</strong> {pago.tipo === 'abono' ? 'Abono' : 'Pago'}</p>
+            {pago ? (
+              <>
+                <p><strong>Método:</strong> {pago.metodo || 'N/A'}</p>
+                <p><strong>Tipo:</strong> {pago.tipo === 'abono' ? 'Abono' : 'Pago'}</p>
+              </>
+            ) : (
+              <p><strong>Estado:</strong> <span className="badge bg-warning text-dark">Sin registro de pago</span></p>
+            )}
             <div className="mt-3 p-2 bg-light rounded">
               <p className="mb-1"><strong>Total Pagado:</strong> {formatPrice(totalPagado)}</p>
               <p className="mb-0"><strong>Saldo Pendiente:</strong> <span className={saldoPendiente > 0 ? 'text-danger' : 'text-success'}>{formatPrice(saldoPendiente)}</span></p>
@@ -103,10 +116,10 @@ const PagoDetail = () => {
             )}
           </div>
         </div>
-        {(pago.notas || domicilio?.notas) && (
+        {(pago?.notas || domicilio?.notas) && (
           <div className="mt-3 pt-2 border-top">
             <p className="mb-1"><strong>Notas:</strong></p>
-            <p className="text-muted">{pago.notas || domicilio?.notas || '-'}</p>
+            <p className="text-muted">{pago?.notas || domicilio?.notas || '-'}</p>
           </div>
         )}
       </div>

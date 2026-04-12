@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link, useLocation } from 'react-router-dom';
-import { getVentaById, getProductos, getPagosByVenta, getTotalPagadoByVenta, formatPrice, cambiarEstadoPago, cambiarEstadoPedido, aprobarSolicitudAbono, rechazarAbono, cambiarEstado } from '../../services/dataService';
+import { getVentaById, getProductos, getPagosByVenta, getTotalPagadoByVenta, formatPrice, cambiarEstadoPago, cambiarEstadoPedido, aprobarSolicitudAbono, rechazarAbono, cambiarEstado, getDomicilioByVentaId } from '../../services/dataService';
 import { useAuth } from '../../context/AuthContext';
 
 const VentaDetails = () => {
@@ -10,6 +10,7 @@ const VentaDetails = () => {
   const isFromPedidos = location.pathname.includes('/pedidos/');
   const { user, role, hasPermission } = useAuth();
   const [pedido, setPedido] = useState(null);
+  const [domicilio, setDomicilio] = useState(null);
   const [pagos, setPagos] = useState([]);
   const [totalPagado, setTotalPagado] = useState(0);
   const [productos, setProductos] = useState([]);
@@ -33,6 +34,11 @@ const VentaDetails = () => {
           return;
         }
         setPedido(p);
+
+        const dom = await getDomicilioByVentaId(id);
+        if (dom) {
+          setDomicilio(dom);
+        }
 
         const prods = await getProductos() || [];
         setProductos(prods);
@@ -114,8 +120,7 @@ const VentaDetails = () => {
   };
 
   const estadoOrden = String(pedido?.estadoPedido || pedido?.estado || 'pendiente').toLowerCase();
-  const esDomicilio = (pedido?.delivery === true || String(pedido?.tipo_venta || '').toLowerCase() === 'domicilio');
-  console.log('[VentaDetails] pedido:', pedido?.id, 'estadoPedido:', estadoOrden, 'tipo_venta:', pedido?.tipo_venta, 'esDomicilio:', esDomicilio);
+  const esDomicilio = (pedido?.delivery === true || String(pedido?.tipo_venta || '').toLowerCase() === 'domicilio' || !!pedido?.direccion);
   
   const pasosEntrega = [
     { estado: 'pendiente', label: 'Recibido', icon: 'fa-clipboard-list' },
@@ -231,12 +236,6 @@ const VentaDetails = () => {
 
       <div className="alert d-flex align-items-center justify-content-between">
         <div>
-          <strong>Estado:</strong>{' '}
-          <span className={`badge ${getEstadoBadge(estadoMostrar)} fs-6`}>
-            {estadoMostrar}
-          </span>
-        </div>
-        <div>
           <strong>Método de pago:</strong>{' '}
           <span className={`badge ${getMetodoBadge(pedido.metodoPago)} fs-6`}>
             {pedido.metodoPago}
@@ -251,50 +250,53 @@ const VentaDetails = () => {
       </div>
 
 {/* Status Timeline para Domicilio */}
-      {esDomicilio && estadoOrden !== 'cancelado' && (
-        <div className="card mb-4">
-          <div className="card-body">
-            <h5 className="mb-4">
-              <i className="fas fa-shipping-fast me-2"></i>
-              Estado del domicilio
-            </h5>
-            <div className="position-relative">
-              {/* Barra de progreso */}
-              <div className="position-absolute top-0 start-0 end-0" style={{ height: 4, background: '#e5e7eb' }}>
-                <div
-                  className="h-100 bg-success transition-all"
-                  style={{
-                    width: `${Math.max(0, (statusSteps.filter(s => s.isActive).length - 1) * (100 / (pasosMostrar.length - 1)))}%`,
-                  }}
-                />
-              </div>
-              {/* Pasos */}
-              <div className="position-relative d-flex justify-content-between">
-                {statusSteps.map((step, idx) => (
-                  <div key={idx} className="d-flex flex-column align-items-center" style={{ width: '80px' }}>
-                    <div
-                      className={`rounded-circle d-flex align-items-center justify-content-center border-4 transition ${
-                        step.isActive
-                          ? 'bg-success border-white text-white'
-                          : 'bg-white border-secondary text-secondary'
-                      }`}
-                      style={{ width: 48, height: 48, ...(step.isCurrent && { boxShadow: '0 0 0 4px rgba(34, 197, 94, 0.3)' }) }}
-                    >
-                      <i className={`fas ${step.icon}`} style={{ fontSize: '1.25rem' }} />
-                    </div>
-                    <p
-                      className={`mt-2 text-center ${step.isActive ? 'fw-medium text-dark' : 'text-muted'}`}
-                      style={{ fontSize: '0.75rem', maxWidth: '80px' }}
-                    >
-                      {step.label}
-                    </p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
+{(esDomicilio || !!pedido?.direccion) && estadoOrden !== 'cancelado' && (
+  <div className="card mb-4">
+    <div className="card-body">
+      <h5 className="mb-4">
+        <i className="fas fa-shipping-fast me-2"></i>
+        Estado del domicilio
+      </h5>
+      <div className="position-relative" style={{ paddingTop: 24, paddingBottom: 8 }}>
+        {/* Barra de progreso - centrada verticalmente */}
+        <div
+          className="position-absolute start-0 end-0"
+          style={{ height: 4, top: 46, background: '#e5e7eb' }}
+        >
+          <div
+            className="h-100 bg-success transition-all"
+            style={{
+              width: `${Math.max(0, currentStepIndex / (pasosMostrar.length - 1) * 100)}%`,
+            }}
+          />
         </div>
-      )}
+        {/* Pasos */}
+        <div className="position-relative d-flex justify-content-between">
+          {statusSteps.map((step, idx) => (
+            <div key={idx} className="d-flex flex-column align-items-center" style={{ width: '80px' }}>
+              <div
+                className={`rounded-circle d-flex align-items-center justify-content-center border-4 transition ${
+                  step.isActive
+                    ? 'bg-success border-white text-white'
+                    : 'bg-white border-secondary text-secondary'
+                }`}
+                style={{ width: 48, height: 48, ...(step.isCurrent && { boxShadow: '0 0 0 4px rgba(34, 197, 94, 0.3)' }) }}
+              >
+                <i className={`fas ${step.icon}`} style={{ fontSize: '1.25rem' }} />
+              </div>
+              <p
+                className={`mt-2 text-center ${step.isActive ? 'fw-medium text-dark' : 'text-muted'}`}
+                style={{ fontSize: '0.75rem', maxWidth: '80px' }}
+              >
+                {step.label}
+              </p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  </div>
+)}
 
       <div className="row">
         <div className="col-lg-8">
@@ -358,32 +360,49 @@ const VentaDetails = () => {
                       <th colSpan="3" className="text-end">Subtotal:</th>
                       <td className="text-end">{formatPrice(pedido.subtotal)}</td>
                     </tr>
-                    {pedido.shipping > 0 && (
-                      <tr>
-                        <th colSpan="3" className="text-end">Envío:</th>
-                        <td className="text-end">{formatPrice(pedido.shipping)}</td>
-                      </tr>
-                    )}
-                    <tr className="table-primary">
-                      <th colSpan="3" className="text-end">Total:</th>
-                      <td className="text-end fw-bold">{formatPrice((parseFloat(pedido.subtotal) || 0) + (parseFloat(pedido.shipping) || 0))}</td>
-                    </tr>
+                    {(() => {
+                      const costoEnvio = parseFloat(pedido.shipping) || parseFloat(domicilio?.tarifa) || 0;
+                      if (costoEnvio > 0) {
+                        return (
+                          <tr>
+                            <th colSpan="3" className="text-end">Envío:</th>
+                            <td className="text-end">{formatPrice(costoEnvio)}</td>
+                          </tr>
+                        );
+                      }
+                      return null;
+                    })()}
+                    {(() => {
+                      const envio = parseFloat(pedido.shipping) || parseFloat(domicilio?.tarifa) || 0;
+                      const total = (parseFloat(pedido.subtotal) || 0) + envio;
+                      return (
+                        <tr className="table-primary">
+                          <th colSpan="3" className="text-end">Total:</th>
+                          <td className="text-end fw-bold">{formatPrice(total)}</td>
+                        </tr>
+                      );
+                    })()}
                   </tfoot>
                 </table>
               </div>
             </div>
           </div>
 
-          {pedido.metodoPago === 'Abono' && (
+          {pedido.metodoPago === 'Abono' && (() => {
+          const envio = parseFloat(pedido.shipping) || parseFloat(domicilio?.tarifa) || 0;
+          const totalConEnvio = (parseFloat(pedido.subtotal) || 0) + envio;
+          const saldo = Math.max(0, totalConEnvio - totalPagado);
+          return (
             <div className="card mb-4">
               <div className="card-header"><h5 className="mb-0"><i className="fas fa-hand-holding-usd me-2"></i>Abonos</h5></div>
               <div className="card-body">
-                <p className="mb-1"><strong>Total {esPedido ? 'pedido' : 'venta'}:</strong> {formatPrice(pedido.total)}</p>
+                <p className="mb-1"><strong>Total {esPedido ? 'pedido' : 'venta'}:</strong> {formatPrice(totalConEnvio)}</p>
                 <p className="mb-1"><strong>Total pagado:</strong> {formatPrice(totalPagado)}</p>
-                <p className="mb-0"><strong>Saldo pendiente:</strong> {formatPrice(Math.max(0, (pedido.total || 0) - totalPagado))}</p>
+                <p className="mb-0"><strong>Saldo pendiente:</strong> {formatPrice(saldo)}</p>
               </div>
             </div>
-          )}
+          );
+        })()}
 
           {pagos.length > 0 && (
             <div className="card mb-4">

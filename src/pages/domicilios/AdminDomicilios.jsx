@@ -396,6 +396,11 @@ const handleExportar = () => {
                     <button className="btn btn-sm btn-outline-dark" onClick={() => dom.venta && openPrintVoucher(dom.venta, dom)}><i className="fas fa-print"></i></button>
                     <button className="btn btn-sm btn-success" onClick={() => { const target = dom.repartidor?.telefono ? normalizeNumber(dom.repartidor.telefono) : normalizeNumber(dom.telefono); if (target) window.open(`https://wa.me/${target}`, '_blank'); else alert('Teléfono inválido para WhatsApp'); }}><i className="fab fa-whatsapp"></i></button>
                     <button className="btn btn-sm btn-info" onClick={() => handleNotas(dom.pedidoId, dom.notas)}><i className="fas fa-sticky-note"></i></button>
+                    {dom.estado === 'entregado' && dom.venta?.esVenta === false && (
+                      <button className="btn btn-sm btn-warning" onClick={async () => { if (confirm('¿Convertir pedido a venta?')) { await updateDomicilioEstado(dom.pedidoId, 'entregado', true); cargarDatos(); } }} title="Convertir a venta">
+                        <i className="fas fa-check-circle"></i>
+                      </button>
+                    )}
                   </div>
                 </div>
               </div>

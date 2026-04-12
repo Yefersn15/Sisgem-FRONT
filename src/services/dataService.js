@@ -1010,10 +1010,11 @@ export const getDomicilioByVentaId = async (ventaId) => {
   return domicilios.find(d => String(d.pedidoId) === String(ventaId) || String(d.ventaId) === String(ventaId));
 };
 
-export const updateDomicilioEstado = async (ventaId, estado) => {
+export const updateDomicilioEstado = async (ventaId, estado, forzar = false) => {
   const dom = await getDomicilioByVentaId(ventaId);
   if (dom) {
-    return await request(`/api/domicilios/${dom.id}/estado`, { method: 'PATCH', body: { estado } });
+    const endpoint = forzar ? `/api/domicilios/${dom.id}/convertir` : `/api/domicilios/${dom.id}/estado`;
+    return await request(endpoint, { method: 'PATCH', body: { estado, forzar } });
   }
   return null;
 };
