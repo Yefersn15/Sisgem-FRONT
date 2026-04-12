@@ -680,7 +680,8 @@ const mapPedidoToFront = (pedido) => {
     id: pedido.id,
     fecha: pedido.createdAt || pedido.fecha_pedido,
     usuarioId: typeof pedido.usuario === 'object' ? pedido.usuario?.id : (pedido.usuarioId || pedido.usuario),
-    usuarioNombre: typeof pedido.usuario === 'object' ? pedido.usuario?.nombre : undefined,
+    usuarioNombre: typeof pedido.usuario === 'object' ? `${pedido.usuario?.nombre || ''} ${pedido.usuario?.apellido || ''}`.trim() : undefined,
+    usuarioDocumento: typeof pedido.usuario === 'object' ? pedido.usuario?.documento : undefined,
     telefono: pedido.telefono_contacto || telefonoDir || '',
     metodoPago: pedido.metodo_pago || pedido.metodoPago || 'Efectivo',
     subtotal: parseFloat(pedido.subtotal) || 0,
@@ -835,13 +836,16 @@ export const getPagos = async () => {
     const data = await request('/api/pagos');
     return Array.isArray(data) ? data.map(pago => {
       const ventaId = typeof pago.pedido === 'object' ? pago.pedido?.id : pago.pedido;
-      const usuarioId = typeof pago.pedido?.usuario === 'object' ? pago.pedido?.usuario?.id : pago.pedido?.usuario;
-      const usuarioNombre = typeof pago.pedido?.usuario === 'object' ? pago.pedido?.usuario?.nombre : undefined;
+      const usuarioObj = pago.pedido?.usuario;
+      const usuarioId = usuarioObj?.id || pago.pedido?.usuario;
+      const usuarioNombre = usuarioObj ? `${usuarioObj.nombre || ''} ${usuarioObj.apellido || ''}`.trim() : undefined;
+      const usuarioDocumento = usuarioObj?.documento;
       return {
         id: pago.id,
         ventaId,
         usuarioId,
         usuarioNombre,
+        usuarioDocumento,
         monto: pago.monto,
         metodo: pago.metodo,
         referencia: pago.referencia,
@@ -860,11 +864,14 @@ export const getPagoById = async (id) => {
   const data = await request(`/api/pagos/${id}`);
   if (!data) return null;
   const ventaId = typeof data.pedido === 'object' ? (data.pedido?.id || data.pedido?._id) : data.pedido;
-  const usuarioNombre = typeof data.pedido?.usuario === 'object' ? data.pedido?.usuario?.nombre : undefined;
+  const usuarioObj = data.pedido?.usuario;
+  const usuarioNombre = usuarioObj ? `${usuarioObj.nombre || ''} ${usuarioObj.apellido || ''}`.trim() : undefined;
+  const usuarioDocumento = usuarioObj?.documento;
   return {
     id: data.id || data._id,
     ventaId,
     usuarioNombre,
+    usuarioDocumento,
     monto: parseFloat(data.monto) || 0,
     metodo: data.metodo,
     estado: data.estado,

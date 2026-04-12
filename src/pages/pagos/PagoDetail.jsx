@@ -75,6 +75,7 @@ const PagoDetail = () => {
             <h5 className="border-bottom pb-2 mb-3">Información del Pedido</h5>
             <p><strong>Pedido ID:</strong> <Link to={`/ventas/${ventaId}`}>#{ventaId}</Link></p>
             <p><strong>Usuario:</strong> {venta?.usuarioNombre || 'N/A'}</p>
+            {venta?.usuarioDocumento && <p><strong>Documento:</strong> {venta.usuarioDocumento}</p>}
             <p><strong>Fecha:</strong> {venta?.fecha ? new Date(venta.fecha).toLocaleString() : 'N/A'}</p>
             <p><strong>Método de Pago:</strong> {venta?.metodoPago || 'N/A'}</p>
             {domicilio && (

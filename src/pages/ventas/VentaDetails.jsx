@@ -452,6 +452,7 @@ const VentaDetails = () => {
               {pedido.usuarioNombre ? (
                 <>
                   <p className="mb-1"><strong>Nombre:</strong> {pedido.usuarioNombre}</p>
+                  {pedido.usuarioDocumento && <p className="mb-1"><strong>Documento:</strong> {pedido.usuarioDocumento}</p>}
                   {pedido.usuarioId && <p className="mb-1"><strong>ID:</strong> {pedido.usuarioId}</p>}
                   <p className="mb-1"><strong>Teléfono:</strong> {pedido.telefono || pedido.telefonoContacto || '-'}</p>
                   {pedido.direccion && (

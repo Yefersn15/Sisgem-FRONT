@@ -115,16 +115,15 @@ const Checkout = () => {
     }
   };
 
-  const handleDireccionSelect = (e) => {
+const handleDireccionSelect = (e) => {
     const id = e.target.value;
     if (id === 'new') {
       setShowNewAddress(true);
-      setSelectedDireccionId('');
+      setSelectedDireccionId(id);
       setFormData(prev => ({ ...prev, direccion: '', barrio: '', telefono: '' }));
     } else if (id === 'registered') {
       setShowNewAddress(false);
-      setSelectedDireccionId('registered');
-      // Cargar datos del usuario registrado
+      setSelectedDireccionId(id);
       setFormData(prev => ({
         ...prev,
         direccion: user.direccion || '',
@@ -149,39 +148,56 @@ const Checkout = () => {
 
   const handleAddAddress = async () => {
     try {
-      if (newAddress.direccion.trim() && user) {
-        // Verificar límite de 3 direcciones
-        if (direcciones.length >= 3) {
-          alert('Máximo 3 direcciones guardadas. Por favor elimina una para agregar una nueva.');
-          return;
-        }
-        
-        const dirData = {
-          nombre: `${newAddress.direccion} ${newAddress.barrio || ''}`.trim(),
-          direccion: newAddress.direccion,
-          barrio: newAddress.barrio,
-          telefono: newAddress.telefono || user.telefono || user.celular || '',
-          tipo: newAddress.tipo || 'casa',
-          es_predeterminada: direcciones.length === 0
-        };
-        const nuevaDir = await createDireccion(dirData);
-        setDirecciones(prev => [...prev, nuevaDir]);
-        setSelectedDireccionId(nuevaDir.id);
-        setFormData(prev => ({
-          ...prev,
-          direccion: nuevaDir.direccion,
-          barrio: nuevaDir.barrio,
-          telefono: nuevaDir.telefono
-        }));
-        setShowNewAddress(false);
-        setNewAddress({ direccion: '', barrio: '', telefono: '', tipo: 'casa' });
+      if (!newAddress.direccion?.trim()) {
+        alert('La dirección es obligatoria');
+        return;
       }
+      if (!user) {
+        alert('Debe iniciar sesión para guardar una dirección');
+        return;
+      }
+      
+      // Verificar límite de 3 direcciones
+      if (direcciones.length >= 3) {
+        alert('Máximo 3 direcciones guardadas. Por favor elimina una para agregar una nueva.');
+        return;
+      }
+      
+      const dirData = {
+        nombre: `${newAddress.direccion} ${newAddress.barrio || ''}`.trim(),
+        direccion: newAddress.direccion,
+        barrio: newAddress.barrio || '',
+        telefono: newAddress.telefono || user.telefono || user.celular || '',
+        tipo: newAddress.tipo || 'casa',
+        es_predeterminada: direcciones.length === 0
+      };
+      
+      console.log('Guardando dirección:', dirData);
+      const nuevaDir = await createDireccion(dirData);
+      console.log('Dirección guardada:', nuevaDir);
+      
+      if (!nuevaDir || !nuevaDir.id) {
+        alert('Error: No se recibió respuesta válida del servidor');
+        return;
+      }
+      
+      setDirecciones(prev => [...prev, nuevaDir]);
+      setSelectedDireccionId(nuevaDir.id);
+      setFormData(prev => ({
+        ...prev,
+        direccion: nuevaDir.direccion,
+        barrio: nuevaDir.barrio,
+        telefono: nuevaDir.telefono
+      }));
+      setShowNewAddress(false);
+      setNewAddress({ direccion: '', barrio: '', telefono: '', tipo: 'casa' });
+      alert('Dirección guardada correctamente');
     } catch (e) {
       console.error('Error agregando dirección:', e);
       alert('No se pudo guardar la dirección: ' + (e.message || e));
     }
   };
-
+  
   const validate = () => {
     const newErrors = {};
     const metodo = formData.metodoPago;
@@ -325,7 +341,7 @@ const Checkout = () => {
                             {addr.direccion} {addr.barrio ? `- ${addr.barrio}` : ''} {addr.tipo ? `(${addr.tipo})` : ''} {addr.es_predeterminada ? '(Principal)' : ''}
                           </option>
                         ))}
-                        {direcciones.length < 3 && <option value="new">+ Agregar nueva dirección</option>}
+                        {direcciones.length < 3 && <option key="new" value="new">+ Agregar nueva dirección</option>}
                       </select>
                     </div>
 
