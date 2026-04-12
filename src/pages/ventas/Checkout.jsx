@@ -174,33 +174,44 @@ const handleDireccionSelect = (e) => {
     console.log('Guardando dirección:', dirData);
     try {
       const respuesta = await createDireccion(dirData);
-      // Si la respuesta es un array (caso de backend mal implementado), tomamos el último elemento
       let nuevaDir = respuesta;
-      if (Array.isArray(respuesta) && respuesta.length > 0) {
-        nuevaDir = respuesta[respuesta.length - 1];
-        console.warn('La API devolvió un array, usando el último elemento como dirección creada');
-      }
-      console.log('Dirección guardada:', nuevaDir);
+      let guardadaExitosamente = false;
       
-      if (nuevaDir && (nuevaDir.id || nuevaDir._id)) {
+      if (Array.isArray(respuesta) && respuesta.length > 0) {
+        const dirText = (newAddress.direccion || '').toLowerCase().trim();
+        const found = respuesta.find(d => (d.direccion || '').toLowerCase().trim() === dirText);
+        if (found) {
+          nuevaDir = found;
+          guardadaExitosamente = true;
+          console.log('Dirección encontrada en el array devuelto por la API');
+        } else {
+          nuevaDir = respuesta[respuesta.length - 1];
+          guardadaExitosamente = Boolean(nuevaDir?.id || nuevaDir?._id);
+        }
+      } else if (respuesta && (respuesta.id || respuesta._id)) {
+        guardadaExitosamente = true;
+      }
+      
+      console.log('Resultado - dirección extraida:', nuevaDir, 'guardada:', guardadaExitosamente);
+      
+      if (guardadaExitosamente && nuevaDir) {
         setDirecciones(prev => [...prev, nuevaDir]);
         setSelectedDireccionId(nuevaDir.id || nuevaDir._id);
         setFormData(prev => ({
           ...prev,
-          direccion: nuevaDir.direccion,
-          barrio: nuevaDir.barrio,
-          telefono: nuevaDir.telefono
+          direccion: nuevaDir.direccion || newAddress.direccion,
+          barrio: nuevaDir.barrio || newAddress.barrio,
+          telefono: nuevaDir.telefono || newAddress.telefono || user.telefono || user.celular || ''
         }));
-        alert('Dirección guardada correctamente');
+        setShowNewAddress(false);
       } else {
-        // Fallback: usar los datos ingresados sin guardar en el perfil
         setFormData(prev => ({
           ...prev,
           direccion: newAddress.direccion,
           barrio: newAddress.barrio,
           telefono: newAddress.telefono || user.telefono || user.celular || ''
         }));
-        alert('No se pudo guardar en perfil, pero puede usar esta dirección para el pedido');
+        setShowNewAddress(false);
       }
     } catch (e) {
       console.error('Error agregando dirección:', e);
@@ -210,7 +221,7 @@ const handleDireccionSelect = (e) => {
         barrio: newAddress.barrio,
         telefono: newAddress.telefono || user.telefono || user.celular || ''
       }));
-      alert('No se pudo guardar en perfil, pero puede usar esta dirección para el pedido');
+      setShowNewAddress(false);
     }
     setShowNewAddress(false);
     setNewAddress({ direccion: '', barrio: '', telefono: '', tipo: 'casa' });

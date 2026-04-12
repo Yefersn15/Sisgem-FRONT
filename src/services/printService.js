@@ -12,12 +12,18 @@ export const openPrintVoucher = async (venta, domicilio, options = {}) => {
     if (blockedVentaStates.includes(venta.estado)) { alert('No se puede imprimir voucher de una venta anulada o cancelada'); return; }
     if (domicilio && ['Anulada', 'Rechazada', 'Cancelado'].includes(domicilio.estado)) { alert('No se puede imprimir voucher de un domicilio anulado/cancelado'); return; }
     const fecha = venta?.fecha ? new Date(venta.fecha).toLocaleString() : new Date().toLocaleString();
+    const getNombreProducto = (d) => {
+      if (d.productoSnapshot?.nombre) return d.productoSnapshot.nombre;
+      if (d.producto?.nombre) return d.producto.nombre;
+      if (d.nombreProducto) return d.nombreProducto;
+      return 'Producto';
+    };
     const detalleRows = (venta.productos || []).map(d => `
       <tr>
-        <td style="padding:6px;border:1px solid #ddd">${(d.productoSnapshot?.nombre) || (d.producto?.nombre) || 'Producto'}</td>
-        <td style="padding:6px;border:1px solid #ddd;text-align:center">${d.cantidad}</td>
-        <td style="padding:6px;border:1px solid #ddd;text-align:right">${formatPrice(d.precioUnitario||d.precio_unitario||0)}</td>
-        <td style="padding:6px;border:1px solid #ddd;text-align:right">${formatPrice(d.subtotal||0)}</td>
+        <td style="padding:4px;border:1px solid #ddd">${getNombreProducto(d)}</td>
+        <td style="padding:4px;border:1px solid #ddd;text-align:center">${d.cantidad}</td>
+        <td style="padding:4px;border:1px solid #ddd;text-align:right">${formatPrice(d.precioUnitario||d.precio_unitario||0)}</td>
+        <td style="padding:4px;border:1px solid #ddd;text-align:right">${formatPrice(d.subtotal||0)}</td>
       </tr>`).join('');
 
     const resTipo = domicilio?.tipo ? `[${domicilio.tipo.charAt(0).toUpperCase() + domicilio.tipo.slice(1)}]` : '';
@@ -31,7 +37,6 @@ export const openPrintVoucher = async (venta, domicilio, options = {}) => {
           <p style="margin:2px 0"><strong>Repartidor:</strong> ${domicilio.repartidor.nombre || ''} (${domicilio.repartidor.telefono || ''})</p>
           <p style="margin:2px 0"><strong>Vehículo:</strong> ${domicilio.repartidor.tipoVehiculo || ''} - ${domicilio.repartidor.placa || ''}</p>
         ` : ''}
-        <p style="margin:2px 0"><strong>Estado:</strong> ${domicilio.estado || ''}</p>
       </div>
     ` : '';
 
@@ -62,7 +67,6 @@ export const openPrintVoucher = async (venta, domicilio, options = {}) => {
 
         ${domicilioHtml}
 
-        <h4>Detalle</h4>
         <table>
           <thead>
             <tr>
@@ -112,8 +116,8 @@ export const openPrintVoucher = async (venta, domicilio, options = {}) => {
         margin:       forBag ? 4 : 10,
         filename:     `voucher-${venta.id}${forBag ? '-bolsa' : ''}.pdf`,
         image:        { type: 'jpeg', quality: 0.98 },
-        html2canvas:  { scale: 2 },
-        jsPDF:        { unit: 'mm', format: [80, 200], orientation: 'portrait' }
+        html2canvas:  { scale: forBag ? 1 : 2 },
+        jsPDF:        { unit: 'mm', format: forBag ? [80, 150] : 'a4', orientation: 'portrait' }
       };
       // Crear elemento temporal
       const container = document.createElement('div');

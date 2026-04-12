@@ -710,7 +710,11 @@ const mapPedidoToFront = (pedido) => {
         nombre: item.producto.nombre,
         fotoUrl: item.producto.imagen,
         codigoBarras: item.producto.codigo_barras
-      } : null
+      } : (item.productoSnapshot ? {
+        nombre: item.productoSnapshot.nombre || item.productoSnapshot,
+        fotoUrl: item.productoSnapshot.fotoUrl,
+        codigoBarras: item.productoSnapshot.codigoBarras
+      } : null)
     }))
   };
 };

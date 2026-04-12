@@ -13,35 +13,23 @@ const PagoDetail = () => {
 
   useEffect(() => {
     (async () => {
-      let p = null;
       let ventaId = id;
-      let esIdPago = false;
       
-      // 1. Intentar cargar como pago directo (ID de pago)
-      try {
-        p = await getPagoById(id);
-        if (p && p.id) {
-          setPago(p);
-          // IMPORTANTE: NO cambiar ventaId aquí, el ID de la URL sigue siendo el objetivo principal
-          // Solo guardamos que este ID es un pago para mostrar en el título
-          esIdPago = true;
-        }
-      } catch (e) {
-        // No existe pago con ese ID, continuar
-      }
-      
-      // 2. Cargar todos los pagos y filtrar por ventaId (el ID de la URL)
+      // 1. Cargar todos los pagos y filtrar por ventaId (el ID de la URL)
       try {
         const todosLosPagos = await getPagos();
         const misPagos = todosLosPagos.filter(pg => String(pg.ventaId) === String(id));
         if (misPagos.length > 0) {
           setPagosVenta(misPagos.sort((a, b) => new Date(b.fecha) - new Date(a.fecha)));
+          if (misPagos.length === 1) {
+            setPago(misPagos[0]);
+          }
         }
       } catch (e) {
         console.log('Error cargando pagos');
       }
       
-      // 3. Cargar datos del pedido/venta usando el ID de la URL (no el del pago)
+      // 2. Cargar datos del pedido/venta usando el ID de la URL
       try {
         const v = await getVentaById(id);
         setVenta(v);

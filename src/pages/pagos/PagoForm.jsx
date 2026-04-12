@@ -69,14 +69,13 @@ const PagoForm = ({ initial = {}, onSubmit, onCancel }) => {
       setErrors(validationErrors);
       return;
     }
-    const metodoNormalizado = (form.metodo || '').toLowerCase();
     const payload = {
       ...form,
       monto: Math.round(parseFloat(form.monto) || 0),
       fecha: isAbono ? new Date().toISOString() : new Date(form.fecha).toISOString(),
-      metodo: metodoNormalizado === 'abono' ? 'efectivo' : metodoNormalizado,
-      tipo: metodoNormalizado === 'abono' ? 'abono' : 'pago_total',
-      estado: (form.estado || '').toLowerCase()
+      metodo: (form.metodo || '').toLowerCase(),
+      tipo: isAbono ? 'abono' : 'pago_total',
+      estado: isAbono ? 'aplicado' : (form.estado || '').toLowerCase()
     };
     onSubmit && onSubmit(payload);
   };
@@ -130,7 +129,6 @@ const PagoForm = ({ initial = {}, onSubmit, onCancel }) => {
           <select name="metodo" className="form-select" value={form.metodo} onChange={handleChange}>
             <option>Efectivo</option>
             <option>Transferencia</option>
-            <option>Abono</option>
           </select>
         </div>
         <div className="col-md-4">
