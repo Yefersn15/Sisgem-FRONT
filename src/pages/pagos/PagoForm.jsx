@@ -69,13 +69,14 @@ const PagoForm = ({ initial = {}, onSubmit, onCancel }) => {
       setErrors(validationErrors);
       return;
     }
+    const metodoNormalizado = (form.metodo || '').toLowerCase();
     const payload = {
       ...form,
       monto: Math.round(parseFloat(form.monto) || 0),
       fecha: isAbono ? new Date().toISOString() : new Date(form.fecha).toISOString(),
-      metodo: isAbono ? 'efectivo' : form.metodo.toLowerCase(),
-      tipo: isAbono ? 'abono' : 'pago_total',
-      estado: isAbono ? 'pendiente' : form.estado.toLowerCase()
+      metodo: metodoNormalizado === 'abono' ? 'efectivo' : metodoNormalizado,
+      tipo: metodoNormalizado === 'abono' ? 'abono' : 'pago_total',
+      estado: (form.estado || '').toLowerCase()
     };
     onSubmit && onSubmit(payload);
   };

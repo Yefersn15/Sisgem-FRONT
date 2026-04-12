@@ -26,14 +26,19 @@ const MisPagos = () => {
 
   const ventasConPagos = useMemo(() => {
     return registros.map(registro => {
-      const totalVenta = (parseFloat(registro.total) || 0);
+      const subtotal = parseFloat(registro.subtotal) || 0;
+      const shipping = parseFloat(registro.shipping) || 0;
+      const totalVenta = subtotal + shipping;
       const metodoPago = registro.metodo_pago || registro.metodoPago || '';
       const esAbono = metodoPago === 'Abono';
       const esVenta = registro.es_venta || registro.esVenta;
       
       const pagosVenta = pagos.filter(p => String(p.ventaId) === String(registro._id || registro.id));
       const totalPagado = pagosVenta
-        .filter(p => String(p.estado).toLowerCase() === 'aplicado')
+        .filter(p => {
+          const estado = String(p.estado).toLowerCase();
+          return estado === 'aplicado' || estado === 'pendiente';
+        })
         .reduce((sum, p) => sum + (parseFloat(p.monto) || 0), 0);
       
       let saldoPendiente = 0;

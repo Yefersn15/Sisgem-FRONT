@@ -853,7 +853,7 @@ export const getPagos = async () => {
         metodo: pago.metodo,
         referencia: pago.referencia,
         estado: pago.estado,
-        fecha: pago.fecha_pago,
+        fecha: pago.fecha_pago || pago.created_at || pago.createdAt,
         notas: pago.observaciones
       };
     }) : [];
@@ -878,7 +878,7 @@ export const getPagoById = async (id) => {
     monto: parseFloat(data.monto) || 0,
     metodo: data.metodo,
     estado: data.estado,
-    fecha: data.fecha_pago || data.createdAt,
+    fecha: data.fecha_pago || data.created_at || data.createdAt,
     notas: data.observaciones
   };
 };
@@ -1814,7 +1814,9 @@ export const getTotalPagadoByVenta = async (ventaId) => {
   const pagosVenta = pagos.filter(p => String(p.ventaId) === String(ventaId));
   let total = 0;
   pagosVenta.forEach(p => {
-    if (String(p.estado).toLowerCase() === 'aplicado') {
+    const estado = String(p.estado).toLowerCase();
+    // Contar tanto aplicados como pendientes
+    if (estado === 'aplicado' || estado === 'pendiente') {
       if (p.movimientos && p.movimientos.length) {
         total += p.movimientos.reduce((s, m) => s + (parseFloat(m.monto) || 0), 0);
       } else {

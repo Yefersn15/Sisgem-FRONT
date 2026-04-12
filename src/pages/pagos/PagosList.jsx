@@ -34,12 +34,14 @@ const PagosList = () => {
 
   const ventasConPagos = useMemo(() => {
     return todasLasVentas.map(venta => {
-      // Ya no necesitamos buscar domicilio, porque venta.shipping ya incluye el costo de envío
       const shipping = parseFloat(venta.shipping) || 0;
       const totalVenta = (venta.subtotal || 0) + shipping;
       const pagosVenta = pagos.filter(p => String(p.ventaId) === String(venta.id));
       const totalPagado = pagosVenta
-        .filter(p => String(p.estado).toLowerCase() === 'aplicado')
+        .filter(p => {
+          const estado = String(p.estado).toLowerCase();
+          return estado === 'aplicado' || estado === 'pendiente';
+        })
         .reduce((sum, p) => sum + (parseFloat(p.monto) || 0), 0);
       const saldoPendiente = Math.max(0, totalVenta - totalPagado);
       const estadoPago = saldoPendiente <= 0 ? 'Pagado' : 'Pendiente';

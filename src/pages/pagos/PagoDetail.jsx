@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
-import { getPagoById, getVentaById, formatPrice, getDomicilioByVentaId, getPagosByVenta } from '../../services/dataService';
+import { getPagoById, getVentaById, formatPrice, getDomicilioByVentaId, getPagosByVenta, getPagos } from '../../services/dataService';
 
 const PagoDetail = () => {
   const { id } = useParams();
@@ -15,38 +15,45 @@ const PagoDetail = () => {
     (async () => {
       let p = null;
       let ventaId = id;
+      let esIdPago = false;
       
-      // Intentar cargar pago
+      // 1. Intentar cargar como pago directo (ID de pago)
       try {
         p = await getPagoById(id);
-        setPago(p);
-        if (p?.ventaId) {
-          ventaId = p.ventaId;
+        if (p && p.id) {
+          setPago(p);
+          // IMPORTANTE: NO cambiar ventaId aquí, el ID de la URL sigue siendo el objetivo principal
+          // Solo guardamos que este ID es un pago para mostrar en el título
+          esIdPago = true;
         }
       } catch (e) {
-        console.log('No hay pago registrado para este ID');
+        // No existe pago con ese ID, continuar
       }
       
-      // Cargar datos del pedido/venta
+      // 2. Cargar todos los pagos y filtrar por ventaId (el ID de la URL)
       try {
-        const v = await getVentaById(ventaId);
+        const todosLosPagos = await getPagos();
+        const misPagos = todosLosPagos.filter(pg => String(pg.ventaId) === String(id));
+        if (misPagos.length > 0) {
+          setPagosVenta(misPagos.sort((a, b) => new Date(b.fecha) - new Date(a.fecha)));
+        }
+      } catch (e) {
+        console.log('Error cargando pagos');
+      }
+      
+      // 3. Cargar datos del pedido/venta usando el ID de la URL (no el del pago)
+      try {
+        const v = await getVentaById(id);
         setVenta(v);
       } catch (e) {
         console.log('Error cargando venta');
       }
       
       try {
-        const dom = await getDomicilioByVentaId(ventaId);
+        const dom = await getDomicilioByVentaId(id);
         setDomicilio(dom);
       } catch (e) {
         console.log('No hay domicilio');
-      }
-      
-      try {
-        const pagos = await getPagosByVenta(ventaId);
-        setPagosVenta(pagos);
-      } catch (e) {
-        console.log('Error cargando pagos');
       }
       
       setLoading(false);
@@ -66,12 +73,16 @@ const PagoDetail = () => {
 
   const shipping = domicilio?.costo ? parseFloat(domicilio.costo) : (venta?.shipping || 0);
   const totalVenta = (venta?.subtotal || 0) + shipping;
+  
+  // Calcular total pagado: incluir tanto aplicados como pendientes
   const totalPagado = pagosVenta
-    .filter(p => String(p.estado)?.toLowerCase() === 'aplicado')
+    .filter(p => {
+      const estado = String(p.estado)?.toLowerCase();
+      return estado === 'aplicado' || estado === 'pendiente';
+    })
     .reduce((sum, p) => sum + (parseFloat(p.monto) || 0), 0);
   const saldoPendiente = Math.max(0, totalVenta - totalPagado);
 
-  const pagosAplicados = pagosVenta.filter(p => String(p.estado)?.toLowerCase() === 'aplicado');
   const ventaId = venta?.id || id;
 
   return (
@@ -154,11 +165,19 @@ const PagoDetail = () => {
               </tr>
             </thead>
             <tbody>
-              {pagosAplicados.length > 0 ? pagosAplicados.map((p, idx) => (
+              {pagosVenta.length > 0 ? pagosVenta.map((p, idx) => (
                 <tr key={p.id || idx}>
                   <td>{p.fecha ? new Date(p.fecha).toLocaleString() : 'N/A'}</td>
-                  <td>{p.metodo || 'N/A'}</td>
-                  <td>{formatPrice(p.monto || 0)}</td>
+                  <td>
+                    <span className={`badge ${String(p.estado).toLowerCase() === 'aplicado' ? 'bg-success' : 'bg-warning text-dark'}`}>
+                      {p.metodo || 'N/A'}
+                    </span>
+                  </td>
+                  <td>
+                    <span className={String(p.estado).toLowerCase() === 'pendiente' ? 'text-warning' : ''}>
+                      {formatPrice(p.monto || 0)}
+                    </span>
+                  </td>
                 </tr>
               )) : (
                 <tr>
@@ -205,7 +224,7 @@ const PagoDetail = () => {
                   </tr>
                 )}
                 <tr>
-                  <td colSpan="3" class="text-end"><strong>Total:</strong></td>
+                  <td colSpan="3" className="text-end"><strong>Total:</strong></td>
                   <td><strong>{formatPrice((venta.subtotal || 0) + (venta.shipping || 0))}</strong></td>
                 </tr>
               </tfoot>

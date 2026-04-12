@@ -249,54 +249,33 @@ const VentaDetails = () => {
         </div>
       </div>
 
-{/* Status Timeline para Domicilio */}
-{(esDomicilio || !!pedido?.direccion) && estadoOrden !== 'cancelado' && (
-  <div className="card mb-4">
-    <div className="card-body">
-      <h5 className="mb-4">
-        <i className="fas fa-shipping-fast me-2"></i>
-        Estado del domicilio
-      </h5>
-      <div className="position-relative" style={{ paddingTop: 24, paddingBottom: 8 }}>
-        {/* Barra de progreso - centrada verticalmente */}
-        <div
-          className="position-absolute start-0 end-0"
-          style={{ height: 4, top: 46, background: '#e5e7eb' }}
-        >
-          <div
-            className="h-100 bg-success transition-all"
-            style={{
-              width: `${Math.max(0, currentStepIndex / (pasosMostrar.length - 1) * 100)}%`,
-            }}
-          />
-        </div>
-        {/* Pasos */}
-        <div className="position-relative d-flex justify-content-between">
-          {statusSteps.map((step, idx) => (
-            <div key={idx} className="d-flex flex-column align-items-center" style={{ width: '80px' }}>
-              <div
-                className={`rounded-circle d-flex align-items-center justify-content-center border-4 transition ${
-                  step.isActive
-                    ? 'bg-success border-white text-white'
-                    : 'bg-white border-secondary text-secondary'
-                }`}
-                style={{ width: 48, height: 48, ...(step.isCurrent && { boxShadow: '0 0 0 4px rgba(34, 197, 94, 0.3)' }) }}
-              >
-                <i className={`fas ${step.icon}`} style={{ fontSize: '1.25rem' }} />
+      {((esDomicilio || !!pedido?.direccion) && estadoOrden !== 'cancelado') && (
+        <div className="card mb-4">
+          <div className="card-body">
+            <h5 className="mb-4">
+              <i className="fas fa-shipping-fast me-2"></i>
+              Estado del domicilio
+            </h5>
+            <div className="position-relative" style={{ paddingTop: 24, paddingBottom: 8 }}>
+              <div className="position-absolute start-0 end-0" style={{ height: 4, top: 46, background: '#e5e7eb' }}>
+                <div className="h-100 bg-success transition-all" style={{ width: `${Math.max(0, currentStepIndex / (pasosMostrar.length - 1) * 100)}%` }} />
               </div>
-              <p
-                className={`mt-2 text-center ${step.isActive ? 'fw-medium text-dark' : 'text-muted'}`}
-                style={{ fontSize: '0.75rem', maxWidth: '80px' }}
-              >
-                {step.label}
-              </p>
+              <div className="position-relative d-flex justify-content-between">
+                {statusSteps.map((step, idx) => (
+                  <div key={idx} className="d-flex flex-column align-items-center" style={{ width: '80px' }}>
+                    <div className={`rounded-circle d-flex align-items-center justify-content-center border-4 transition ${step.isActive ? 'bg-success border-white text-white' : 'bg-white border-secondary text-secondary'}`} style={{ width: 48, height: 48, ...(step.isCurrent && { boxShadow: '0 0 0 4px rgba(34, 197, 94, 0.3)' }) }}>
+                      <i className={`fas ${step.icon}`} style={{ fontSize: '1.25rem' }} />
+                    </div>
+                    <p className={`mt-2 text-center ${step.isActive ? 'fw-medium text-dark' : 'text-muted'}`} style={{ fontSize: '0.75rem', maxWidth: '80px' }}>
+                      {step.label}
+                    </p>
+                  </div>
+                ))}
+              </div>
             </div>
-          ))}
+          </div>
         </div>
-      </div>
-    </div>
-  </div>
-)}
+      )}
 
       <div className="row">
         <div className="col-lg-8">
@@ -393,54 +372,69 @@ const VentaDetails = () => {
           const totalConEnvio = (parseFloat(pedido.subtotal) || 0) + envio;
           const saldo = Math.max(0, totalConEnvio - totalPagado);
           return (
-            <div className="card mb-4">
-              <div className="card-header"><h5 className="mb-0"><i className="fas fa-hand-holding-usd me-2"></i>Abonos</h5></div>
-              <div className="card-body">
-                <p className="mb-1"><strong>Total {esPedido ? 'pedido' : 'venta'}:</strong> {formatPrice(totalConEnvio)}</p>
-                <p className="mb-1"><strong>Total pagado:</strong> {formatPrice(totalPagado)}</p>
-                <p className="mb-0"><strong>Saldo pendiente:</strong> {formatPrice(saldo)}</p>
+            <div className="row mb-4">
+              <div className="col-md-6">
+                <div className="card h-100">
+                  <div className="card-header"><h6 className="mb-0"><i className="fas fa-hand-holding-usd me-2"></i>Abonos</h6></div>
+                  <div className="card-body">
+                    <p className="mb-1"><strong>Total:</strong> {formatPrice(totalConEnvio)}</p>
+                    <p className="mb-1"><strong>Pagado:</strong> {formatPrice(totalPagado)}</p>
+                    <p className="mb-0"><strong>Saldo:</strong> <span className={saldo > 0 ? 'text-danger' : 'text-success'}>{formatPrice(saldo)}</span></p>
+                  </div>
+                </div>
+              </div>
+              <div className="col-md-6">
+                <div className="card h-100">
+                  <div className="card-header">
+                    <h6 className="mb-0"><i className="fas fa-money-bill-wave me-2"></i>Pagos</h6>
+                  </div>
+                  <div className="card-body p-0" style={{ maxHeight: '250px', overflowY: 'auto' }}>
+                    {pagos.length > 0 ? (
+                      <table className="table table-sm table-hover mb-0">
+                        <thead className="table-light sticky-top">
+                          <tr>
+                            <th>Fecha</th>
+                            <th>Método</th>
+                            <th className="text-end">Monto</th>
+                            <th>Estado</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {pagos.map((pago) => (
+                            <tr key={pago.id}>
+                              <td>{formatFecha(pago.fecha)}</td>
+                              <td>{pago.metodo}</td>
+                              <td className="text-end">{formatPrice(pago.monto)}</td>
+                              <td>
+                                {canConfirmPayment && String(pago.estado).toLowerCase() === 'pendiente' ? (
+                                  <select 
+                                    className={`form-select form-select-sm ${getEstadoBadge(pago.estado)}`}
+                                    value={pago.estado}
+                                    onChange={(e) => handleCambiarEstadoPago(pago.id, e.target.value)}
+                                  >
+                                    <option value="pendiente">Pendiente</option>
+                                    <option value="aplicado">Aplicado</option>
+                                    <option value="rechazado">Rechazado</option>
+                                  </select>
+                                ) : (
+                                  <span className={`badge ${getEstadoBadge(pago.estado)}`}>
+                                    {pago.estado}
+                                  </span>
+                                )}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    ) : (
+                      <div className="text-center text-muted p-3">No hay pagos registrados</div>
+                    )}
+                  </div>
+                </div>
               </div>
             </div>
           );
         })()}
-
-          {pagos.length > 0 && (
-            <div className="card mb-4">
-              <div className="card-header">
-                <h5 className="mb-0"><i className="fas fa-money-bill-wave me-2"></i>Pagos</h5>
-              </div>
-              <div className="card-body p-0">
-                <div className="table-responsive">
-                  <table className="table table-hover mb-0">
-                    <thead className="table-light">
-                      <tr>
-                        <th>Fecha</th>
-                        <th>Método</th>
-                        <th>Referencia</th>
-                        <th className="text-end">Monto</th>
-                        <th>Estado</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {pagos.map((pago) => (
-                        <tr key={pago.id}>
-                          <td>{formatFecha(pago.fecha)}</td>
-                          <td>{pago.metodo}</td>
-                          <td>{pago.referencia || '-'}</td>
-                          <td className="text-end">{formatPrice(pago.monto)}</td>
-                          <td>
-                            <span className={`badge ${getEstadoBadge(pago.estado)}`}>
-                              {pago.estado}
-                            </span>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            </div>
-          )}
         </div>
 
         <div className="col-lg-4">
