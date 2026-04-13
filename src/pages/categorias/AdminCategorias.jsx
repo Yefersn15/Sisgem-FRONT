@@ -217,7 +217,7 @@ const AdminCategorias = () => {
                 className="btn btn-outline-secondary w-100"
                 onClick={() => { setQuery(''); setFilterEstado(''); setSortBy('nombre-asc'); }}
               >
-                <i className="fas fa-times me-1"></i>Limpiar
+                <i className="fas fa-eraser me-1"></i>Limpiar
               </button>
             </div>
           </div>
@@ -259,7 +259,7 @@ const AdminCategorias = () => {
                           onClick={() => toggleActiva(categoria)}
                           title={categoria.activa ? 'Desactivar' : 'Activar'}
                         >
-                          <i className={`fas fa-toggle-${categoria.activa ? 'on' : 'off'}`}></i>
+                          <i className={`fas fa-toggle-${categoria.activa ? 'off' : 'on'}`}></i>
                         </button>
                       </td>
                       <td>

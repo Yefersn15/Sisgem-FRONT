@@ -205,7 +205,7 @@ const UsersList = ({ source = 'usuarios' }) => {
                         disabled={currentUser && String(currentUser.id) === String(u.id)}
                         title={currentUser && String(currentUser.id) === String(u.id) ? 'No puedes cambiar tu propio estado' : (u.estado ? 'Desactivar' : 'Activar')}
                       >
-                        <i className={`fas fa-toggle-${u.estado ? 'on' : 'off'}`}></i>
+                        <i className={`fas fa-toggle-${u.estado ? 'off' : 'on'}`}></i>
                       </button>
                     </div>
                   </td>

@@ -32,6 +32,7 @@ const AdminDashboard = () => {
   const [topMarcas, setTopMarcas] = useState([]);
   const [topCategorias, setTopCategorias] = useState([]);
   const [chartDataSemana, setChartDataSemana] = useState([]);
+  const [filtroDias, setFiltroDias] = useState(7);
 
   useEffect(() => {
     const cargarDatos = async () => {
@@ -92,9 +93,9 @@ const AdminDashboard = () => {
       setTopMarcas(await getTopByBrand(15));
       setTopCategorias(await getTopByCategory(15));
 
-      // Datos para gráfico de últimos 7 días
+      // Datos para gráfico de ventas según filtro de días
       const dias = [];
-      for (let i = 6; i >= 0; i--) {
+      for (let i = filtroDias - 1; i >= 0; i--) {
         const fecha = new Date(hoy);
         fecha.setDate(hoy.getDate() - i);
         const fechaStr = fecha.toISOString().split('T')[0];
@@ -109,7 +110,7 @@ const AdminDashboard = () => {
     };
 
     cargarDatos();
-  }, []);
+  }, [filtroDias]);
 
   const formatFecha = (fecha) => {
     if (!fecha) return '';
@@ -154,7 +155,7 @@ const AdminDashboard = () => {
             <div className="card-body">
               <div className="d-flex justify-content-between align-items-center">
                 <div>
-                  <p className="text-muted mb-1">Ventas Hoy</p>
+                  <p className="text-muted mb-1">Ventas de hoy</p>
                   <h4 className="mb-0">{formatPrice(stats.ventasHoy)}</h4>
                 </div>
                 <div className="bg-primary bg-opacity-10 p-3 rounded">
@@ -170,7 +171,7 @@ const AdminDashboard = () => {
             <div className="card-body">
               <div className="d-flex justify-content-between align-items-center">
                 <div>
-                  <p className="text-muted mb-1">Ventas Semana</p>
+                  <p className="text-muted mb-1">Ventas de la semana</p>
                   <h4 className="mb-0">{formatPrice(stats.ventasSemana)}</h4>
                 </div>
                 <div className="bg-info bg-opacity-10 p-3 rounded">
@@ -186,7 +187,7 @@ const AdminDashboard = () => {
             <div className="card-body">
               <div className="d-flex justify-content-between align-items-center">
                 <div>
-                  <p className="text-muted mb-1">Ventas Mes</p>
+                  <p className="text-muted mb-1">Ventas del mes</p>
                   <h4 className="mb-0">{formatPrice(stats.ventasMes)}</h4>
                 </div>
                 <div className="bg-success bg-opacity-10 p-3 rounded">
@@ -308,7 +309,6 @@ const AdminDashboard = () => {
             <table className="table table-hover mb-0">
               <thead className="table-light">
                 <tr>
-                  <th>ID</th>
                   <th>Fecha</th>
                   <th>Usuario</th>
                   <th className="text-end">Total</th>
@@ -320,7 +320,6 @@ const AdminDashboard = () => {
                 {ventasRecientes.length > 0 ? (
                   ventasRecientes.map((venta) => (
                     <tr key={venta.id}>
-                      <td>#{venta.id}</td>
                       <td>{formatFecha(venta.fechaVenta || venta.fecha)}</td>
                       <td>{venta.usuarioNombre || 'Usuario no registrado'}</td>
                       <td className="text-end fw-medium">{formatPrice(venta.total)}</td>
@@ -334,7 +333,7 @@ const AdminDashboard = () => {
                   ))
                 ) : (
                   <tr>
-                    <td colSpan="6" className="text-center text-muted py-4">
+                    <td colSpan="5" className="text-center text-muted py-4">
                       No hay ventas recientes
                     </td>
                   </tr>
@@ -359,7 +358,14 @@ const AdminDashboard = () => {
       <div className="row g-4 mb-4">
         <div className="col-lg-8">
           <div className="card h-100">
-            <div className="card-header">Ventas últimos 7 días</div>
+            <div className="card-header d-flex justify-content-between align-items-center">
+              <span>Ventas últimos {filtroDias} días</span>
+              <select className="form-select form-select-sm w-auto" value={filtroDias} onChange={(e) => setFiltroDias(Number(e.target.value))}>
+                <option value={7}>7 días</option>
+                <option value={14}>14 días</option>
+                <option value={30}>30 días</option>
+              </select>
+            </div>
             <div className="card-body">
               <ResponsiveContainer width="100%" height={300}>
                 <BarChart data={chartDataSemana}>
@@ -375,13 +381,13 @@ const AdminDashboard = () => {
         </div>
         <div className="col-lg-4">
           <div className="card h-100">
-            <div className="card-header">Top Marcas</div>
+            <div className="card-header">Top Categorías</div>
             <div className="card-body">
-              {topMarcas.length > 0 ? (
+              {topCategorias.length > 0 ? (
                 <ResponsiveContainer width="100%" height={300}>
                   <PieChart>
-                    <Pie data={topMarcas.map(m => ({ name: m.nombre, value: m.cantidad }))} cx="50%" cy="50%" outerRadius={80} dataKey="value" label>
-                      {topMarcas.map((entry, index) => (
+                    <Pie data={topCategorias.map(c => ({ name: c.nombre, value: c.cantidad }))} cx="50%" cy="50%" outerRadius={80} dataKey="value" label>
+                      {topCategorias.map((entry, index) => (
                         <Cell key={`cell-${index}`} fill={['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8'][index % 5]} />
                       ))}
                     </Pie>

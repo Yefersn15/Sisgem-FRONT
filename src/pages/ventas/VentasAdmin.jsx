@@ -236,7 +236,7 @@ const VentasAdmin = () => {
               >
                 <option value="">Todos los estados</option>
                 <option value="pendiente">Pendiente</option>
-                <option value="por_validar">Por Validar</option>
+                <option value="por_validar">Por validar</option>
                 <option value="completada">Completada</option>
                 <option value="anulada">Anulada</option>
                 <option value="rechazada">Rechazada</option>
@@ -279,7 +279,6 @@ const VentasAdmin = () => {
             <table className="table table-hover">
               <thead>
                 <tr>
-                  <th>ID</th>
                   <th>Fecha</th>
                   <th>Usuario</th>
                   <th className="text-end">Subtotal</th>
@@ -294,7 +293,6 @@ const VentasAdmin = () => {
                 {currentVentas.length > 0 ? (
                   currentVentas.map((venta) => (
                     <tr key={venta.id}>
-                      <td>#{venta.id}</td>
                       <td>{formatFecha(venta.fecha)}</td>
                       <td>{venta.usuarioNombre || 'Usuario no registrado'}</td>
                       <td className="text-end">{formatPrice(venta.subtotal)}</td>
@@ -350,7 +348,7 @@ const VentasAdmin = () => {
                   ))
                 ) : (
                   <tr>
-                    <td colSpan="9" className="text-center text-muted py-4">
+                    <td colSpan="8" className="text-center text-muted py-4">
                       No hay ventas registradas
                     </td>
                   </tr>

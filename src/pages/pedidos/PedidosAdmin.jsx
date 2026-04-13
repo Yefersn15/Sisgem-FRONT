@@ -104,7 +104,7 @@ const PedidosAdmin = () => {
             </div>
             <div className="col-md-2">
               <button className="btn btn-outline-secondary w-100" onClick={() => { setBusqueda(''); setFilterEstado(''); setCurrentPage(1); }}>
-                <i className="fas fa-times me-1"></i>Limpiar
+                <i className="fas fa-eraser me-1"></i>Limpiar
               </button>
             </div>
           </div>
@@ -119,7 +119,6 @@ const PedidosAdmin = () => {
               <thead>
                 <tr>
                   <th>Tipo</th>
-                  <th>ID</th>
                   <th>Fecha</th>
                   <th>Usuario</th>
                   <th className="text-end">Total</th>
@@ -132,7 +131,6 @@ const PedidosAdmin = () => {
                 {currentItems.map(pedido => (
                   <tr key={pedido.id}>
                     <td>{pedido.tipo_venta === 'domicilio' ? 'Domicilio' : 'Mostrador'}</td>
-                    <td>#{pedido.id}</td>
                     <td>{new Date(pedido.fecha).toLocaleString()}</td>
                     <td>{pedido.usuarioNombre || 'Usuario'}</td>
                     <td className="text-end fw-medium">{formatPrice(pedido.total)}</td>
@@ -154,8 +152,8 @@ const PedidosAdmin = () => {
                           pedido.estadoPedido === 'asignado' || pedido.estadoPedido === 'en_preparacion' ? 'bg-warning' :
                           pedido.estadoPedido === 'aprobado' ? 'bg-primary' : 'bg-secondary'
                         }`}>
-                          {pedido.estadoPedido === 'en_preparacion' ? 'En Preparación' : 
-                           pedido.estadoPedido === 'en_camino' ? 'En Camino' :
+                          {pedido.estadoPedido === 'en_preparacion' ? 'En preparación' : 
+                           pedido.estadoPedido === 'en_camino' ? 'En camino' :
                            String(pedido.estadoPedido).charAt(0).toUpperCase() + String(pedido.estadoPedido).slice(1)}
                         </span>
                       )}
@@ -184,7 +182,7 @@ const PedidosAdmin = () => {
                 ))}
                 {currentItems.length === 0 && (
                   <tr>
-                    <td colSpan="8" className="text-center text-muted py-4">
+                    <td colSpan="7" className="text-center text-muted py-4">
                       No hay pedidos registrados
                     </td>
                   </tr>

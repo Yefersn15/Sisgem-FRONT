@@ -61,6 +61,8 @@ const Rutas = () => {
       <Route path="/productos" element={<ProductosList />} />
       <Route path="/productos/nuevo" element={<PrivateRoute module="Productos"><ProductoCreate /></PrivateRoute>} />
       <Route path="/productos/editar/:id" element={<PrivateRoute module="Productos"><ProductoEdit /></PrivateRoute>} />
+      <Route path="/productos/ver/:id" element={<PrivateRoute module="Productos"><ProductoEdit esDetalle={true} /></PrivateRoute>} />
+      <Route path="/productos/:id" element={<PrivateRoute module="Productos"><ProductoEdit esDetalle={true} /></PrivateRoute>} />
       <Route path="/productos/por-categoria/:id" element={<ProductosPorCategoria />} />
       <Route path="/productos/por-marca/:id" element={<ProductosPorMarca />} />
 

@@ -245,10 +245,8 @@ const AdminProductos = () => {
               >
                 <option value="nombre-asc">Nombre (A-Z)</option>
                 <option value="nombre-desc">Nombre (Z-A)</option>
-                <option value="id-asc">ID (menor a mayor)</option>
-                <option value="id-desc">ID (mayor a menor)</option>
-                <option value="stock-asc">Stock (menos a más)</option>
-                <option value="stock-desc">Stock (más a menos)</option>
+                <option value="stock-asc">Stock (menor a mayor)</option>
+                <option value="stock-desc">Stock (mayor a menor)</option>
                 <option value="precio-asc">Precio (menor a mayor)</option>
                 <option value="precio-desc">Precio (mayor a menor)</option>
               </select>
@@ -257,7 +255,7 @@ const AdminProductos = () => {
               <input
                 type="text"
                 className="form-control"
-                placeholder="Buscar por nombre, descripción o ID..."
+                placeholder="Buscar por nombre o descripción..."
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
               />
@@ -267,7 +265,7 @@ const AdminProductos = () => {
                 className="btn btn-outline-secondary w-100"
                 onClick={() => { setQuery(''); setFilterMarca(''); setFilterCategoria(''); setFilterEstado(''); setSortBy('nombre-asc'); }}
               >
-                <i className="fas fa-times me-1"></i>Limpiar
+                <i className="fas fa-eraser me-1"></i>Limpiar
               </button>
             </div>
           </div>
@@ -315,11 +313,18 @@ const AdminProductos = () => {
                           onClick={() => toggleActivo(producto)}
                           title={producto.activo !== false ? 'Desactivar' : 'Activar'}
                         >
-                          <i className={`fas fa-toggle-${producto.activo !== false ? 'on' : 'off'}`}></i>
+                          <i className={`fas fa-toggle-${producto.activo !== false ? 'off' : 'on'}`}></i>
                         </button>
                       </td>
                       <td>
                         <div className="d-flex gap-1">
+                          <button 
+                            className="btn btn-outline-info btn-sm"
+                            onClick={() => navigate(`/productos/${producto.id}`)}
+                            title="Ver detalle"
+                          >
+                            <i className="fas fa-eye"></i>
+                          </button>
                           <button 
                             className="btn btn-outline-primary btn-sm"
                             onClick={() => navigate(`/productos/editar/${producto.id}`)}

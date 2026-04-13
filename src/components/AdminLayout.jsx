@@ -122,7 +122,7 @@ const AdminSidebar = () => {
   return (
     <nav className="app-admin-sidebar p-3" style={{ width: '250px', minHeight: 'calc(100vh - var(--topbar-height) - 50px)' }}>
       <div className="mb-3 d-none d-lg-block">
-        <small className="text-muted text-uppercase">Menú Principal</small>
+        <small className="text-muted fw-bold">Menú principal</small>
       </div>
 
       <ul className="nav flex-column">
@@ -139,7 +139,7 @@ const AdminSidebar = () => {
         {(hasPermission('Inventario') || hasPermission('Productos')) && (
           <>
             <li className="nav-item mt-3">
-              <small className="text-muted text-uppercase d-none d-lg-block">Inventario</small>
+              <small className="text-muted fw-bold d-none d-lg-block">Inventario</small>
             </li>
             <li className="nav-item">
               <Link 
@@ -171,7 +171,7 @@ const AdminSidebar = () => {
         {hasPermission('Ventas') && (
           <>
             <li className="nav-item mt-3">
-              <small className="text-muted text-uppercase d-none d-lg-block">Ventas</small>
+              <small className="text-muted fw-bold d-none d-lg-block">Ventas</small>
             </li>
             <li className="nav-item">
               <Link 
@@ -212,7 +212,7 @@ const AdminSidebar = () => {
         {hasPermission('Proveedores') && (
           <>
             <li className="nav-item mt-3">
-              <small className="text-muted text-uppercase d-none d-lg-block">Proveedores</small>
+              <small className="text-muted fw-bold d-none d-lg-block">Proveedores</small>
             </li>
             <li className="nav-item">
               <Link 
@@ -227,7 +227,7 @@ const AdminSidebar = () => {
 
         {hasPermission('Usuarios') && (
           <li className="nav-item mt-3">
-            <small className="text-muted text-uppercase d-none d-lg-block">Sistema</small>
+            <small className="text-muted fw-bold d-none d-lg-block">Sistema</small>
           </li>
         )}
 

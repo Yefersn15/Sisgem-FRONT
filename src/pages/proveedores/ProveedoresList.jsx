@@ -117,7 +117,7 @@ const ProveedoresList = () => {
         <div className="card-body">
           <div className="row g-3">
             <div className="col-md-4">
-              <label className="form-label small text-muted text-uppercase fw-bold">Buscar</label>
+              <label className="form-label small text-muted fw-bold">Buscar</label>
               <input
                 className="form-control"
                 placeholder="Nombre, documento, contacto, email, rubro..."
@@ -126,7 +126,7 @@ const ProveedoresList = () => {
               />
             </div>
             <div className="col-md-3">
-              <label className="form-label small text-muted text-uppercase fw-bold">Tipo Persona</label>
+              <label className="form-label small text-muted fw-bold">Tipo de persona</label>
               <select className="form-select" value={filterTipo} onChange={(e) => setFilterTipo(e.target.value)}>
                 <option value="">Todos</option>
                 <option value="Natural">Natural</option>
@@ -134,7 +134,7 @@ const ProveedoresList = () => {
               </select>
             </div>
             <div className="col-md-3">
-              <label className="form-label small text-muted text-uppercase fw-bold">Estado</label>
+              <label className="form-label small text-muted fw-bold">Estado</label>
               <select className="form-select" value={filterEstado} onChange={(e) => setFilterEstado(e.target.value)}>
                 <option value="">Todos</option>
                 <option value="Activo">Activos</option>
@@ -163,7 +163,6 @@ const ProveedoresList = () => {
               <table className="table table-hover mb-0">
                 <thead>
                   <tr>
-                    <th>ID</th>
                     <th>Proveedor</th>
                     <th>Documento</th>
                     <th>Contacto</th>
@@ -177,7 +176,6 @@ const ProveedoresList = () => {
                 <tbody>
                   {proveedores.map((p) => (
                     <tr key={p.id} style={{ cursor: 'pointer' }} onClick={() => navigate(`/admin/proveedores/${p.id}`)}>
-                      <td className="text-muted font-monospace">{p.id}</td>
                       <td className="fw-bold">{p.nombre}</td>
                       <td className="font-monospace">{p.tipo_documento} {p.documento}</td>
                       <td>{p.contacto || '—'}</td>
@@ -196,7 +194,7 @@ const ProveedoresList = () => {
                               <i className="fas fa-edit"></i>
                             </button>
                             <button className={`btn btn-sm ${p.estado ? 'btn-outline-warning' : 'btn-outline-success'}`} title={p.estado ? 'Desactivar' : 'Activar'} onClick={() => handleToggle(p.id, p.estado, p.nombre)}>
-                              <i className={`fas fa-toggle-${p.estado ? 'on' : 'off'}`}></i>
+                              <i className={`fas fa-toggle-${p.estado ? 'off' : 'on'}`}></i>
                             </button>
                             <button className="btn btn-sm btn-outline-danger" title="Eliminar" onClick={() => handleDelete(p.id, p.nombre)}>
                               <i className="fas fa-trash"></i>

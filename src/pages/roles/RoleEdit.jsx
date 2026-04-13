@@ -24,6 +24,12 @@ const RoleEdit = () => {
         setEstado(rol.estado !== false);
         setEsDefault(rol.esDefault === true);
         setPermisos(rol.permisos || []);
+        
+        // Verificar si es el rol de administrador
+        if (rol.nombre?.toUpperCase() === 'ADMIN' || rol.nombre?.toUpperCase() === 'ADMINISTRADOR') {
+          alert('El rol de Administrador no puede ser editado.');
+          navigate('/admin/roles');
+        }
       }
       setLoadingData(false);
     });

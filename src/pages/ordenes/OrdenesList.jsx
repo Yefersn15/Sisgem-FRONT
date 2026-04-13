@@ -116,7 +116,7 @@ const OrdenesList = () => {
             </div>
             <div className="col-md-2">
               <button className="btn btn-outline-secondary w-100" onClick={() => { setSearchTerm(''); setFilterEstado(''); }}>
-                <i className="fas fa-times me-1"></i>Limpiar
+                <i className="fas fa-eraser me-1"></i>Limpiar
               </button>
             </div>
           </div>

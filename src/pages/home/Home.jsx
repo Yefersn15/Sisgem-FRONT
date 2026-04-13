@@ -297,8 +297,9 @@ const Home = () => {
                                                 <button
                                                     className="btn btn-primary"
                                                     onClick={() => handleAdd(modalProducto, modalCantidad)}
+                                                    title="Agregar al carrito"
                                                 >
-                                                    <i className="fas fa-cart-plus me-2"></i>
+                                                    <i className="fas fa-cart-plus"></i>
                                                 </button>
                                             </div>
                                         )}

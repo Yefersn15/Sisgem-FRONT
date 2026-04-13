@@ -1,13 +1,11 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { getMarcas, getCategorias, deleteMarca, updateMarca, getProductos, exportMarcas, importMarcas } from '../../services/dataService';
+import { getMarcas, deleteMarca, updateMarca, getProductos, exportMarcas, importMarcas } from '../../services/dataService';
 import useDebounce from '../../hooks/useDebounce';
 
 const AdminMarcas = () => {
   const navigate = useNavigate();
   const [marcas, setMarcas] = useState([]);
-  const [categorias, setCategorias] = useState([]);
-  const [filterCategoria, setFilterCategoria] = useState('');
   const [filterEstado, setFilterEstado] = useState('');
   const [sortBy, setSortBy] = useState('nombre-asc');
   const [query, setQuery] = useState('');
@@ -43,12 +41,6 @@ const AdminMarcas = () => {
 
   useEffect(() => {
     const init = async () => {
-      let cats = await getCategorias() || [];
-      // Extraer datos de la respuesta API { success, data }
-      if (!Array.isArray(cats)) {
-        cats = cats.data ? cats.data : (cats || []);
-      }
-      setCategorias(cats);
       await cargarMarcas();
     };
     init();
@@ -56,7 +48,7 @@ const AdminMarcas = () => {
 
   useEffect(() => {
     cargarMarcas();
-  }, [debounced, filterCategoria, filterEstado, sortBy]);
+  }, [debounced, filterEstado, sortBy]);
 
   const cargarMarcas = () => {
     const cargar = async () => {
@@ -67,23 +59,16 @@ const AdminMarcas = () => {
       }
 
       const productos = await getProductos() || [];
-      const categoriasLocal = await getCategorias() || [];
 
-      // Enriquecer con conteo de productos y nombre de categoría
+      // Enriquecer con conteo de productos
       lista = lista.map(m => {
         const productosMarca = productos.filter(p => String(p.marcaId) === String(m.id));
-        const cat = categoriasLocal.find(c => String(c.id) === String(m.categoriaId));
         return {
           ...m,
           productoCount: productosMarca.length,
-          categoriaNombre: cat?.nombre || 'Sin categoría',
           activa: m.activa !== false
         };
       });
-
-    if (filterCategoria) {
-      lista = lista.filter(m => String(m.categoriaId) === String(filterCategoria));
-    }
 
     if (filterEstado) {
       if (filterEstado === 'activa') {
@@ -195,18 +180,6 @@ const AdminMarcas = () => {
       <div className="card mb-4">
         <div className="card-body">
           <div className="row g-3">
-            <div className="col-md-3">
-              <select 
-                className="form-select" 
-                value={filterCategoria} 
-                onChange={(e) => setFilterCategoria(e.target.value)}
-              >
-                <option value="">Todas las categorías</option>
-                {categorias.map(c => (
-                  <option key={c.id} value={c.id}>{c.nombre}</option>
-                ))}
-              </select>
-            </div>
             <div className="col-md-2">
               <select 
                 className="form-select" 
@@ -232,7 +205,7 @@ const AdminMarcas = () => {
                 <option value="productos-desc">Productos (más a menos)</option>
               </select>
             </div>
-            <div className="col-md-3">
+            <div className="col-md-6">
               <input
                 type="text"
                 className="form-control"
@@ -244,9 +217,9 @@ const AdminMarcas = () => {
             <div className="col-md-2">
               <button
                 className="btn btn-outline-secondary w-100"
-                onClick={() => { setQuery(''); setFilterCategoria(''); setFilterEstado(''); setSortBy('nombre-asc'); }}
+                onClick={() => { setQuery(''); setFilterEstado(''); setSortBy('nombre-asc'); }}
               >
-                <i className="fas fa-times me-1"></i>Limpiar
+                <i className="fas fa-eraser me-1"></i>Limpiar
               </button>
             </div>
           </div>
@@ -262,7 +235,6 @@ const AdminMarcas = () => {
                 <tr>
                   <th>Nombre</th>
                   <th>Descripción</th>
-                  <th>Categoría</th>
                   <th>Productos</th>
                   <th>Estado</th>
                   <th>Acciones</th>
@@ -271,7 +243,7 @@ const AdminMarcas = () => {
               <tbody>
                 {paginatedItems.length === 0 ? (
                   <tr>
-                    <td colSpan="6" className="text-center text-muted py-4">
+                    <td colSpan="5" className="text-center text-muted py-4">
                       No hay marcas que mostrar
                     </td>
                   </tr>
@@ -280,7 +252,6 @@ const AdminMarcas = () => {
                     <tr key={marca.id}>
                       <td className="fw-medium">{marca.nombre}</td>
                       <td><small>{marca.descripcion || '-'}</small></td>
-                      <td>{marca.categoriaNombre}</td>
                       <td>
                         <span className="badge bg-secondary">{marca.productoCount}</span>
                       </td>
@@ -290,7 +261,7 @@ const AdminMarcas = () => {
                           onClick={() => toggleActiva(marca)}
                           title={marca.activa ? 'Desactivar' : 'Activar'}
                         >
-                          <i className={`fas fa-toggle-${marca.activa ? 'on' : 'off'}`}></i>
+                          <i className={`fas fa-toggle-${marca.activa ? 'off' : 'on'}`}></i>
                         </button>
                       </td>
                       <td>

@@ -32,11 +32,14 @@ const PagosList = () => {
   }, [pedidosData, ventasData]);
 
   const ventasConPagos = useMemo(() => {
-    const estadosExcluidos = ['rechazado', 'cancelado', 'anulado'];
-    const abonos = todasLasVentas.filter(venta => 
-      venta.metodoPago === 'Abono' && 
-      !estadosExcluidos.includes(String(venta.estadoPedido || '').toLowerCase())
-    );
+    const estadosExcluidos = ['rechazado', 'cancelado', 'anulado', 'pendiente'];
+    const abonos = todasLasVentas.filter(venta => {
+      const estadoLower = String(venta.estadoPedido || '').toLowerCase();
+      const esExcluido = estadosExcluidos.includes(estadoLower);
+      if (esExcluido) return false;
+      if (venta.metodoPago !== 'Abono') return false;
+      return true;
+    });
     return abonos.map(venta => {
       const shipping = parseFloat(venta.shipping) || 0;
       const totalVenta = (venta.subtotal || 0) + shipping;

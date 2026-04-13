@@ -84,7 +84,7 @@ const MarcasList = () => {
               setSortBy('');
             }}
           >
-            <i className="fas fa-times me-1"></i>Limpiar
+            <i className="fas fa-eraser me-1"></i>Limpiar
           </button>
         </div>
       </form>

@@ -199,7 +199,7 @@ const ProductosList = () => {
               setFilterCategoria('');
             }}
           >
-            <i className="fas fa-times me-1"></i>Limpiar
+            <i className="fas fa-eraser me-1"></i>Limpiar
           </button>
         </div>
       </form>
@@ -328,8 +328,9 @@ const ProductosList = () => {
                               alert('Producto agregado al carrito');
                               closeModal();
                             }}
+                            title="Agregar al carrito"
                           >
-                            <i className="fas fa-cart-plus me-2"></i>Agregar al Carrito
+                            <i className="fas fa-cart-plus"></i>
                           </button>
                         </div>
                       )}

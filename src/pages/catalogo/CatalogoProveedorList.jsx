@@ -240,7 +240,7 @@ const CatalogoProveedorList = () => {
             className="btn btn-outline-secondary w-100" 
             onClick={() => { setSearchQuery(''); navigate(`/proveedores/${proveedorId}/catalogo`); }}
           >
-            <i className="fas fa-times me-1"></i>Limpiar
+            <i className="fas fa-eraser me-1"></i>Limpiar
           </button>
         </div>
       </form>
@@ -314,8 +314,8 @@ const CatalogoProveedorList = () => {
                       <button className="btn btn-sm btn-outline-primary" onClick={(e) => { e.stopPropagation(); navigate(`/catalogo/editar/${i.refId}`); }}>
                         <i className="fas fa-edit"></i> Editar
                       </button>
-                      <button className="btn btn-sm btn-success" onClick={(e) => { e.stopPropagation(); addToProviderCart(proveedorId, i.refId, 1, 'catalogo'); alert('Agregado a orden'); }}>
-                        <i className="fas fa-cart-plus"></i> Agregar
+                      <button className="btn btn-sm btn-success" onClick={(e) => { e.stopPropagation(); addToProviderCart(proveedorId, i.refId, 1, 'catalogo'); alert('Agregado a orden'); }} title="Agregar a orden">
+                        <i className="fas fa-cart-plus"></i>
                       </button>
                     </>
                   ) : (

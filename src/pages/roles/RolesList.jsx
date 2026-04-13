@@ -18,7 +18,11 @@ const RolesList = () => {
     loadData();
   }, []);
 
-  const handleDelete = async (id) => {
+  const handleDelete = async (id, nombre) => {
+    if (nombre?.toUpperCase() === 'ADMIN' || nombre?.toUpperCase() === 'ADMINISTRADOR') {
+      alert('El rol de Administrador no puede ser eliminado.');
+      return;
+    }
     if (window.confirm('¿Eliminar este rol? Los usuarios con este rol perderán acceso.')) {
       try {
         await deleteRol(id);
@@ -63,11 +67,10 @@ const RolesList = () => {
             <table className="table table-hover mb-0">
               <thead>
                 <tr>
-                  <th>ID</th>
                   <th>Nombre</th>
                   <th>Descripción</th>
                   <th>Permisos</th>
-                  <th>Por Defecto</th>
+                  <th>Por defecto</th>
                   <th>Estado</th>
                   <th>Acciones</th>
                 </tr>
@@ -76,7 +79,6 @@ const RolesList = () => {
                 {roles.map(r => (
                   <React.Fragment key={r.id}>
                     <tr>
-                      <td className="font-monospace" style={{ fontSize: '0.75rem' }}>{r.id}</td>
                       <td className="fw-bold">{r.nombre}</td>
                       <td>{r.descripcion || '—'}</td>
                       <td>
@@ -99,7 +101,7 @@ const RolesList = () => {
                           <button
                             className={`btn btn-sm ${showPermisos === r.id ? 'btn-primary' : 'btn-outline-info'}`}
                             onClick={() => setShowPermisos(showPermisos === r.id ? null : r.id)}
-                            title="Ver Permisos"
+                            title="Ver permisos"
                           >
                             <i className="fas fa-key"></i>
                           </button>
@@ -108,7 +110,7 @@ const RolesList = () => {
                           </Link>
                           <button
                             className="btn btn-sm btn-outline-danger"
-                            onClick={() => handleDelete(r.id)}
+                            onClick={() => handleDelete(r.id, r.nombre)}
                             title="Eliminar"
                           >
                             <i className="fas fa-trash"></i>
@@ -118,7 +120,7 @@ const RolesList = () => {
                     </tr>
                     {showPermisos === r.id && (
                       <tr>
-                        <td colSpan="7" className="bg-light">
+                        <td colSpan="6" className="bg-light">
                           <div className="p-3">
                             <h6>Permisos de {r.nombre}:</h6>
                             <div className="row">
@@ -126,7 +128,7 @@ const RolesList = () => {
                                 <div key={categoria} className="col-md-4 mb-3">
                                   <div className="card border-secondary">
                                     <div className="card-header bg-light border-secondary py-2 fw-bold text-dark">
-                                      {categoria.toUpperCase()}
+                                      {categoria.charAt(0).toUpperCase() + categoria.slice(1)}
                                     </div>
                                     <div className="card-body py-2">
                                       {permisos.map(p => (
@@ -139,7 +141,7 @@ const RolesList = () => {
                                             disabled
                                           />
                                           <label className={`form-check-label fw-bold ${getPermisosAsignados(r).includes(p) ? 'text-white bg-success px-2 rounded' : 'text-muted'}`} htmlFor={`${r.id}-${p}`} style={{ fontSize: '0.8rem' }}>
-                                            {p.split('.')[1].replace('read', 'LEER').replace('write', 'ESCRIBIR').replace('delete', 'ELIMINAR')}
+                                            {p.split('.')[1].replace('read', 'Leer').replace('write', 'Escribir').replace('delete', 'Eliminar')}
                                           </label>
                                         </div>
                                       ))}
