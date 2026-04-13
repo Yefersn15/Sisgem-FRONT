@@ -266,6 +266,13 @@ const AdminMarcas = () => {
                       </td>
                       <td>
                         <div className="d-flex gap-1">
+                          <button 
+                            className="btn btn-outline-info btn-sm" 
+                            onClick={() => navigate(`/marcas/${marca.id}`)}
+                            title="Ver detalles"
+                          >
+                            <i className="fas fa-eye"></i>
+                          </button>
                           <Link to={`/marcas/editar/${marca.id}`} className="btn btn-outline-primary btn-sm" title="Editar">
                             <i className="fas fa-edit"></i>
                           </Link>

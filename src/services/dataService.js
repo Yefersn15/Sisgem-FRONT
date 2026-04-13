@@ -199,7 +199,6 @@ const mapApiToProducto = (api) => ({
 const mapCategoriaToApi = (c) => ({
   nombre: c.nombre,
   descripcion: c.descripcion,
-  foto_url: c.imagen,
   estado: c.activa !== undefined ? c.activa : true
 });
 
@@ -208,7 +207,6 @@ const mapApiToCategoria = (api) => ({
   id: api.id,
   nombre: api.nombre,
   descripcion: api.descripcion,
-  imagen: api.fotoUrl || api.foto_url || api.foto_data,
   activo: api.estado
 });
 
@@ -230,7 +228,8 @@ const mapApiToMarca = (api) => ({
   logoUrl: api.logo || api.logo_data,
   sitioWeb: api.sitio_web || '',
   proveedorId: api.proveedor?.id || api.proveedorId || api.proveedor_id,
-  activo: api.estado
+  proveedor: api.proveedor ? { nombre: api.proveedor.nombre } : null,
+  activa: api.estado !== false
 });
 
 // Proveedor: Frontend -> API
