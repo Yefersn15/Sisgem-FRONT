@@ -15,15 +15,31 @@ const ProductoEdit = ({ esDetalle = false }) => {
 
   useEffect(() => {
     const init = async () => {
-      const producto = await getProductoById(id);
-      if (!producto) {
-        setFetchError('Producto no encontrado');
-        return;
+      try {
+        const producto = await getProductoById(id);
+        if (!producto) {
+          setFetchError('Producto no encontrado');
+          return;
+        }
+        setFormData(producto);
+        
+        const [marcasData, categoriasData, proveedoresData] = await Promise.all([
+          getMarcas(),
+          getCategorias(),
+          getProveedores()
+        ]);
+        
+        console.log('Marcas cargadas:', marcasData);
+        console.log('Categorías cargadas:', categoriasData);
+        console.log('Proveedores cargados:', proveedoresData);
+        
+        setMarcas(Array.isArray(marcasData) ? marcasData : []);
+        setCategorias(Array.isArray(categoriasData) ? categoriasData : []);
+        setProveedores(Array.isArray(proveedoresData) ? proveedoresData : []);
+      } catch (err) {
+        console.error('Error cargando datos:', err);
+        setFetchError('Error al cargar datos');
       }
-      setFormData(producto);
-      setMarcas(await getMarcas() || []);
-      setCategorias(await getCategorias() || []);
-      setProveedores(await getProveedores() || []);
     };
     init();
   }, [id]);
@@ -134,17 +150,24 @@ const ProductoEdit = ({ esDetalle = false }) => {
                       <td className="text-muted fw-bold">Descripción:</td>
                       <td>{formData.descripcion}</td>
                     </tr>
-                    <tr>
+<tr>
                       <td className="text-muted fw-bold">Categoría:</td>
-                      <td>{categorias.find(c => String(c.id) === String(formData.categoriaId))?.nombre || 'Sin categoría'}</td>
+                      <td>
+                        {formData.categoria?.nombre || formData.categoriaNombre || categorias.find(c => c.id == formData.categoriaId)?.nombre || 'Sin categoría'}
+                      </td>
                     </tr>
                     <tr>
                       <td className="text-muted fw-bold">Marca:</td>
-                      <td>{marcas.find(m => String(m.id) === String(formData.marcaId))?.nombre || 'Sin marca'}</td>
+                      <td>
+                        {formData.marca?.nombre || formData.marcaNombre || marcas.find(m => m.id == formData.marcaId)?.nombre || 'Sin marca'}
+                      </td>
                     </tr>
                     <tr>
                       <td className="text-muted fw-bold">Proveedor:</td>
-                      <td>{proveedores.find(p => String(p.id) === String(formData.proveedorId))?.nombre || 'Sin proveedor'}</td>
+                      <td>
+                        {formData.proveedor?.nombre || formData.proveedorNombre || 
+                         (formData.proveedorId ? (proveedores.find(p => p.id == formData.proveedorId)?.nombre || 'Sin proveedor') : 'Sin proveedor')}
+                      </td>
                     </tr>
                     <tr>
                       <td className="text-muted fw-bold">Precio:</td>

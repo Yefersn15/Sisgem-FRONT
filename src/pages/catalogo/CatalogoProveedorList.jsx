@@ -36,6 +36,7 @@ const CatalogoProveedorList = () => {
   const { addToProviderCart } = useCart();
   const fileRef = useRef(null);
   const [importStatus, setImportStatus] = useState({});
+  const [productosTienda, setProductosTienda] = useState([]);
 
   const reloadBase = async () => {
     const productos = await getProductos() || [];
@@ -48,7 +49,7 @@ const CatalogoProveedorList = () => {
     const marcaMap = (marcas || []).reduce((acc, m) => { acc[String(m.id)] = m; return acc; }, {});
     const catMap = (categorias || []).reduce((acc, c) => { acc[String(c.id)] = c; return acc; }, {});
 
-    // Productos existentes (ya en tienda)
+    // Productos existentes (ya en tienda) - filtrar solo los de este proveedor
     const productosMapped = (productos || []).filter(p => String(p.proveedorId) === String(proveedorId)).map(p => ({
       source: 'producto',
       refId: p.id,
@@ -58,7 +59,8 @@ const CatalogoProveedorList = () => {
       precioSugerido: p.precioUnitario,
       adicional: p,
       stock: p.stockDisponible,
-      activo: p.activo
+      activo: p.activo,
+      enTienda: true
     }));
 
     // Ítems del catálogo (nuevas ofertas)
@@ -71,10 +73,15 @@ const CatalogoProveedorList = () => {
       precioSugerido: c.precioSugerido,
       adicional: c,
       estadoStock: c.estadoStock,
-      imagen: c.imagen
+      imagen: c.imagen,
+      enTienda: false
     }));
 
     let list = [...productosMapped, ...catalogoMapped];
+
+    // Guardar todos los productos de tienda (sin proveedor, para verificar si ya existen)
+    const tiendaProducts = (productos || []).filter(p => !p.proveedorId);
+    setProductosTienda(tiendaProducts);
 
     // Calcular marcas y categorías disponibles
     const marcasSet = new Set();
@@ -269,71 +276,84 @@ const CatalogoProveedorList = () => {
 
       {/* Lista de productos */}
       {items.length === 0 ? (
-        <div className="alert alert-info">
-          <i className="fas fa-info-circle me-2"></i>
-          No hay items en el catálogo.
+        <div className="alert alert-info text-center">
+          <i className="fas fa-box-open fa-3x mb-3"></i>
+          <h4>No hay productos disponibles</h4>
+          <p>Este proveedor no tiene productos en su catálogo.</p>
         </div>
       ) : (
         <div className="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
-          {items.map(i => (
-            <div key={`${i.source}-${i.refId}`} className="col">
-              <div className="card h-100 shadow-sm producto-card">
-                <div className="position-relative">
-                  {i.adicional && i.adicional.fotoUrl ? (
-                    <img src={i.adicional.fotoUrl} className="card-img-top" alt={i.nombre} style={{ height: '200px', objectFit: 'contain', backgroundColor: '#f8f9fa' }} />
-                  ) : (
-                    <div className="card-img-top d-flex align-items-center justify-content-center bg-light" style={{ height: '200px' }}>
-                      <i className="fas fa-image fa-3x text-muted"></i>
+          {items.map(i => {
+            const enTiendaGeneral = productosTienda.find(p => 
+              p.nombre?.toLowerCase() === i.nombre?.toLowerCase()
+            );
+            const stockEnTiendaGeneral = enTiendaGeneral?.stockDisponible || 0;
+            const esProductoEnTienda = i.source === 'producto';
+            return (
+              <div key={`${i.source}-${i.refId}`} className="col">
+                <div className="card h-100 shadow-sm producto-card productCard" style={{ cursor: 'pointer' }} onClick={() => openModal(i)}>
+                  <div className="position-relative">
+                    {(i.adicional?.fotoUrl || i.adicional?.imagen) ? (
+                      <img src={i.adicional?.fotoUrl || i.adicional?.imagen} className="card-img-top productImage" alt={i.nombre} style={{ height: '250px', objectFit: 'contain', backgroundColor: 'var(--surface2)' }} />
+                    ) : (
+                      <div className="card-img-top d-flex align-items-center justify-content-center bg-light" style={{ height: '200px' }}>
+                        <i className="fas fa-image fa-3x text-muted"></i>
+                      </div>
+                    )}
+                    {esProductoEnTienda ? (
+                      <span className={`badge position-absolute top-0 start-0 m-2 ${(i.adicional?.stockDisponible || 0) > 0 ? 'bg-success' : 'bg-danger'}`}>
+                        <i className="fas fa-store me-1"></i>En tienda: {i.adicional?.stockDisponible || 0}
+                      </span>
+                    ) : stockEnTiendaGeneral > 0 ? (
+                      <span className="badge position-absolute top-0 start-0 m-2 bg-info">
+                        <i className="fas fa-store me-1"></i>También en tienda: {stockEnTiendaGeneral}
+                      </span>
+                    ) : (
+                      <span className={`badge position-absolute top-0 end-0 m-2 ${
+                        i.adicional?.estadoStock === 'Disponible' ? 'bg-warning' : 
+                        i.adicional?.estadoStock === 'No Disponible' ? 'bg-danger' : 'bg-secondary'
+                      }`}>
+                        <i className="fas fa-plus-circle me-1"></i>Nuevo
+                      </span>
+                    )}
+                  </div>
+                  <div className="card-body">
+                    <h5 className="card-title">{i.nombre}</h5>
+                    <p className="card-text text-muted small">{i.adicional?.descripcion || ''}</p>
+                    <div className="d-flex justify-content-between align-items-center">
+                      <strong className="text-primary">{formatPrice(i.precioSugerido || 0)}</strong>
+                      <div className="text-muted small">
+                        <i className="fas fa-tag me-1"></i>{i.categoriaNombre || 'Sin categoría'}
+                      </div>
                     </div>
-                  )}
-                  {i.source === 'producto' ? (
-                    <span className={`badge position-absolute top-0 end-0 m-2 ${i.adicional.stockDisponible > 0 ? 'bg-success' : 'bg-danger'}`}>
-                      {i.adicional.stockDisponible > 0 ? `Stock: ${i.adicional.stockDisponible}` : 'Agotado'}
-                    </span>
-                  ) : (
-                    <span className={`badge position-absolute top-0 end-0 m-2 ${
-                      i.adicional?.estadoStock === 'Disponible' ? 'bg-success' : 
-                      i.adicional?.estadoStock === 'No Disponible' ? 'bg-danger' : 'bg-info'
-                    }`}>
-                      {i.adicional?.estadoStock || 'Desconocido'}
-                    </span>
-                  )}
-                </div>
-                <div className="card-body">
-                  <h5 className="card-title">
-                    {i.nombre} 
-                    {i.source === 'producto' && <small className="text-success ms-2">(En tienda)</small>}
-                  </h5>
-                  <p className="card-text text-muted small">{i.adicional?.descripcion || ''}</p>
-                  <div className="d-flex justify-content-between align-items-center">
-                    <strong className="text-primary">{formatPrice(i.precioSugerido || 0)}</strong>
+                    <div className="mt-2">
+                      {i.categoriaNombre && (
+                        <button 
+                          className="badge bg-secondary me-1 text-decoration-none" 
+                          onClick={(e) => { e.stopPropagation(); navigate(`/proveedores/${proveedorId}/catalogo?categoria=${encodeURIComponent(i.categoriaNombre)}`); }}
+                        >
+                          {i.categoriaNombre}
+                        </button>
+                      )}
+                      {i.marcaNombre && (
+                        <button 
+                          className="badge bg-light text-dark me-1" 
+                          onClick={(e) => { e.stopPropagation(); navigate(`/proveedores/${proveedorId}/catalogo?marca=${encodeURIComponent(i.marcaNombre)}`); }}
+                        >
+                          {i.marcaNombre}
+                        </button>
+                      )}
+                    </div>
                   </div>
-                  <div className="mt-2">
-                    <button 
-                      className="badge bg-secondary me-1 text-decoration-none" 
-                      onClick={(e) => { e.stopPropagation(); navigate(`/proveedores/${proveedorId}/catalogo?categoria=${encodeURIComponent(i.categoriaNombre || '')}`); }}
-                    >
-                      {i.categoriaNombre}
-                    </button>
-                    <button 
-                      className="badge bg-light text-dark me-1" 
-                      onClick={(e) => { e.stopPropagation(); navigate(`/proveedores/${proveedorId}/catalogo?marca=${encodeURIComponent(i.marcaNombre || '')}`); }}
-                    >
-                      {i.marcaNombre}
+                  <div className="card-footer bg-transparent border-0">
+                    <button className="btn btn-sm btn-primary w-100" onClick={(e) => { e.stopPropagation(); openPedirStockModal(i); }}>
+                      <i className="fas fa-cart-plus me-1"></i>Pedir Stock
                     </button>
                   </div>
-                </div>
-                <div className="card-footer bg-transparent border-0 d-flex justify-content-between">
-                  <button className="btn btn-sm btn-outline-primary" onClick={(e) => { e.stopPropagation(); openModal(i); }}>
-                    <i className="fas fa-eye"></i> Ver
-                  </button>
-                  <button className="btn btn-sm btn-primary" onClick={(e) => { e.stopPropagation(); openPedirStockModal(i); }}>
-                    <i className="fas fa-cart-plus me-1"></i>Pedir Stock
-                  </button>
                 </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
 
@@ -369,12 +389,10 @@ const CatalogoProveedorList = () => {
                             
                             {selectedProducto.source === 'producto' ? (
                               <>
-                                <p>
-                                  <strong>Stock en Tienda:</strong>{' '}
-                                  <span className={`badge ${(detail.stockDisponible || 0) > 0 ? 'bg-success' : 'bg-danger'}`}>
-                                    {detail.stockDisponible || 0} unidades
-                                  </span>
-                                </p>
+                                <div className="alert alert-success mb-3">
+                                  <i className="fas fa-store me-2"></i>
+                                  <strong>Producto ya en tienda</strong> - Stock actual: {detail.stockDisponible || 0} unidades
+                                </div>
                                 <p>
                                   <strong>Estado:</strong>{' '}
                                   <span className={`badge ${(detail.activo || detail.activo === undefined) ? 'bg-success' : 'bg-secondary'}`}>
@@ -384,6 +402,20 @@ const CatalogoProveedorList = () => {
                               </>
                             ) : (
                               <>
+                                {(() => {
+                                  const enTienda = productosTienda.find(p => p.nombre?.toLowerCase() === selectedProducto.nombre?.toLowerCase());
+                                  return enTienda ? (
+                                    <div className="alert alert-info mb-3">
+                                      <i className="fas fa-store me-2"></i>
+                                      <strong>También en tienda</strong> - Stock: {enTienda.stockDisponible || 0} unidades
+                                    </div>
+                                  ) : (
+                                    <div className="alert alert-warning mb-3">
+                                      <i className="fas fa-plus-circle me-2"></i>
+                                      <strong>Nuevo producto</strong> - No disponible aún en tienda
+                                    </div>
+                                  );
+                                })()}
                                 <p>
                                   <strong>Estado stock:</strong>{' '}
                                   <span className={`badge ${
@@ -443,10 +475,11 @@ const CatalogoProveedorList = () => {
                   <div className="col-md-5 text-center">
                     {(() => {
                       const detail = selectedProducto.source === 'producto' ? selectedProducto.adicional : (selectedProducto.catalogItem || selectedProducto.adicional || {});
-                      return detail.fotoUrl ? (
-                        <img src={detail.fotoUrl} className="img-fluid rounded shadow mb-3" alt={detail.nombre || selectedProducto.nombre} style={{ maxHeight: '300px', width: 'auto', objectFit: 'contain' }} />
+                      const imgUrl = detail?.fotoUrl || detail?.imagen;
+                      return imgUrl ? (
+                        <img src={imgUrl} className="img-fluid rounded shadow mb-3 productImage" alt={detail.nombre || selectedProducto.nombre} style={{ maxHeight: '300px', width: 'auto', objectFit: 'contain' }} />
                       ) : (
-                        <div className="text-muted d-flex align-items-center justify-content-center" style={{ height: '200px' }}>
+                        <div className="text-muted d-flex align-items-center justify-content-center bg-light" style={{ height: '200px' }}>
                           <div>
                             <i className="fas fa-image fa-5x mb-3 d-block"></i>
                             <span>Sin imagen</span>
