@@ -77,7 +77,7 @@ export const AuthProvider = ({ children }) => {
   const hasPermission = (moduleName) => {
     if (!user) return false;
     // El rol de ADMIN/Administrador tiene todos los permisos
-    if (role?.nombre === 'ADMIN' || role?.nombre === 'Administrador' || user?.rol_id === 5) return true;
+    if (role?.nombre === 'ADMIN' || role?.nombre === 'Administrador' || user?.rol_id === 5 || user?.rol === 'ADMIN' || user?.rol === 'Administrador') return true;
     // Verificar en módulos/permisos
     return modules.some(m => m.nombre === moduleName || m === moduleName);
   };

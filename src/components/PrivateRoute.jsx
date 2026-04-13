@@ -25,7 +25,7 @@ const PrivateRoute = ({ children, module, requireGuest }) => {
   }
   
   // Verificar si es administrador
-  const isAdmin = role?.nombre === 'ADMIN' || role?.nombre === 'Administrador' || user.rol_id === 5;
+  const isAdmin = role?.nombre === 'ADMIN' || role?.nombre === 'Administrador' || user?.rol_id === 5 || user?.rol === 'ADMIN' || user?.rol === 'Administrador';
   
   // Si es admin, permitir acceso a todo
   if (isAdmin) {
