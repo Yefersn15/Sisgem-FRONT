@@ -20,16 +20,24 @@ const OrdenCreate = () => {
 
   // Cargar items del carrito cuando cambia el proveedor
   useEffect(() => {
-    if (selectedProveedorId) {
-      try {
-        const items = getCartDetailsFromContext ? getCartDetailsFromContext(selectedProveedorId) : getProviderCartItemsWithDetails(selectedProveedorId);
-        setCartItems(items.map(item => ({ ...item })));
-      } catch (e) {
+    const loadCart = async () => {
+      if (selectedProveedorId) {
+        try {
+          let items = [];
+          if (getCartDetailsFromContext) {
+            items = getCartDetailsFromContext(selectedProveedorId);
+          } else {
+            items = await getProviderCartItemsWithDetails(selectedProveedorId);
+          }
+          setCartItems(items.map(item => ({ ...item })));
+        } catch (e) {
+          setCartItems([]);
+        }
+      } else {
         setCartItems([]);
       }
-    } else {
-      setCartItems([]);
-    }
+    };
+    loadCart();
   }, [selectedProveedorId]);
 
   useEffect(() => {
@@ -59,7 +67,7 @@ const OrdenCreate = () => {
     return sum + (precio * (item.cantidad || 0));
   }, 0);
 
-  const handleCreateAndSend = () => {
+  const handleCreateAndSend = async () => {
     const proveedor = proveedores.find(p => String(p.id) === String(selectedProveedorId));
     
     if (!proveedor) {
@@ -79,7 +87,7 @@ const OrdenCreate = () => {
       return { productoId: '', nombre: item.catalogItem.nombre, cantidad: item.cantidad, precioUnitario: item.catalogItem.precioSugerido };
     });
 
-    const orden = createOrdenCompra({ 
+    const orden = await createOrdenCompra({ 
       proveedorId: selectedProveedorId, 
       proveedor: proveedor.nombre,
       items: ordenItems, 

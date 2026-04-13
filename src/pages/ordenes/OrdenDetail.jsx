@@ -23,18 +23,27 @@ const OrdenDetail = () => {
   const [saved, setSaved] = useState(false);
 
   useEffect(() => {
-    const o = getOrdenCompraById(id);
-    if (!o) {
-      alert('Orden no encontrada');
-      navigate('/ordenes');
-      return;
-    }
-    setOrden(o);
-    setForm({ ...o });
-    setItems([...(o.items || [])]);
-    
-    const prov = getProveedorById(o.proveedorId);
-    setProveedor(prov);
+    const load = async () => {
+      try {
+        const o = await getOrdenCompraById(id);
+        if (!o) {
+          alert('Orden no encontrada');
+          navigate('/ordenes');
+          return;
+        }
+        setOrden(o);
+        setForm({ ...o });
+        setItems([...(o.items || [])]);
+        
+        if (o.proveedorId) {
+          const prov = await getProveedorById(o.proveedorId).catch(() => null);
+          setProveedor(prov);
+        }
+      } catch (err) {
+        console.error('Error loading orden:', err);
+      }
+    };
+    load();
   }, [id]);
 
   useEffect(() => {
@@ -48,13 +57,37 @@ const OrdenDetail = () => {
     setTimeout(() => { setSaved(false); setEditMode(false); loadOrden(); }, 1200);
   };
 
-  const loadOrden = () => {
-    const o = getOrdenCompraById(id);
-    if (o) {
-      setOrden(o);
-      setForm({ ...o });
-      setItems([...(o.items || [])]);
+  const loadOrden = async () => {
+    try {
+      const o = await getOrdenCompraById(id);
+      if (o) {
+        setOrden(o);
+        setForm({ ...o });
+        setItems([...(o.items || [])]);
+      }
+    } catch (err) {
+      console.error('Error loading orden:', err);
     }
+  };
+
+  const handleSave = async () => {
+    const total = items.reduce((s, it) => s + (it.subtotal || 0), 0);
+    await updateOrdenCompra(id, { ...form, items, total });
+    setSaved(true);
+    setTimeout(() => { setSaved(false); setEditMode(false); loadOrden(); }, 1200);
+  };
+
+  const handleAnular = async () => {
+    await updateOrdenCompra(id, { estado: 'Anulada', motivoAnulacion: motivo });
+    setAnularModal(false);
+    setMotivo('');
+    loadOrden();
+  };
+
+  const handleCambiarEstado = async () => {
+    await updateOrdenCompra(id, { estado: nuevoEstado });
+    setEstadoModal(false);
+    loadOrden();
   };
 
   const handleAnular = () => {
@@ -113,7 +146,7 @@ const OrdenDetail = () => {
             <>
               {orden.estado !== 'Anulada' && (
                 <>
-                  <button className="btn btn-outline-secondary btn-sm" onClick={() => setEditMode(true)}>
+                  <button className="btn btn-outline-primary btn-sm" onClick={() => setEditMode(true)}>
                     <i className="fas fa-edit me-1"></i>Editar
                   </button>
                   <button className="btn btn-outline-primary btn-sm" onClick={() => { setEstadoModal(true); setNuevoEstado(orden.estado); }}>

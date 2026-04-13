@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { createCatalogoItem, getProveedores, createMarcaAndLinkProveedor, createCategoria, getMarcas, getCategorias, getMarcasByProveedor } from '../../services/dataService';
+import { getProveedores, createMarcaAndLinkProveedor, createCategoria, getMarcas, getCategorias, getMarcasByProveedor } from '../../services/dataService';
 
 const CatalogoCreate = () => {
   const { id: proveedorIdParam } = useParams();
@@ -32,13 +32,8 @@ const CatalogoCreate = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    try {
-      createCatalogoItem(form);
-      alert('Item de catálogo creado');
-      navigate(`/proveedores/${form.proveedorId}/catalogo`);
-    } catch (err) {
-      alert(err.message || 'Error creando item');
-    }
+    alert('La entidad Catálogo ya no existe. Por favor, cree productos directamente desde la gestión de productos.');
+    navigate(`/admin/productos/nuevo?proveedorId=${form.proveedorId}`);
   };
 
   const handleCrearMarca = () => {
@@ -73,7 +68,12 @@ const CatalogoCreate = () => {
 
   return (
     <div className="container my-4">
-      <h3>Agregar Item al Catálogo</h3>
+      <div className="alert alert-warning">
+        <h4>Catálogo de proveedor descontinuado</h4>
+        <p>La entidad Catálogo ya no existe. Ahora los productos de los proveedores se gestionan directamente desde la sección de Productos.</p>
+        <p className="mb-0">Por favor, cree los productos desde: <strong>Admin → Productos → Nuevo Producto</strong></p>
+      </div>
+      <h3>Agregar Item al Catálogo (Descontinuado)</h3>
       <form onSubmit={handleSubmit}>
         <div className="row g-3">
           <div className="col-md-6">
@@ -85,46 +85,45 @@ const CatalogoCreate = () => {
           </div>
           <div className="col-md-6">
             <label className="form-label">Nombre</label>
-            <input className="form-control" name="nombre" value={form.nombre} onChange={handleChange} />
+            <input className="form-control" name="nombre" value={form.nombre} onChange={handleChange} disabled />
           </div>
           <div className="col-12">
             <label className="form-label">Descripción</label>
-            <textarea className="form-control" name="descripcion" value={form.descripcion} onChange={handleChange}></textarea>
+            <textarea className="form-control" name="descripcion" value={form.descripcion} onChange={handleChange} disabled></textarea>
           </div>
           <div className="col-md-3">
             <label className="form-label">Precio sugerido</label>
-            <input className="form-control" name="precioSugerido" value={form.precioSugerido} onChange={handleChange} />
+            <input className="form-control" name="precioSugerido" value={form.precioSugerido} onChange={handleChange} disabled />
           </div>
-          {/* Campo SKU proveedor eliminado para ahorrar espacio y evitar dependencia */}
           <div className="col-md-4">
             <label className="form-label">Categoría</label>
             <div className="input-group">
-              <select className="form-select" onChange={(e) => setForm(prev => ({ ...prev, categoriaNombre: e.target.value }))} value={form.categoriaNombre}>
+              <select className="form-select" onChange={(e) => setForm(prev => ({ ...prev, categoriaNombre: e.target.value }))} value={form.categoriaNombre} disabled>
                 <option value="">-- Seleccione existente --</option>
                 {categorias.map(c => <option key={c.id} value={c.nombre}>{c.nombre}</option>)}
               </select>
-              <input className="form-control" name="categoriaNombre" value={form.categoriaNombre} onChange={handleChange} placeholder="o escriba nueva" />
-              <button type="button" className="btn btn-primary" onClick={handleCrearCategoria}>Crear</button>
+              <input className="form-control" name="categoriaNombre" value={form.categoriaNombre} onChange={handleChange} placeholder="o escriba nueva" disabled />
+              <button type="button" className="btn btn-primary" onClick={handleCrearCategoria} disabled>Crear</button>
             </div>
           </div>
           <div className="col-md-4">
             <label className="form-label">Marca</label>
             <div className="input-group">
-              <select className="form-select" onChange={(e) => setForm(prev => ({ ...prev, marcaNombre: e.target.value }))} value={form.marcaNombre}>
+              <select className="form-select" onChange={(e) => setForm(prev => ({ ...prev, marcaNombre: e.target.value }))} value={form.marcaNombre} disabled>
                 <option value="">-- Seleccione existente --</option>
                 {marcas.map(m => <option key={m.id} value={m.nombre}>{m.nombre}</option>)}
               </select>
-              <input className="form-control" name="marcaNombre" value={form.marcaNombre} onChange={handleChange} placeholder="o escriba nueva" />
-              <button type="button" className="btn btn-primary" onClick={handleCrearMarca}>Crear</button>
+              <input className="form-control" name="marcaNombre" value={form.marcaNombre} onChange={handleChange} placeholder="o escriba nueva" disabled />
+              <button type="button" className="btn btn-primary" onClick={handleCrearMarca} disabled>Crear</button>
             </div>
           </div>
           <div className="col-md-6">
             <label className="form-label">Foto URL</label>
-            <input className="form-control" name="fotoUrl" value={form.fotoUrl} onChange={handleChange} />
+            <input className="form-control" name="fotoUrl" value={form.fotoUrl} onChange={handleChange} disabled />
           </div>
           <div className="col-md-3">
             <label className="form-label">Estado stock</label>
-            <select className="form-select" name="estadoStock" value={form.estadoStock} onChange={handleChange}>
+            <select className="form-select" name="estadoStock" value={form.estadoStock} onChange={handleChange} disabled>
               <option value="Disponible">Disponible</option>
               <option value="No Disponible">No Disponible</option>
               <option value="De temporada">De temporada</option>
@@ -134,12 +133,13 @@ const CatalogoCreate = () => {
           </div>
           <div className="col-md-3 d-flex align-items-center">
             <div className="form-check mt-2">
-              <input className="form-check-input" type="checkbox" name="activo" checked={form.activo} onChange={handleChange} />
+              <input className="form-check-input" type="checkbox" name="activo" checked={form.activo} onChange={handleChange} disabled />
               <label className="form-check-label">Activo</label>
             </div>
           </div>
-          <div className="col-12 d-flex justify-content-end">
-            <button className="btn btn-primary">Crear</button>
+          <div className="col-12 d-flex justify-content-end gap-2">
+            <button type="button" className="btn btn-secondary" onClick={() => navigate(-1)}>Volver</button>
+            <button type="submit" className="btn btn-primary">Ir a Productos</button>
           </div>
         </div>
       </form>

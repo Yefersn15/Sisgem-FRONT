@@ -6,16 +6,38 @@ import { useCart } from '../../context/CartContext';
 const OrdenCompraDraft = () => {
   const { id: proveedorId } = useParams();
   const navigate = useNavigate();
-  const proveedor = getProveedorById(proveedorId) || null;
+  const [proveedor, setProveedor] = useState(null);
   const { getProviderCartItemsWithDetails: getCartDetailsFromContext, clearProviderCart: clearProviderCartContext } = useCart();
   const [items, setItems] = useState([]);
   const [notas, setNotas] = useState('');
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // preferir la versión del context si existe, sino usar el servicio
-    let details = [];
-    try { details = getCartDetailsFromContext ? getCartDetailsFromContext(proveedorId) : getProviderCartItemsWithDetails(proveedorId); } catch (e) { details = getProviderCartItemsWithDetails(proveedorId); }
-    setItems(details.map(d => ({ ...d })));
+    const loadData = async () => {
+      try {
+        // Cargar proveedor
+        const prov = await getProveedorById(proveedorId).catch(() => null);
+        setProveedor(prov);
+        
+        // Cargar items del carrito
+        let details = [];
+        try { 
+          if (getCartDetailsFromContext) {
+            details = getCartDetailsFromContext(proveedorId);
+          } else {
+            details = await getProviderCartItemsWithDetails(proveedorId);
+          }
+        } catch (e) { 
+          details = await getProviderCartItemsWithDetails(proveedorId); 
+        }
+        setItems(details.map(d => ({ ...d })));
+      } catch (err) {
+        console.error('Error loading data:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadData();
   }, [proveedorId]);
 
   const total = items.reduce((s, it) => s + ((it.source === 'producto' ? (it.producto?.precioUnitario || 0) : (it.catalogItem?.precioSugerido || 0)) * (it.cantidad || 0)), 0);
@@ -26,7 +48,7 @@ const OrdenCompraDraft = () => {
 
   const removeItem = (idx) => setItems(prev => prev.filter((_, i) => i !== idx));
 
-  const handleCreateAndSend = () => {
+  const handleCreateAndSend = async () => {
     if (!proveedor) return alert('Proveedor no encontrado');
     if (items.length === 0) return alert('No hay items en la orden');
 
@@ -35,11 +57,14 @@ const OrdenCompraDraft = () => {
       if (it.source === 'producto') {
         return { productoId: it.producto.id, nombre: it.producto.nombre, cantidad: it.cantidad, precioUnitario: it.producto.precioUnitario };
       }
-      // catálogo
-      return { productoId: '', nombre: it.catalogItem.nombre, cantidad: it.cantidad, precioUnitario: it.catalogItem.precioSugerido };
+      // catálogo (deprecated)
+      return { productoId: '', nombre: it.catalogItem?.nombre || 'Unknown', cantidad: it.cantidad, precioUnitario: it.catalogItem?.precioSugerido || 0 };
     });
 
-    const orden = createOrdenCompra({ proveedorId, items: ordenItems, notas });
+    const orden = await createOrdenCompra({ proveedorId, items: ordenItems, notas });
+    if (!orden || !orden.id) {
+      return alert('Error al crear la orden');
+    }
 
     // Preparar mensaje de WhatsApp
     const phoneRaw = ((proveedor.telefonoPais || '') + (proveedor.telefono || '')).replace(/\D/g, '');
@@ -52,10 +77,11 @@ const OrdenCompraDraft = () => {
     let msg = `Orden de Compra - ${proveedor.nombre || ''}\n`;
     msg += `ID orden: ${orden.id}\n\n`;
     msg += `Items:\n`;
-    orden.items.forEach(it => {
+    ordenItems.forEach(it => {
       msg += `- ${it.cantidad} x ${it.nombre} @ $${Math.round(it.precioUnitario).toLocaleString('es-CO', { minimumFractionDigits: 0 })}\n`;
     });
-    msg += `\nTotal: $${Math.round(orden.total).toLocaleString('es-CO', { minimumFractionDigits: 0 })}\n`;
+    const total = ordenItems.reduce((s, it) => s + (it.cantidad * it.precioUnitario), 0);
+    msg += `\nTotal: $${Math.round(total).toLocaleString('es-CO', { minimumFractionDigits: 0 })}\n`;
     if (notas) msg += `Notas: ${notas}\n`;
 
     // Limpiar carrito del proveedor

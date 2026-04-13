@@ -18,33 +18,35 @@ const OrdenesList = () => {
     cargar();
   }, [filterEstado, searchTerm]);
 
-  const cargar = () => {
-    (async () => {
-      const list = getOrdenesCompra();
+  const cargar = async () => {
+    try {
+      const list = await getOrdenesCompra();
       const provs = await getProveedores() || [];
       setProveedores(provs);
     
-    let filtered = [...list];
+      let filtered = [...list];
     
-    if (filterEstado) {
-      filtered = filtered.filter(o => o.estado === filterEstado);
+      if (filterEstado) {
+        filtered = filtered.filter(o => o.estado === filterEstado);
+      }
+    
+      if (searchTerm) {
+        const q = searchTerm.toLowerCase();
+        filtered = filtered.filter(o => {
+          const prov = provs.find(p => String(p.id) === String(o.proveedorId));
+          const provNombre = prov ? prov.nombre.toLowerCase() : '';
+          return (
+            (o.numeroOrden || '').toLowerCase().includes(q) ||
+            provNombre.includes(q) ||
+            (o.notas || '').toLowerCase().includes(q)
+          );
+        });
+      }
+    
+      setOrdenes(filtered);
+    } catch (err) {
+      console.error('Error cargando órdenes:', err);
     }
-    
-    if (searchTerm) {
-      const q = searchTerm.toLowerCase();
-      filtered = filtered.filter(o => {
-        const prov = provs.find(p => String(p.id) === String(o.proveedorId));
-        const provNombre = prov ? prov.nombre.toLowerCase() : '';
-        return (
-          (o.numeroOrden || '').toLowerCase().includes(q) ||
-          provNombre.includes(q) ||
-          (o.notas || '').toLowerCase().includes(q)
-        );
-      });
-    }
-    
-    setOrdenes(filtered);
-    })();
   };
 
   const handleGenerarReporte = () => {
@@ -143,7 +145,7 @@ const OrdenesList = () => {
               </thead>
               <tbody>
                 {ordenes.map((o) => (
-                  <tr key={o.id} style={{ cursor: 'pointer' }} onClick={() => navigate(`/ordenes/${o.id}`)}>
+                  <tr key={o.id}>
                     <td className="font-monospace fw-bold">{o.numeroOrden}</td>
                     <td>{getProveedorNombre(o.proveedorId)}</td>
                     <td>{new Date(o.fechaCreacion).toLocaleDateString('es-CO')}</td>
@@ -154,10 +156,13 @@ const OrdenesList = () => {
                         {o.estado}
                       </span>
                     </td>
-                    <td onClick={(e) => e.stopPropagation()}>
+                    <td>
                       <div className="d-flex gap-1">
-                        <button className="btn btn-sm btn-outline-primary" title="Ver" onClick={() => navigate(`/ordenes/${o.id}`)}>
+                        <button className="btn btn-sm btn-outline-info" title="Ver" onClick={() => navigate(`/ordenes/${o.id}`)}>
                           <i className="fas fa-eye"></i>
+                        </button>
+                        <button className="btn btn-sm btn-outline-primary" title="Editar" onClick={() => navigate(`/ordenes/${o.id}/editar`)}>
+                          <i className="fas fa-edit"></i>
                         </button>
                       </div>
                     </td>

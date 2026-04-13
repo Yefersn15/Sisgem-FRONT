@@ -1,11 +1,10 @@
 import { useEffect, useState, useRef } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
+import * as XLSX from 'xlsx';
+import { saveAs } from 'file-saver';
 import useDebounce from '../../hooks/useDebounce';
 import { useCart } from '../../context/CartContext';
 import { 
-  getCatalogoByProveedor, 
-  exportCatalogoProveedor, 
-  importCatalogoProveedor, 
   getProductos, 
   getMarcaById, 
   getCategoriaById, 
@@ -38,7 +37,6 @@ const CatalogoProveedorList = () => {
   const [importStatus, setImportStatus] = useState({});
 
   const reloadBase = async () => {
-    const catalogo = await getCatalogoByProveedor(proveedorId) || [];
     const productos = await getProductos() || [];
     const marcas = await getMarcas() || [];
     const categorias = await getCategorias() || [];
@@ -58,17 +56,8 @@ const CatalogoProveedorList = () => {
       adicional: p
     }));
 
-    const catalogoMapped = (catalogo || []).map(it => ({
-      source: 'catalogo',
-      refId: it.id,
-      nombre: it.nombre,
-      marcaNombre: it.marcaNombre || '',
-      categoriaNombre: it.categoriaNombre || '',
-      precioSugerido: it.precioSugerido,
-      adicional: it
-    }));
-
-    let list = [...catalogoMapped, ...productosMapped];
+    // Solo productos del proveedor (no hay catálogo separado)
+    let list = [...productosMapped];
 
     // Calcular marcas y categorías disponibles
     const marcasSet = new Set();
@@ -86,23 +75,29 @@ const CatalogoProveedorList = () => {
 
   useEffect(() => { reloadBase(); }, [proveedorId]);
 
-  const handleExport = () => exportCatalogoProveedor(proveedorId);
+  const handleExport = async () => {
+    const productos = await getProductos() || [];
+    const filtered = productos.filter(p => String(p.proveedorId) === String(proveedorId));
+    const data = filtered.map(p => ({
+      Id: p.id,
+      Nombre: p.nombre,
+      Precio: p.precioUnitario,
+      Stock: p.stockDisponible,
+      Categoria: p.categoriaNombre,
+      Marca: p.marcaNombre,
+    }));
+    const worksheet = XLSX.utils.json_to_sheet(data);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Productos');
+    const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+    const blob = new Blob([excelBuffer], { type: 'application/octet-stream' });
+    saveAs(blob, `productos_proveedor_${proveedorId}.xlsx`);
+  };
 
   const handleImport = (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    importCatalogoProveedor(file, 
-      async () => { 
-        setImportStatus({ message: 'Importación exitosa', type: 'success' }); 
-        await reloadBase();
-        if (fileRef.current) fileRef.current.value = ''; 
-        setTimeout(() => setImportStatus({}), 3000); 
-      }, 
-      (err) => { 
-        setImportStatus({ message: 'Error importando', type: 'danger' }); 
-        setTimeout(() => setImportStatus({}), 5000); 
-      }
-    );
+    // La importación de catálogo ya no existe - mostrar mensaje
+    setImportStatus({ message: 'Importación de catálogo no disponible. Use importación de productos.', type: 'warning' });
+    setTimeout(() => setImportStatus({}), 5000);
   };
 
   // Aplicar filtros por query params: ?marca=... o ?categoria=...
@@ -262,7 +257,7 @@ const CatalogoProveedorList = () => {
         <div className="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
           {items.map(i => (
             <div key={`${i.source}-${i.refId}`} className="col">
-              <div className="card h-100 shadow-sm producto-card" style={{ cursor: 'pointer' }} onClick={() => openModal(i)}>
+              <div className="card h-100 shadow-sm producto-card">
                 <div className="position-relative">
                   {i.adicional && i.adicional.fotoUrl ? (
                     <img src={i.adicional.fotoUrl} className="card-img-top" alt={i.nombre} style={{ height: '200px', objectFit: 'contain', backgroundColor: '#f8f9fa' }} />
@@ -309,25 +304,12 @@ const CatalogoProveedorList = () => {
                   </div>
                 </div>
                 <div className="card-footer bg-transparent border-0 d-flex justify-content-between">
-                  {i.source === 'catalogo' ? (
-                    <>
-                      <button className="btn btn-sm btn-outline-primary" onClick={(e) => { e.stopPropagation(); navigate(`/catalogo/editar/${i.refId}`); }}>
-                        <i className="fas fa-edit"></i> Editar
-                      </button>
-                      <button className="btn btn-sm btn-success" onClick={(e) => { e.stopPropagation(); addToProviderCart(proveedorId, i.refId, 1, 'catalogo'); alert('Agregado a orden'); }} title="Agregar a orden">
-                        <i className="fas fa-cart-plus"></i>
-                      </button>
-                    </>
-                  ) : (
-                    <>
-                      <button className="btn btn-sm btn-outline-primary" onClick={(e) => { e.stopPropagation(); openModal(i); }}>
-                        <i className="fas fa-eye"></i> Ver
-                      </button>
-                      <button className="btn btn-sm btn-warning" onClick={(e) => { e.stopPropagation(); openPedirStockModal(i); }}>
-                        <i className="fas fa-plus"></i> Pedir Stock
-                      </button>
-                    </>
-                  )}
+                  <button className="btn btn-sm btn-outline-primary" onClick={(e) => { e.stopPropagation(); openModal(i); }}>
+                    <i className="fas fa-eye"></i> Ver
+                  </button>
+                  <button className="btn btn-sm btn-primary" onClick={(e) => { e.stopPropagation(); openPedirStockModal(i); }}>
+                    <i className="fas fa-cart-plus me-1"></i>Pedir Stock
+                  </button>
                 </div>
               </div>
             </div>
@@ -426,10 +408,10 @@ const CatalogoProveedorList = () => {
                                 }}
                               />
                               <button 
-                                className="btn btn-outline-primary" 
+                                className="btn btn-primary" 
                                 onClick={() => handleAddToOrder(selectedProducto.refId || detail.id, modalCantidad, selectedProducto.source)}
                               >
-                                <i className="fas fa-shopping-cart me-2"></i>
+                                <i className="fas fa-cart-plus me-2"></i>
                                 Agregar a Orden
                               </button>
                             </div>

@@ -1179,9 +1179,13 @@ export const getCatalogo = async () => {
   return Array.isArray(data) ? data : [];
 };
 
+// Nota: el backend no tiene /api/catalogo/proveedor/:id
+// Usar getProductos() y filtrar por proveedorId en el frontend
 export const getCatalogoByProveedor = async (proveedorId) => {
-  const data = await request(`/api/catalogo/proveedor/${proveedorId}`);
-  return Array.isArray(data) ? data : [];
+  // El backend no tiene esta ruta - devolver array vacío
+  // El componente CatalogoProveedorList debe usar getProductos().filter() en su lugar
+  console.warn('getCatalogoByProveedor: endpoint no existe en backend, use getProductos().filter(p => p.proveedorId === id)');
+  return [];
 };
 
 // ----------------------------------------------------------------------
@@ -1425,14 +1429,10 @@ export const clearProviderCart = (proveedorId) => {
 export const getProviderCartItemsWithDetails = async (proveedorId) => {
   const cart = getProviderCart(proveedorId);
   const productos = await getProductos();
-  const catalogo = await getCatalogoByProveedor(proveedorId);
+  // No hay catálogo separado - solo productos del proveedor
   return cart.map(item => {
-    if (item.source === 'producto') {
-      const producto = productos.find(p => p.id === item.refId) || { id: item.refId, nombre: '(desconocido)', precioUnitario: 0 };
-      return { source: 'producto', producto, cantidad: item.cantidad };
-    }
-    const catalogItem = catalogo.find(c => String(c.id) === String(item.refId)) || { id: item.refId, nombre: '(desconocido)', precioSugerido: 0 };
-    return { source: 'catalogo', catalogItem, cantidad: item.cantidad };
+    const producto = productos.find(p => String(p.id) === String(item.refId)) || { id: item.refId, nombre: '(desconocido)', precioUnitario: 0 };
+    return { source: 'producto', producto, cantidad: item.cantidad };
   });
 };
 
@@ -2090,59 +2090,48 @@ export const generarReporteOrdenes = async () => {
 };
 
 // ----------------------------------------------------------------//
-// CATÁLOGO - Export para proveedor
+// CATÁLOGO - Export para proveedor (usa productos)
 // ----------------------------------------------------------------//
 export const exportCatalogoProveedor = async (proveedorId) => {
-  const catalogo = await getCatalogoByProveedor(proveedorId);
-  const data = catalogo.map(c => ({
-    RefId: c.refId,
-    Nombre: c.nombre,
-    Precio: c.precioSugerido,
-    Stock: c.stock,
+  const productos = await getProductos();
+  const filtered = productos.filter(p => String(p.proveedorId) === String(proveedorId));
+  const data = filtered.map(p => ({
+    Id: p.id,
+    Nombre: p.nombre,
+    Precio: p.precioUnitario,
+    Stock: p.stockDisponible,
+    Categoria: p.categoriaNombre,
+    Marca: p.marcaNombre,
   }));
-  exportToExcel(data, 'catalogo.xlsx');
+  exportToExcel(data, `catalogo_proveedor_${proveedorId}.xlsx`);
 };
 
 export const importCatalogoProveedor = async (proveedorId, file, onSuccess, onError) => {
-  try {
-    const data = new Uint8Array(await file.arrayBuffer());
-    const workbook = XLSX.read(data, { type: 'array' });
-    const rows = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]]);
-    for (const row of rows) {
-      const refId = row.RefId || row.refId || '';
-      const nombre = row.Nombre || row.nombre || '';
-      const precioSugerido = parseFloat(row.Precio || row.precioSugerido || 0);
-      const stock = parseInt(row.Stock || row.stock || 0, 10);
-      if (refId && nombre) {
-        await createCatalogo({
-          proveedor: proveedorId,
-          refId,
-          nombre,
-          precioSugerido,
-          stock,
-        });
-      }
-    }
-    onSuccess && onSuccess(rows.length);
-  } catch (err) {
-    onError && onError(err);
-  }
+  // La importación de catálogo ya no existe como entidad separada
+  // Se puede importar productos con las funciones existentes
+  onError && onError(new Error('Importación de catálogo no disponible. Use importación de productos.'));
 };
 
+// DEPRECATED: El backend no tiene endpoint /api/catalogo
+// Estas funciones ya no se usan - el catálogo de proveedores son productos con proveedorId
 export const createCatalogoItem = async (item) => {
-  return await request('/api/catalogo', { method: 'POST', body: item });
+  console.warn('createCatalogoItem: endpoint no existe en backend');
+  throw new Error('Catálogo separado no existe - use productos');
 };
 
 export const getCatalogoItemById = async (id) => {
-  return await request(`/api/catalogo/${id}`);
+  console.warn('getCatalogoItemById: endpoint no existe en backend');
+  throw new Error('Catálogo separado no existe - use productos');
 };
 
 export const updateCatalogoItem = async (id, item) => {
-  return await request(`/api/catalogo/${id}`, { method: 'PUT', body: item });
+  console.warn('updateCatalogoItem: endpoint no existe en backend');
+  throw new Error('Catálogo separado no existe - use productos');
 };
 
 export const deleteCatalogoItem = async (id) => {
-  return await request(`/api/catalogo/${id}`, { method: 'DELETE' });
+  console.warn('deleteCatalogoItem: endpoint no existe en backend');
+  throw new Error('Catálogo separado no existe - use productos');
 };
 
 // ----------------------------------------------------------------//

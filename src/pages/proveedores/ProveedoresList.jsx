@@ -70,16 +70,7 @@ const ProveedoresList = () => {
   };
 
   const handleExport = async () => { try { await exportProveedores(); } catch (e) { alert('Error exportando: '+(e.message||e)); } };
-  
-  const handleViewDetail = (id) => {
-    if (id && id !== 'undefined') {
-      navigate(`/admin/proveedores/${id}`);
-    } else {
-      console.error('ID inválido para navegar');
-      alert('Error: ID de proveedor no válido');
-    }
-  };
-
+   
   const handleImport = (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -119,11 +110,11 @@ const ProveedoresList = () => {
           </button>
           {canManageProveedores && (
             <>
-              <button className="btn btn-outline-primary" onClick={handleExport} title="Exportar">
+              <button className="btn btn-outline-secondary" onClick={handleExport} title="Exportar">
                 <i className="fas fa-file-export me-1"></i>Exportar
               </button>
               <input type="file" ref={fileRef} accept=".xlsx,.xls" style={{ display: 'none' }} onChange={handleImport} />
-              <button className="btn btn-outline-primary" onClick={() => fileRef.current && fileRef.current.click()} title="Importar">
+              <button className="btn btn-outline-secondary" onClick={() => fileRef.current && fileRef.current.click()} title="Importar">
                 <i className="fas fa-file-import me-1"></i>Importar
               </button>
               <Link to="/admin/proveedores/nuevo" className="btn btn-primary">
@@ -196,7 +187,7 @@ const ProveedoresList = () => {
                 </thead>
                 <tbody>
                   {proveedores.map((p) => (
-                    <tr key={p.id} style={{ cursor: 'pointer' }} onClick={() => handleViewDetail(p.id)}>
+                    <tr key={p.id}>
                       <td className="fw-bold">{p.nombre}</td>
                       <td className="font-monospace">{p.tipoDocumento} {p.documento}</td>
                       <td>{p.contacto || '—'}</td>
@@ -208,9 +199,12 @@ const ProveedoresList = () => {
                           {p.estado ? 'Activo' : 'Inactivo'}
                         </span>
                       </td>
-                      <td onClick={(e) => e.stopPropagation()}>
+                      <td>
                         {canManageProveedores && (
                           <div className="d-flex gap-1">
+                            <button className="btn btn-sm btn-outline-info" title="Ver" onClick={() => navigate(`/admin/proveedores/${p.id}`)}>
+                              <i className="fas fa-eye"></i>
+                            </button>
                             <button className="btn btn-sm btn-outline-primary" title="Editar" onClick={() => navigate(`/admin/proveedores/editar/${p.id}`)}>
                               <i className="fas fa-edit"></i>
                             </button>
