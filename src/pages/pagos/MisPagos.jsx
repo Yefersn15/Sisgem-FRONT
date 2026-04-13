@@ -25,7 +25,11 @@ const MisPagos = () => {
   }, [user]);
 
   const ventasConPagos = useMemo(() => {
-    const abonos = registros.filter(r => (r.metodo_pago || r.metodoPago) === 'Abono');
+    const estadosExcluidos = ['rechazado', 'cancelado', 'anulado'];
+    const abonos = registros.filter(r => 
+      (r.metodo_pago || r.metodoPago) === 'Abono' &&
+      !estadosExcluidos.includes(String(r.estado_pedido || r.estadoPedido || '').toLowerCase())
+    );
     return abonos.map(registro => {
       const subtotal = parseFloat(registro.subtotal) || 0;
       const shipping = parseFloat(registro.shipping) || 0;
