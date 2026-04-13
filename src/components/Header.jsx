@@ -95,7 +95,7 @@ const Header = () => {
         { label: 'Pedidos', icon: 'fa-box', path: '/admin/pedidos', module: 'Ventas' },
         { label: 'Domicilios', icon: 'fa-truck', path: '/admin/domicilios', module: 'Ventas' },
         { label: 'Pagos', icon: 'fa-money-bill-wave', path: '/admin/pagos', module: 'Ventas' },
-        { label: 'Proveedores', icon: 'fa-truck-loading', path: '/proveedores', module: 'Proveedores' },
+        { label: 'Proveedores', icon: 'fa-truck-loading', path: '/admin/proveedores', module: 'Proveedores' },
         { label: 'Usuarios', icon: 'fa-users', path: '/admin/usuarios', module: 'Usuarios' },
         { label: 'Roles', icon: 'fa-user-shield', path: '/admin/roles', module: 'Configuración' }
       ] : [
@@ -112,7 +112,7 @@ const Header = () => {
           { label: 'Pagos', icon: 'fa-money-bill-wave', path: '/admin/pagos', module: 'Ventas' }
         ] : []),
         ...(hasPermission('Proveedores') ? [
-          { label: 'Proveedores', icon: 'fa-truck-loading', path: '/proveedores', module: 'Proveedores' }
+          { label: 'Proveedores', icon: 'fa-truck-loading', path: '/admin/proveedores', module: 'Proveedores' }
         ] : []),
         ...(hasPermission('Usuarios') ? [
           { label: 'Usuarios', icon: 'fa-users', path: '/admin/usuarios', module: 'Usuarios' }

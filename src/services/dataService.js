@@ -250,7 +250,7 @@ const mapProveedorToApi = (p) => ({
 
 // Proveedor: API -> Frontend
 const mapApiToProveedor = (api) => ({
-  id: api._id,
+  id: api.id,
   nombre: api.nombre,
   documento: api.nit,
   tipoPersona: api.tipo_persona,

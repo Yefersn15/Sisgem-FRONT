@@ -24,7 +24,18 @@ const ProveedoresList = () => {
   const cargar = async () => {
     let list = await getProveedores() || [];
     if (!Array.isArray(list)) list = list && list.data ? list.data : (list || []);
-    if (filterTipo) list = list.filter(p => p.tipo_persona === filterTipo);
+    
+    // Validar que cada proveedor tenga un ID
+    list = list.filter(p => {
+      if (!p.id && p._id) p.id = p._id;
+      if (!p.id) {
+        console.warn('Proveedor sin ID:', p);
+        return false;
+      }
+      return true;
+    });
+
+    if (filterTipo) list = list.filter(p => p.tipoPersona === filterTipo);
     if (filterEstado === 'Activo') list = list.filter(p => p.estado === true);
     if (filterEstado === 'Inactivo') list = list.filter(p => p.estado === false);
     if (debounced) {
@@ -59,6 +70,16 @@ const ProveedoresList = () => {
   };
 
   const handleExport = async () => { try { await exportProveedores(); } catch (e) { alert('Error exportando: '+(e.message||e)); } };
+  
+  const handleViewDetail = (id) => {
+    if (id && id !== 'undefined') {
+      navigate(`/admin/proveedores/${id}`);
+    } else {
+      console.error('ID inválido para navegar');
+      alert('Error: ID de proveedor no válido');
+    }
+  };
+
   const handleImport = (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -175,9 +196,9 @@ const ProveedoresList = () => {
                 </thead>
                 <tbody>
                   {proveedores.map((p) => (
-                    <tr key={p.id} style={{ cursor: 'pointer' }} onClick={() => navigate(`/admin/proveedores/${p.id}`)}>
+                    <tr key={p.id} style={{ cursor: 'pointer' }} onClick={() => handleViewDetail(p.id)}>
                       <td className="fw-bold">{p.nombre}</td>
-                      <td className="font-monospace">{p.tipo_documento} {p.documento}</td>
+                      <td className="font-monospace">{p.tipoDocumento} {p.documento}</td>
                       <td>{p.contacto || '—'}</td>
                       <td className="font-monospace">{p.telefonoPais ? p.telefonoPais + ' ' : ''}{p.telefono || '—'}</td>
                       <td>{p.email || '—'}</td>

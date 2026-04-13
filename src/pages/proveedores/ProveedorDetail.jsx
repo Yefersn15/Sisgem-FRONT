@@ -16,6 +16,13 @@ const ProveedorDetail = () => {
   const [catalogo, setCatalogo] = useState([]);
 
   useEffect(() => {
+    // Validar que el id sea válido
+    if (!id || id === 'undefined' || isNaN(parseInt(id))) {
+      alert('ID de proveedor no válido');
+      navigate('/admin/proveedores');
+      return;
+    }
+    
     (async () => {
       try {
         const p = await getProveedorById(id);
@@ -46,7 +53,7 @@ const ProveedorDetail = () => {
         navigate('/admin/proveedores');
       }
     })();
-  }, [id]);
+  }, [id, navigate]);
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -107,7 +114,7 @@ const ProveedorDetail = () => {
     <div className="container my-4">
       <div className="d-flex align-items-center gap-3 mb-4">
         <button className="btn btn-outline-secondary" onClick={() => navigate('/admin/proveedores')}>
-          <i className="fas fa-arrow-left"></i>
+          <i className="fas fa-arrow-left me-1"></i> Volver
         </button>
         <h2 className="mb-0">Detalle del Proveedor</h2>
       </div>
@@ -142,8 +149,8 @@ const ProveedorDetail = () => {
                   <button className="btn btn-outline-primary" onClick={() => setEditMode(true)}>
                     <i className="fas fa-edit me-1"></i>
                   </button>
-                  <button className="btn btn-outline-warning" onClick={handleToggle}>
-                    <i className={`fas fa-toggle-${proveedor.estado ? 'on' : 'off'} me-1`}></i>
+                  <button className={`btn btn-outline-${proveedor.estado ? 'warning' : 'success'}`} onClick={handleToggle}>
+                    <i className={`fas fa-toggle-${proveedor.estado ? 'off' : 'on'} me-1`}></i>
                     {proveedor.estado ? 'Desactivar' : 'Activar'}
                   </button>
                   <Link to={`/proveedores/${id}/catalogo`} className="btn btn-outline-primary">
@@ -156,7 +163,9 @@ const ProveedorDetail = () => {
               ) : (
                 <>
                   {saved && <span className="text-success d-flex align-items-center"><i className="fas fa-check-circle me-1"></i> Guardado</span>}
-                  <button className="btn btn-secondary" onClick={() => { setEditMode(false); setForm({ ...proveedor }); setErrors({}); }}>Cancelar</button>
+                  <button className="btn btn-secondary" onClick={() => { setEditMode(false); setForm({ ...proveedor }); setErrors({}); }}>
+                    <i className="fas fa-times me-1"></i> Cancelar
+                  </button>
                   <button className="btn btn-primary" onClick={handleSave}><i className="fas fa-save me-1"></i>Guardar</button>
                 </>
               )}
@@ -185,19 +194,14 @@ const ProveedorDetail = () => {
             </div>
           ) : (
             <div className="row">
-              <div className="col-md-6 mb-3">
-                <label className="form-label">Nombre *</label>
-                <input type="text" className={`form-control ${errors.nombre ? 'is-invalid' : ''}`} name="nombre" value={form.nombre || ''} onChange={handleInputChange} />
-                {errors.nombre && <div className="invalid-feedback">{errors.nombre}</div>}
-              </div>
-              <div className="col-md-3 mb-3">
+              <div className="col-md-2 mb-3">
                 <label className="form-label">Tipo Persona</label>
                 <select className="form-select" name="tipo_persona" value={form.tipo_persona || ''} onChange={handleInputChange}>
                   <option value="Natural">Natural</option>
                   <option value="Jurídica">Jurídica</option>
                 </select>
               </div>
-              <div className="col-md-3 mb-3">
+              <div className="col-md-2 mb-3">
                 <label className="form-label">Tipo Documento</label>
                 <select className="form-select" name="tipo_documento" value={form.tipo_documento || ''} onChange={handleInputChange}>
                   <option value="CC">CC</option>
@@ -206,10 +210,15 @@ const ProveedorDetail = () => {
                   <option value="Pasaporte">Pasaporte</option>
                 </select>
               </div>
-              <div className="col-md-4 mb-3">
+              <div className="col-md-3 mb-3">
                 <label className="form-label">Documento *</label>
                 <input type="text" className={`form-control ${errors.documento ? 'is-invalid' : ''}`} name="documento" value={form.documento || ''} onChange={handleInputChange} />
                 {errors.documento && <div className="invalid-feedback">{errors.documento}</div>}
+              </div>
+              <div className="col-md-5 mb-3">
+                <label className="form-label">Nombre / Razón social *</label>
+                <input type="text" className={`form-control ${errors.nombre ? 'is-invalid' : ''}`} name="nombre" value={form.nombre || ''} onChange={handleInputChange} />
+                {errors.nombre && <div className="invalid-feedback">{errors.nombre}</div>}
               </div>
               <div className="col-md-4 mb-3">
                 <label className="form-label">Contacto</label>
@@ -219,7 +228,7 @@ const ProveedorDetail = () => {
                 <label className="form-label">Rubro</label>
                 <input type="text" className="form-control" name="rubro" value={form.rubro || ''} onChange={handleInputChange} />
               </div>
-              <div className="col-md-3 mb-3">
+              <div className="col-md-2 mb-3">
                 <label className="form-label">Código País</label>
                 <input type="text" className="form-control" name="telefonoPais" value={form.telefonoPais || ''} onChange={handleInputChange} />
               </div>
@@ -227,11 +236,11 @@ const ProveedorDetail = () => {
                 <label className="form-label">Teléfono</label>
                 <input type="text" className="form-control" name="telefono" value={form.telefono || ''} onChange={handleInputChange} />
               </div>
-              <div className="col-md-6 mb-3">
+              <div className="col-md-3 mb-3">
                 <label className="form-label">Email</label>
                 <input type="email" className="form-control" name="email" value={form.email || ''} onChange={handleInputChange} />
               </div>
-              <div className="col-md-6 mb-3">
+              <div className="col-md-4 mb-3">
                 <label className="form-label">Dirección</label>
                 <input type="text" className="form-control" name="direccion" value={form.direccion || ''} onChange={handleInputChange} />
               </div>

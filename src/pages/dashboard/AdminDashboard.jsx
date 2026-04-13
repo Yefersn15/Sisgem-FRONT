@@ -250,7 +250,7 @@ const AdminDashboard = () => {
               </div>
             </div>
             <div className="card-footer bg-transparent">
-              <Link to="/proveedores" className="small">Ver proveedores <i className="fas fa-arrow-right ms-1"></i></Link>
+              <Link to="/admin/proveedores" className="small">Ver proveedores <i className="fas fa-arrow-right ms-1"></i></Link>
             </div>
           </div>
         </div>

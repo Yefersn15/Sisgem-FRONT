@@ -35,7 +35,7 @@ const ProveedorEdit = () => {
     <div className="container my-4">
       <div className="d-flex align-items-center gap-3 mb-4">
         <button className="btn btn-outline-secondary" onClick={() => navigate('/admin/proveedores')}>
-          <i className="fas fa-arrow-left"></i>
+          <i className="fas fa-arrow-left me-1"></i> Volver
         </button>
         <div>
           <h2>Editar Proveedor</h2>
