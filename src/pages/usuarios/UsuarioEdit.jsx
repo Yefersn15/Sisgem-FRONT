@@ -1,6 +1,7 @@
 // src/pages/usuarios/UsuarioEdit.jsx
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
 import { getUsuarioById, getRoles, createUsuario, updateUsuario, getUsuarios } from '../../services/dataService';
 
 const normalizeText = (text) => {
@@ -16,6 +17,8 @@ const UsuarioEdit = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const isEditing = Boolean(id);
+  const { user: currentUser } = useAuth();
+  const isAdmin = currentUser && (currentUser.rol_id === 5 || currentUser.rol === 'ADMIN');
 
   const [roles, setRoles] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -352,6 +355,7 @@ const UsuarioEdit = () => {
                     value={form.rolId} 
                     onChange={handleChange}
                     required
+                    disabled={!isAdmin && isEditing}
                   >
                     <option value="">Seleccionar rol...</option>
                     {roles.map(r => (

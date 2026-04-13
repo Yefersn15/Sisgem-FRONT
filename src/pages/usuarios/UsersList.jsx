@@ -22,6 +22,8 @@ const UsersList = ({ source = 'usuarios' }) => {
   const [importStatus, setImportStatus] = useState({ message: '', type: '' });
   const fileRef = useRef(null);
 
+  const isAdmin = currentUser && (currentUser.rol_id === 5 || currentUser.rol === 'ADMIN');
+
   // Cargar datos
   const loadData = async () => {
     if (source === 'usuarios') {
@@ -56,7 +58,7 @@ const UsersList = ({ source = 'usuarios' }) => {
       await loadData();
       setShowRoleModal(null);
     } catch (err) {
-      alert('Error al cambiar rol');
+      alert('Error al cambiar rol: ' + (err.message || 'Intente nuevamente'));
     }
   };
 
@@ -178,14 +180,18 @@ const UsersList = ({ source = 'usuarios' }) => {
                   {source === 'usuarios' && <td>{u.telefono || '—'}</td>}
                   {source === 'usuarios' && (
                     <td>
-                      <button
-                        className="btn btn-sm btn-outline-secondary"
-                        onClick={() => setShowRoleModal(u.id)}
-                        disabled={currentUser && String(currentUser.id) === String(u.id)}
-                        title={currentUser && String(currentUser.id) === String(u.id) ? 'No puedes cambiar tu propio rol' : 'Cambiar rol'}
-                      >
-                        {getRoleName(u.rol_id, u.rol_nombre) || 'Sin rol'} <i className="fas fa-edit ms-1"></i>
-                      </button>
+                      {isAdmin ? (
+                        <button
+                          className="btn btn-sm btn-outline-secondary"
+                          onClick={() => setShowRoleModal(u.id)}
+                          disabled={currentUser && currentUser.documento === u.documento}
+                          title={currentUser && currentUser.documento === u.documento ? 'No puedes cambiar tu propio rol' : 'Cambiar rol'}
+                        >
+                          {getRoleName(u.rol_id, u.rol_nombre) || 'Sin rol'} <i className="fas fa-edit ms-1"></i>
+                        </button>
+                      ) : (
+                        <span className="badge bg-secondary">{getRoleName(u.rol_id, u.rol_nombre)}</span>
+                      )}
                     </td>
                   )}
                   <td>
@@ -198,7 +204,7 @@ const UsersList = ({ source = 'usuarios' }) => {
                       <button className="btn btn-sm btn-outline-info" onClick={() => setShowDetalleModal(u)} title="Ver detalles">
                         <i className="fas fa-eye"></i>
                       </button>
-{currentUser && String(currentUser.id) !== String(u.id) && (
+{currentUser && currentUser.documento !== u.documento && (
                         <Link to={`/admin/usuarios/editar/${u.id}`} className="btn btn-sm btn-outline-primary" title="Editar">
                           <i className="fas fa-edit"></i>
                         </Link>
@@ -206,8 +212,8 @@ const UsersList = ({ source = 'usuarios' }) => {
                       <button
                         className={`btn btn-sm ${u.estado ? 'btn-outline-warning' : 'btn-outline-success'}`}
                         onClick={() => handleToggle(u.id, u.nombre, u.estado)}
-                        disabled={currentUser && String(currentUser.id) === String(u.id)}
-                        title={currentUser && String(currentUser.id) === String(u.id) ? 'No puedes cambiar tu propio estado' : (u.estado ? 'Desactivar' : 'Activar')}
+                        disabled={currentUser && currentUser.documento === u.documento}
+                        title={currentUser && currentUser.documento === u.documento ? 'No puedes cambiar tu propio estado' : (u.estado ? 'Desactivar' : 'Activar')}
                       >
                         <i className={`fas fa-toggle-${u.estado ? 'off' : 'on'}`}></i>
                       </button>
