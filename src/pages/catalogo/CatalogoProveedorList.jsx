@@ -6,6 +6,7 @@ import useDebounce from '../../hooks/useDebounce';
 import { useCart } from '../../context/CartContext';
 import { 
   getProductos, 
+  getCatalogo,
   getMarcaById, 
   getCategoriaById, 
   getProveedorById, 
@@ -38,6 +39,7 @@ const CatalogoProveedorList = () => {
 
   const reloadBase = async () => {
     const productos = await getProductos() || [];
+    const catalogoItems = await getCatalogo(proveedorId) || [];
     const marcas = await getMarcas() || [];
     const categorias = await getCategorias() || [];
     const proveedor = await getProveedorById(proveedorId).catch(() => null);
@@ -46,6 +48,7 @@ const CatalogoProveedorList = () => {
     const marcaMap = (marcas || []).reduce((acc, m) => { acc[String(m.id)] = m; return acc; }, {});
     const catMap = (categorias || []).reduce((acc, c) => { acc[String(c.id)] = c; return acc; }, {});
 
+    // Productos existentes (ya en tienda)
     const productosMapped = (productos || []).filter(p => String(p.proveedorId) === String(proveedorId)).map(p => ({
       source: 'producto',
       refId: p.id,
@@ -53,11 +56,25 @@ const CatalogoProveedorList = () => {
       marcaNombre: (marcaMap[String(p.marcaId)] && marcaMap[String(p.marcaId)].nombre) || '',
       categoriaNombre: (catMap[String(p.categoriaId)] && catMap[String(p.categoriaId)].nombre) || '',
       precioSugerido: p.precioUnitario,
-      adicional: p
+      adicional: p,
+      stock: p.stockDisponible,
+      activo: p.activo
     }));
 
-    // Solo productos del proveedor (no hay catálogo separado)
-    let list = [...productosMapped];
+    // Ítems del catálogo (nuevas ofertas)
+    const catalogoMapped = (catalogoItems || []).map(c => ({
+      source: 'catalogo',
+      refId: c.id,
+      nombre: c.nombre,
+      marcaNombre: c.marcaNombre || '',
+      categoriaNombre: c.categoriaNombre || '',
+      precioSugerido: c.precioSugerido,
+      adicional: c,
+      estadoStock: c.estadoStock,
+      imagen: c.imagen
+    }));
+
+    let list = [...productosMapped, ...catalogoMapped];
 
     // Calcular marcas y categorías disponibles
     const marcasSet = new Set();
@@ -182,6 +199,9 @@ const CatalogoProveedorList = () => {
           </button>
           <button className="btn btn-primary me-2" onClick={() => navigate(`/proveedores/${proveedorId}/catalogo/nuevo`)}>
             <i className="fas fa-plus me-1"></i>Agregar Item
+          </button>
+          <button className="btn btn-outline-primary me-2" onClick={() => navigate(`/proveedores/${proveedorId}/catalogo/gestionar`)}>
+            <i className="fas fa-cog me-1"></i>Gestionar Catálogo
           </button>
           <button className="btn btn-primary" onClick={() => navigate(`/proveedores/${proveedorId}/orden`)}>
             <i className="fas fa-clipboard-list me-1"></i>Ver Orden

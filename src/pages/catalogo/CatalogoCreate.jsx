@@ -1,148 +1,129 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { getProveedores, createMarcaAndLinkProveedor, createCategoria, getMarcas, getCategorias, getMarcasByProveedor } from '../../services/dataService';
+import { createCatalogoItem, getMarcas, getCategorias } from '../../services/dataService';
+
+const normalizeText = (text) => {
+  if (!text) return '';
+  return text.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, ' ').trim();
+};
 
 const CatalogoCreate = () => {
-  const { id: proveedorIdParam } = useParams();
+  const { id: proveedorId } = useParams();
   const navigate = useNavigate();
-  const [proveedores, setProveedores] = useState([]);
+  const [form, setForm] = useState({
+    nombre: '',
+    descripcion: '',
+    precioSugerido: 0,
+    imagen: '',
+    categoriaNombre: '',
+    marcaNombre: '',
+    estadoStock: 'Disponible'
+  });
+  const [loading, setLoading] = useState(false);
   const [marcas, setMarcas] = useState([]);
   const [categorias, setCategorias] = useState([]);
-  const [form, setForm] = useState({ proveedorId: proveedorIdParam || '', nombre: '', descripcion: '', precioSugerido: '', categoriaNombre: '', marcaNombre: '', fotoUrl: '', estadoStock: 'Disponible', activo: true });
 
-  useEffect(() => {
-    const init = async () => {
-      setProveedores(await getProveedores() || []);
-      setCategorias(await getCategorias() || []);
-      // Si estamos creando desde la vista de proveedor, mostrar solo sus marcas
-      if (proveedorIdParam) {
-        setMarcas(await getMarcasByProveedor(proveedorIdParam) || []);
-        setForm(prev => ({ ...prev, proveedorId: proveedorIdParam }));
-      } else {
-        setMarcas(await getMarcas() || []);
-      }
-    };
-    init();
-  }, [proveedorIdParam]);
+  const loadData = async () => {
+    const [marcasData, categoriasData] = await Promise.all([getMarcas(), getCategorias()]);
+    setMarcas(marcasData || []);
+    setCategorias(categoriasData || []);
+  };
+
+  useEffect(() => { loadData(); }, []);
 
   const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
-    setForm(prev => ({ ...prev, [name]: type === 'checkbox' ? checked : value }));
+    const { name, value } = e.target;
+    if (['nombre', 'descripcion', 'categoriaNombre', 'marcaNombre'].includes(name)) {
+      setForm(prev => ({ ...prev, [name]: normalizeText(value) }));
+    } else {
+      setForm(prev => ({ ...prev, [name]: value }));
+    }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    alert('La entidad Catálogo ya no existe. Por favor, cree productos directamente desde la gestión de productos.');
-    navigate(`/admin/productos/nuevo?proveedorId=${form.proveedorId}`);
-  };
-
-  const handleCrearMarca = () => {
-    if (!form.marcaNombre || String(form.marcaNombre).trim() === '') return alert('Ingrese nombre de marca antes de crear');
+    if (!form.nombre.trim()) {
+      alert('El nombre es requerido');
+      return;
+    }
+    setLoading(true);
     try {
-      let nm;
-      (async () => {
-        if (proveedorIdParam) {
-          nm = await createMarcaAndLinkProveedor({ nombre: form.marcaNombre }, proveedorIdParam);
-          // refrescar marcas disponibles del proveedor
-          setMarcas(await getMarcasByProveedor(proveedorIdParam) || []);
-        } else {
-          nm = await createMarcaAndLinkProveedor({ nombre: form.marcaNombre });
-          setMarcas(await getMarcas() || []);
-        }
-        setForm(prev => ({ ...prev, marcaNombre: nm.nombre }));
-        alert(`Marca creada: ${nm.nombre}`);
-      })();
-    } catch (err) { alert(err.message || 'Error creando marca'); }
-  };
-
-  const handleCrearCategoria = () => {
-    if (!form.categoriaNombre || String(form.categoriaNombre).trim() === '') return alert('Ingrese nombre de categoría antes de crear');
-    try {
-      (async () => {
-        const nc = await createCategoria({ nombre: form.categoriaNombre });
-        alert(`Categoría creada: ${nc.nombre}`);
-        setCategorias(await getCategorias() || []);
-      })();
-    } catch (err) { alert(err.message || 'Error creando categoría'); }
+      await createCatalogoItem({ ...form, proveedorId });
+      navigate(`/proveedores/${proveedorId}/catalogo`);
+    } catch (err) {
+      alert('Error: ' + (err.message || 'No se pudo crear el ítem'));
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <div className="container my-4">
-      <div className="alert alert-warning">
-        <h4>Catálogo de proveedor descontinuado</h4>
-        <p>La entidad Catálogo ya no existe. Ahora los productos de los proveedores se gestionan directamente desde la sección de Productos.</p>
-        <p className="mb-0">Por favor, cree los productos desde: <strong>Admin → Productos → Nuevo Producto</strong></p>
+      <div className="d-flex align-items-center gap-3 mb-4">
+        <button className="btn btn-secondary" onClick={() => navigate(-1)}>
+          <i className="fas fa-arrow-left me-1"></i> Volver
+        </button>
+        <h2>Nuevo Ítem en Catálogo</h2>
       </div>
-      <h3>Agregar Item al Catálogo (Descontinuado)</h3>
-      <form onSubmit={handleSubmit}>
-        <div className="row g-3">
-          <div className="col-md-6">
-            <label className="form-label">Proveedor</label>
-            <select className="form-select" name="proveedorId" value={form.proveedorId} onChange={handleChange} disabled={!!proveedorIdParam}>
-              <option value="">-- Seleccione --</option>
-              {proveedores.map(p => <option key={p.id} value={p.id}>{p.nombre}</option>)}
-            </select>
-          </div>
-          <div className="col-md-6">
-            <label className="form-label">Nombre</label>
-            <input className="form-control" name="nombre" value={form.nombre} onChange={handleChange} disabled />
-          </div>
-          <div className="col-12">
-            <label className="form-label">Descripción</label>
-            <textarea className="form-control" name="descripcion" value={form.descripcion} onChange={handleChange} disabled></textarea>
-          </div>
-          <div className="col-md-3">
-            <label className="form-label">Precio sugerido</label>
-            <input className="form-control" name="precioSugerido" value={form.precioSugerido} onChange={handleChange} disabled />
-          </div>
-          <div className="col-md-4">
-            <label className="form-label">Categoría</label>
-            <div className="input-group">
-              <select className="form-select" onChange={(e) => setForm(prev => ({ ...prev, categoriaNombre: e.target.value }))} value={form.categoriaNombre} disabled>
-                <option value="">-- Seleccione existente --</option>
-                {categorias.map(c => <option key={c.id} value={c.nombre}>{c.nombre}</option>)}
-              </select>
-              <input className="form-control" name="categoriaNombre" value={form.categoriaNombre} onChange={handleChange} placeholder="o escriba nueva" disabled />
-              <button type="button" className="btn btn-primary" onClick={handleCrearCategoria} disabled>Crear</button>
+      <div className="card">
+        <div className="card-body">
+          <form onSubmit={handleSubmit}>
+            <div className="mb-3">
+              <label className="form-label">Nombre *</label>
+              <input type="text" name="nombre" className="form-control" value={form.nombre} onChange={handleChange} required />
             </div>
-          </div>
-          <div className="col-md-4">
-            <label className="form-label">Marca</label>
-            <div className="input-group">
-              <select className="form-select" onChange={(e) => setForm(prev => ({ ...prev, marcaNombre: e.target.value }))} value={form.marcaNombre} disabled>
-                <option value="">-- Seleccione existente --</option>
-                {marcas.map(m => <option key={m.id} value={m.nombre}>{m.nombre}</option>)}
-              </select>
-              <input className="form-control" name="marcaNombre" value={form.marcaNombre} onChange={handleChange} placeholder="o escriba nueva" disabled />
-              <button type="button" className="btn btn-primary" onClick={handleCrearMarca} disabled>Crear</button>
+            <div className="mb-3">
+              <label className="form-label">Descripción</label>
+              <textarea name="descripcion" className="form-control" rows="3" value={form.descripcion} onChange={handleChange} />
             </div>
-          </div>
-          <div className="col-md-6">
-            <label className="form-label">Foto URL</label>
-            <input className="form-control" name="fotoUrl" value={form.fotoUrl} onChange={handleChange} disabled />
-          </div>
-          <div className="col-md-3">
-            <label className="form-label">Estado stock</label>
-            <select className="form-select" name="estadoStock" value={form.estadoStock} onChange={handleChange} disabled>
-              <option value="Disponible">Disponible</option>
-              <option value="No Disponible">No Disponible</option>
-              <option value="De temporada">De temporada</option>
-              <option value="Fuera de Temporada">Fuera de Temporada</option>
-              <option value="Consultar">Consultar</option>
-            </select>
-          </div>
-          <div className="col-md-3 d-flex align-items-center">
-            <div className="form-check mt-2">
-              <input className="form-check-input" type="checkbox" name="activo" checked={form.activo} onChange={handleChange} disabled />
-              <label className="form-check-label">Activo</label>
+            <div className="row">
+              <div className="col-md-6 mb-3">
+                <label className="form-label">Precio sugerido</label>
+                <input type="number" name="precioSugerido" className="form-control" value={form.precioSugerido} onChange={handleChange} min="0" step="0.01" />
+              </div>
+              <div className="col-md-6 mb-3">
+                <label className="form-label">Estado stock</label>
+                <select name="estadoStock" className="form-select" value={form.estadoStock} onChange={handleChange}>
+                  <option value="Disponible">Disponible</option>
+                  <option value="Agotado">Agotado</option>
+                  <option value="Bajo stock">Bajo stock</option>
+                  <option value="Descontinuado">Descontinuado</option>
+                </select>
+              </div>
             </div>
-          </div>
-          <div className="col-12 d-flex justify-content-end gap-2">
-            <button type="button" className="btn btn-secondary" onClick={() => navigate(-1)}>Volver</button>
-            <button type="submit" className="btn btn-primary">Ir a Productos</button>
-          </div>
+            <div className="row">
+              <div className="col-md-6 mb-3">
+                <label className="form-label">Categoría</label>
+                <input type="text" name="categoriaNombre" className="form-control" value={form.categoriaNombre} onChange={handleChange} list="categorias-list" />
+                <datalist id="categorias-list">
+                  {categorias.map(c => (
+                    <option key={c.id} value={c.nombre} />
+                  ))}
+                </datalist>
+              </div>
+              <div className="col-md-6 mb-3">
+                <label className="form-label">Marca</label>
+                <input type="text" name="marcaNombre" className="form-control" value={form.marcaNombre} onChange={handleChange} list="marcas-list" />
+                <datalist id="marcas-list">
+                  {marcas.map(m => (
+                    <option key={m.id} value={m.nombre} />
+                  ))}
+                </datalist>
+              </div>
+            </div>
+            <div className="mb-3">
+              <label className="form-label">URL de imagen</label>
+              <input type="text" name="imagen" className="form-control" value={form.imagen} onChange={handleChange} placeholder="https://..." />
+            </div>
+            <div className="d-flex justify-content-end gap-2">
+              <button type="button" className="btn btn-secondary" onClick={() => navigate(-1)}>Cancelar</button>
+              <button type="submit" className="btn btn-primary" disabled={loading}>
+                {loading ? <><span className="spinner-border spinner-border-sm me-2"></span> Guardando...</> : <><i className="fas fa-save me-1"></i> Crear</>}
+              </button>
+            </div>
+          </form>
         </div>
-      </form>
+      </div>
     </div>
   );
 };

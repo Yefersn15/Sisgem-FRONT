@@ -52,22 +52,35 @@ const OrdenCompraDraft = () => {
     if (!proveedor) return alert('Proveedor no encontrado');
     if (items.length === 0) return alert('No hay items en la orden');
 
-    // Construir items para createOrdenCompra
+    // Construir items para createOrdenCompra (backend espera 'productos')
     const ordenItems = items.map(it => {
       if (it.source === 'producto') {
-        return { productoId: it.producto.id, nombre: it.producto.nombre, cantidad: it.cantidad, precioUnitario: it.producto.precioUnitario };
+        return { 
+          tipo: 'producto_existente',
+          referenciaId: it.producto.id, 
+          nombre: it.producto.nombre, 
+          cantidad: it.cantidad, 
+          precio_unitario: it.producto.precioUnitario 
+        };
       }
-      // catálogo (deprecated)
-      return { productoId: '', nombre: it.catalogItem?.nombre || 'Unknown', cantidad: it.cantidad, precioUnitario: it.catalogItem?.precioSugerido || 0 };
+      return { 
+        tipo: 'catalogo',
+        referenciaId: it.catalogItem?.id,
+        nombre: it.catalogItem?.nombre || 'Unknown', 
+        cantidad: it.cantidad, 
+        precio_unitario: it.catalogItem?.precioSugerido || 0 
+      };
     });
 
-    const orden = await createOrdenCompra({ proveedorId, items: ordenItems, notas });
+    const orden = await createOrdenCompra({ proveedorId, productos: ordenItems, observaciones: notas });
     if (!orden || !orden.id) {
       return alert('Error al crear la orden');
     }
 
     // Preparar mensaje de WhatsApp
     const phoneRaw = ((proveedor.telefonoPais || '') + (proveedor.telefono || '')).replace(/\D/g, '');
+    const ordenTotal = orden.subtotal || orden.total || 0;
+    
     if (!phoneRaw) {
       alert('Proveedor no tiene teléfono válido para enviar por WhatsApp. Orden creada localmente.');
       navigate(`/ordenes/${orden.id}`);
@@ -78,10 +91,9 @@ const OrdenCompraDraft = () => {
     msg += `ID orden: ${orden.id}\n\n`;
     msg += `Items:\n`;
     ordenItems.forEach(it => {
-      msg += `- ${it.cantidad} x ${it.nombre} @ $${Math.round(it.precioUnitario).toLocaleString('es-CO', { minimumFractionDigits: 0 })}\n`;
+      msg += `- ${it.cantidad} x ${it.nombre} @ $${Math.round(it.precio_unitario).toLocaleString('es-CO', { minimumFractionDigits: 0 })}\n`;
     });
-    const total = ordenItems.reduce((s, it) => s + (it.cantidad * it.precioUnitario), 0);
-    msg += `\nTotal: $${Math.round(total).toLocaleString('es-CO', { minimumFractionDigits: 0 })}\n`;
+    msg += `\nTotal: $${Math.round(ordenTotal).toLocaleString('es-CO', { minimumFractionDigits: 0 })}\n`;
     if (notas) msg += `Notas: ${notas}\n`;
 
     // Limpiar carrito del proveedor

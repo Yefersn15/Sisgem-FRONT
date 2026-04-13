@@ -18,6 +18,7 @@ const UsersList = ({ source = 'usuarios' }) => {
   const [search, setSearch] = useState('');
   const [filterRol, setFilterRol] = useState('');
   const [showRoleModal, setShowRoleModal] = useState(null);
+  const [showDetalleModal, setShowDetalleModal] = useState(null);
   const [importStatus, setImportStatus] = useState({ message: '', type: '' });
   const fileRef = useRef(null);
 
@@ -194,6 +195,9 @@ const UsersList = ({ source = 'usuarios' }) => {
                   </td>
                   <td>
                     <div className="d-flex gap-1">
+                      <button className="btn btn-sm btn-outline-info" onClick={() => setShowDetalleModal(u)} title="Ver detalles">
+                        <i className="fas fa-eye"></i>
+                      </button>
 {currentUser && String(currentUser.id) !== String(u.id) && (
                         <Link to={`/admin/usuarios/editar/${u.id}`} className="btn btn-sm btn-outline-primary" title="Editar">
                           <i className="fas fa-edit"></i>
@@ -242,6 +246,76 @@ const UsersList = ({ source = 'usuarios' }) => {
                     </button>
                   ))}
                 </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Detalles Usuario */}
+      {showDetalleModal && (
+        <div className="modal fade show" style={{ display: 'block', backgroundColor: 'rgba(0,0,0,0.5)' }}>
+          <div className="modal-dialog modal-dialog-centered">
+            <div className="modal-content">
+              <div className="modal-header">
+                <h5 className="modal-title">Detalles del Usuario</h5>
+                <button type="button" className="btn-close" onClick={() => setShowDetalleModal(null)}></button>
+              </div>
+              <div className="modal-body">
+                <div className="row">
+                  <div className="col-md-6 mb-3">
+                    <label className="form-label small text-muted">Documento</label>
+                    <p className="mb-0 fw-bold">{showDetalleModal.documento || '—'}</p>
+                  </div>
+                  <div className="col-md-6 mb-3">
+                    <label className="form-label small text-muted">Nombre</label>
+                    <p className="mb-0">{showDetalleModal.nombre} {showDetalleModal.apellido}</p>
+                  </div>
+                  <div className="col-md-6 mb-3">
+                    <label className="form-label small text-muted">Email</label>
+                    <p className="mb-0">{showDetalleModal.email || '—'}</p>
+                  </div>
+                  <div className="col-md-6 mb-3">
+                    <label className="form-label small text-muted">Teléfono</label>
+                    <p className="mb-0">{showDetalleModal.telefono || '—'}</p>
+                  </div>
+                  <div className="col-md-6 mb-3">
+                    <label className="form-label small text-muted">Rol</label>
+                    <p className="mb-0">{getRoleName(showDetalleModal.rol_id, showDetalleModal.rol_nombre) || 'Sin rol'}</p>
+                  </div>
+                  <div className="col-md-6 mb-3">
+                    <label className="form-label small text-muted">Estado</label>
+                    <p className="mb-0">
+                      <span className={`badge ${showDetalleModal.estado ? 'bg-success' : 'bg-secondary'}`}>
+                        {showDetalleModal.estado ? 'Activo' : 'Inactivo'}
+                      </span>
+                    </p>
+                  </div>
+                  {showDetalleModal.direccion && (
+                    <div className="col-12 mb-3">
+                      <label className="form-label small text-muted">Dirección</label>
+                      <p className="mb-0">{showDetalleModal.direccion}</p>
+                    </div>
+                  )}
+                  {showDetalleModal.barrio && (
+                    <div className="col-12 mb-3">
+                      <label className="form-label small text-muted">Barrio</label>
+                      <p className="mb-0">{showDetalleModal.barrio}</p>
+                    </div>
+                  )}
+                  <div className="col-12 mb-3">
+                    <label className="form-label small text-muted">Fecha de Creación</label>
+                    <p className="mb-0">{showDetalleModal.fecha_creacion ? new Date(showDetalleModal.fecha_creacion).toLocaleString() : '—'}</p>
+                  </div>
+                </div>
+              </div>
+              <div className="modal-footer">
+                <button type="button" className="btn btn-secondary" onClick={() => setShowDetalleModal(null)}>
+                  Cerrar
+                </button>
+                <Link to={`/admin/usuarios/editar/${showDetalleModal.id}`} className="btn btn-primary">
+                  Editar
+                </Link>
               </div>
             </div>
           </div>

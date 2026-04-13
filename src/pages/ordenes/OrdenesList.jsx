@@ -62,17 +62,16 @@ const OrdenesList = () => {
 
   const getEstadoBadge = (estado) => {
     const colors = {
-      'Pendiente': 'bg-warning',
-      'Aprobada': 'bg-info',
-      'Enviada': 'bg-primary',
-      'Recibida': 'bg-success',
-      'Cancelada': 'bg-secondary',
-      'Anulada': 'bg-danger'
+      'borrador': 'bg-secondary',
+      'enviada': 'bg-info',
+      'confirmada': 'bg-primary',
+      'recibida': 'bg-success',
+      'cancelada': 'bg-danger'
     };
     return colors[estado] || 'bg-secondary';
   };
 
-  const totalGeneral = ordenes.filter(o => o.estado !== 'Anulada').reduce((s, o) => s + (o.total || 0), 0);
+  const totalGeneral = ordenes.filter(o => o.estado !== 'cancelada').reduce((s, o) => s + (parseFloat(o.total) || parseFloat(o.subtotal) || 0), 0);
 
   return (
     <div className="container my-4">

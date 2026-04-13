@@ -79,19 +79,30 @@ const OrdenCreate = () => {
       return;
     }
 
-    // Construir items para createOrdenCompra
+    // Construir items para createOrdenCompra (backend espera 'productos')
     const ordenItems = cartItems.map(item => {
       if (item.source === 'producto') {
-        return { productoId: item.producto.id, nombre: item.producto.nombre, cantidad: item.cantidad, precioUnitario: item.producto.precioUnitario };
+        return { 
+          tipo: 'producto_existente',
+          referenciaId: item.producto.id,
+          nombre: item.producto.nombre, 
+          cantidad: item.cantidad, 
+          precio_unitario: item.producto.precioUnitario 
+        };
       }
-      return { productoId: '', nombre: item.catalogItem.nombre, cantidad: item.cantidad, precioUnitario: item.catalogItem.precioSugerido };
+      return { 
+        tipo: 'catalogo',
+        referenciaId: item.catalogItem?.id,
+        nombre: item.catalogItem?.nombre || 'Unknown', 
+        cantidad: item.cantidad, 
+        precio_unitario: item.catalogItem?.precioSugerido || 0 
+      };
     });
 
     const orden = await createOrdenCompra({ 
       proveedorId: selectedProveedorId, 
-      proveedor: proveedor.nombre,
-      items: ordenItems, 
-      notas 
+      productos: ordenItems, 
+      observaciones: notas 
     });
 
     // Limpiar carrito del proveedor
@@ -102,15 +113,16 @@ const OrdenCreate = () => {
 
     // Preparar mensaje de WhatsApp
     const phoneRaw = ((proveedor.telefonoPais || '') + (proveedor.telefono || '')).replace(/\D/g, '');
+    const ordenTotal = orden.subtotal || orden.total || 0;
     
     if (phoneRaw) {
       let msg = `Orden de Compra - ${proveedor.nombre || ''}\n`;
       msg += `ID orden: ${orden.id}\n\n`;
       msg += `Items:\n`;
-      orden.items.forEach(it => {
-        msg += `- ${it.cantidad} x ${it.nombre} @ $${Math.round(it.precioUnitario).toLocaleString('es-CO', { minimumFractionDigits: 0 })}\n`;
+      ordenItems.forEach(it => {
+        msg += `- ${it.cantidad} x ${it.nombre} @ $${Math.round(it.precio_unitario).toLocaleString('es-CO', { minimumFractionDigits: 0 })}\n`;
       });
-      msg += `\nTotal: $${Math.round(orden.total).toLocaleString('es-CO', { minimumFractionDigits: 0 })}\n`;
+      msg += `\nTotal: $${Math.round(ordenTotal).toLocaleString('es-CO', { minimumFractionDigits: 0 })}\n`;
       if (notas) msg += `Notas: ${notas}\n`;
 
       const waUrl = `https://wa.me/${phoneRaw}?text=${encodeURIComponent(msg)}`;

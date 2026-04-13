@@ -3,6 +3,15 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { registerUser } from '../../services/dataService';
 
+const normalizeText = (text) => {
+  if (!text) return '';
+  return text
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+};
+
 const Register = () => {
   const navigate = useNavigate();
   const [form, setForm] = useState({
@@ -22,7 +31,16 @@ const Register = () => {
   const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    let processedValue = value;
+    
+    if (['nombre', 'apellido', 'direccion', 'barrio'].includes(name)) {
+      processedValue = normalizeText(value);
+    } else if (name === 'documento') {
+      processedValue = value.toUpperCase();
+    }
+    
+    setForm({ ...form, [name]: processedValue });
   };
 
   const handleSubmit = async (e) => {
@@ -47,15 +65,15 @@ const Register = () => {
 
       // Llamar a la API para registrar
       const result = await registerUser({
-        nombre: form.nombre,
-        apellido: form.apellido,
+        nombre: normalizeText(form.nombre),
+        apellido: normalizeText(form.apellido),
         tipoDocumento: form.tipoDocumento,
-        documento: form.documento,
+        documento: form.documento.toUpperCase(),
         genero: form.genero,
         telefono: form.celular,
-        direccion: form.direccion,
-        barrio: form.barrio,
-        email: form.email,
+        direccion: form.direccion ? normalizeText(form.direccion) : '',
+        barrio: form.barrio ? normalizeText(form.barrio) : '',
+        email: form.email.toLowerCase().trim(),
         password: form.password
       });
 

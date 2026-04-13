@@ -1,7 +1,7 @@
 // src/pages/proveedores/ProveedorDetail.jsx
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { getProveedorById, toggleProveedorEstado, deleteProveedor, updateProveedor, getMarcasByProveedor, getCatalogoByProveedor } from '../../services/dataService';
+import { getProveedorById, toggleProveedorEstado, deleteProveedor, updateProveedor, getMarcasByProveedor, getProductos } from '../../services/dataService';
 
 const ProveedorDetail = () => {
   const { id } = useParams();
@@ -13,7 +13,8 @@ const ProveedorDetail = () => {
   const [saved, setSaved] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [marcas, setMarcas] = useState([]);
-  const [catalogo, setCatalogo] = useState([]);
+  const [productos, setProductos] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     // Validar que el id sea válido
@@ -23,7 +24,8 @@ const ProveedorDetail = () => {
       return;
     }
     
-    (async () => {
+    const loadData = async () => {
+      setLoading(true);
       try {
         const p = await getProveedorById(id);
         if (!p) {
@@ -34,25 +36,31 @@ const ProveedorDetail = () => {
         setProveedor(p);
         setForm({ ...p });
         
-        // Cargar marcas y catálogo del proveedor
+        // Cargar marcas del proveedor
         try {
           const m = await getMarcasByProveedor(id);
           setMarcas(Array.isArray(m) ? m : []);
         } catch (e) {
           setMarcas([]);
         }
+        
+        // Cargar productos del proveedor (catálogo)
         try {
-          const c = await getCatalogoByProveedor(id);
-          setCatalogo(Array.isArray(c) ? c : []);
+          const prods = await getProductos() || [];
+          const prodsProveedor = prods.filter(p => String(p.proveedorId) === String(id));
+          setProductos(prodsProveedor);
         } catch (e) {
-          setCatalogo([]);
+          setProductos([]);
         }
       } catch (err) {
         console.error('Error cargando proveedor:', err);
         alert('Error al cargar proveedor');
         navigate('/admin/proveedores');
+      } finally {
+        setLoading(false);
       }
-    })();
+    };
+    loadData();
   }, [id, navigate]);
 
   const handleInputChange = (e) => {
@@ -61,7 +69,7 @@ const ProveedorDetail = () => {
     if (errors[name]) setErrors(prev => ({ ...prev, [name]: '' }));
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     const e = {};
     if (!form.nombre?.trim()) e.nombre = 'Requerido';
     if (!form.documento?.trim()) e.documento = 'Requerido';
@@ -70,37 +78,35 @@ const ProveedorDetail = () => {
       return;
     }
     try {
-      updateProveedor(id, form);
+      await updateProveedor(id, form);
       setSaved(true);
       setTimeout(() => {
         setSaved(false);
         setEditMode(false);
         setErrors({});
-        const updated = getProveedorById(id);
-        setProveedor(updated);
-        setForm({ ...updated });
       }, 1200);
+      // Recargar datos
+      const updated = await getProveedorById(id);
+      setProveedor(updated);
+      setForm({ ...updated });
     } catch (err) {
       alert(err.message || 'Error actualizando proveedor');
     }
   };
 
-  const handleToggle = () => {
-    toggleProveedorEstado(id);
-    const updated = getProveedorById(id);
+  const handleToggle = async () => {
+    await toggleProveedorEstado(id);
+    const updated = await getProveedorById(id);
     setProveedor(updated);
     setForm({ ...updated });
   };
 
-  const handleDelete = () => {
-    try {
-      deleteProveedor(id);
-      navigate('/admin/proveedores');
-    } catch (err) {
-      alert(err.message || 'No se pudo eliminar');
-    }
+  const handleDelete = async () => {
+    await deleteProveedor(id);
+    navigate('/admin/proveedores');
   };
 
+  if (loading) return <div className="container my-4">Cargando...</div>;
   if (!proveedor) return null;
 
   const InfoRow = ({ label, value }) => (
@@ -156,6 +162,11 @@ const ProveedorDetail = () => {
                   <Link to={`/proveedores/${id}/catalogo`} className="btn btn-outline-primary">
                     <i className="fas fa-book-open me-1"></i>Catálogo
                   </Link>
+                  {proveedor.estado && (
+                    <Link to={`/ordenes/nueva?proveedorId=${id}`} className="btn btn-primary">
+                      <i className="fas fa-shopping-cart me-1"></i>Nueva Orden
+                    </Link>
+                  )}
                   <button className="btn btn-outline-danger" onClick={() => setShowDeleteModal(true)}>
                     <i className="fas fa-trash"></i>
                   </button>
@@ -255,7 +266,7 @@ const ProveedorDetail = () => {
         </div>
       </div>
 
-      {/* Marcas y Catálogo */}
+      {/* Marcas y Productos del Catálogo */}
       <div className="row">
         <div className="col-md-6">
           <div className="card">
@@ -277,14 +288,47 @@ const ProveedorDetail = () => {
         </div>
         <div className="col-md-6">
           <div className="card">
-            <div className="card-header">
-              <h5 className="mb-0">Catálogo ({catalogo.length})</h5>
+            <div className="card-header d-flex justify-content-between align-items-center">
+              <h5 className="mb-0">Catálogo ({productos.length})</h5>
+              <Link to={`/proveedores/${id}/catalogo`} className="btn btn-sm btn-outline-primary">
+                <i className="fas fa-eye me-1"></i>Ver Catálogo
+              </Link>
             </div>
             <div className="card-body">
-              {catalogo.length === 0 ? (
+              {productos.length === 0 ? (
                 <p className="text-muted">No hay productos en el catálogo</p>
               ) : (
-                <p className="mb-0">{catalogo.length} productos en catálogo</p>
+                <div className="table-responsive" style={{ maxHeight: '200px' }}>
+                  <table className="table table-sm table-hover">
+                    <thead>
+                      <tr>
+                        <th>Producto</th>
+                        <th>Stock</th>
+                        <th>Precio</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {productos.slice(0, 5).map(p => (
+                        <tr key={p.id}>
+                          <td>{p.nombre}</td>
+                          <td>
+                            <span className={`badge ${p.stockDisponible > 0 ? 'bg-success' : 'bg-warning'}`}>
+                              {p.stockDisponible}
+                            </span>
+                          </td>
+                          <td>${Number(p.precioUnitario || 0).toLocaleString('es-CO')}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                  {productos.length > 5 && (
+                    <div className="text-center mt-2">
+                      <Link to={`/proveedores/${id}/catalogo`} className="small">
+                        Ver los {productos.length} productos en el catálogo →
+                      </Link>
+                    </div>
+                  )}
+                </div>
               )}
             </div>
           </div>

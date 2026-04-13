@@ -32,7 +32,19 @@ const AdminDashboard = () => {
   const [topMarcas, setTopMarcas] = useState([]);
   const [topCategorias, setTopCategorias] = useState([]);
   const [chartDataSemana, setChartDataSemana] = useState([]);
-  const [filtroDias, setFiltroDias] = useState(7);
+  const [filtroVentas, setFiltroVentas] = useState('semana');
+
+  const getFiltroDias = () => {
+    const opciones = {
+      dia: 1,
+      semana: 7,
+      mes: 30,
+      trimestre: 90,
+      semestre: 180,
+      año: 365
+    };
+    return opciones[filtroVentas] || 7;
+  };
 
   useEffect(() => {
     const cargarDatos = async () => {
@@ -93,15 +105,21 @@ const AdminDashboard = () => {
       setTopMarcas(await getTopByBrand(15));
       setTopCategorias(await getTopByCategory(15));
 
+      const getDiasPorFiltro = () => {
+        const opciones = { dia: 1, semana: 7, mes: 30, trimestre: 90, semestre: 180, año: 365 };
+        return opciones[filtroVentas] || 7;
+      };
+
       // Datos para gráfico de ventas según filtro de días
       const dias = [];
-      for (let i = filtroDias - 1; i >= 0; i--) {
+      const diasAUsar = getDiasPorFiltro();
+      for (let i = diasAUsar - 1; i >= 0; i--) {
         const fecha = new Date(hoy);
         fecha.setDate(hoy.getDate() - i);
         const fechaStr = fecha.toISOString().split('T')[0];
         const ventasDiaData = ventas.filter(v => (v.fecha || v.fechaVenta || '').toString().split('T')[0] === fechaStr);
         dias.push({
-          dia: fecha.toLocaleDateString('es-ES', { weekday: 'short' }),
+          dia: fecha.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit' }),
           ventas: ventasDiaData.reduce((s, v) => s + (v.total || 0), 0)
         });
       }
@@ -110,7 +128,7 @@ const AdminDashboard = () => {
     };
 
     cargarDatos();
-  }, [filtroDias]);
+  }, [filtroVentas]);
 
   const formatFecha = (fecha) => {
     if (!fecha) return '';
@@ -359,11 +377,14 @@ const AdminDashboard = () => {
         <div className="col-lg-8">
           <div className="card h-100">
             <div className="card-header d-flex justify-content-between align-items-center">
-              <span>Ventas últimos {filtroDias} días</span>
-              <select className="form-select form-select-sm w-auto" value={filtroDias} onChange={(e) => setFiltroDias(Number(e.target.value))}>
-                <option value={7}>7 días</option>
-                <option value={14}>14 días</option>
-                <option value={30}>30 días</option>
+              <span>Ventas últimos {filtroVentas === 'dia' ? '1 día' : filtroVentas === 'semana' ? '7 días' : filtroVentas === 'mes' ? '30 días' : filtroVentas === 'trimestre' ? '90 días' : filtroVentas === 'semestre' ? '180 días' : '365 días'}</span>
+              <select className="form-select form-select-sm w-auto" value={filtroVentas} onChange={(e) => setFiltroVentas(e.target.value)}>
+                <option value="dia">Hoy</option>
+                <option value="semana">7 días</option>
+                <option value="mes">30 días</option>
+                <option value="trimestre">90 días</option>
+                <option value="semestre">180 días</option>
+                <option value="año">1 año</option>
               </select>
             </div>
             <div className="card-body">

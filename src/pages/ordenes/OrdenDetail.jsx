@@ -50,13 +50,6 @@ const OrdenDetail = () => {
     setEditMode(isEditRoute);
   }, [isEditRoute]);
 
-  const handleSave = () => {
-    const total = items.reduce((s, it) => s + (it.subtotal || 0), 0);
-    updateOrdenCompra(id, { ...form, items, total });
-    setSaved(true);
-    setTimeout(() => { setSaved(false); setEditMode(false); loadOrden(); }, 1200);
-  };
-
   const loadOrden = async () => {
     try {
       const o = await getOrdenCompraById(id);
@@ -90,19 +83,6 @@ const OrdenDetail = () => {
     loadOrden();
   };
 
-  const handleAnular = () => {
-    updateOrdenCompra(id, { estado: 'Anulada', motivoAnulacion: motivo });
-    setAnularModal(false);
-    setMotivo('');
-    loadOrden();
-  };
-
-  const handleCambiarEstado = () => {
-    updateOrdenCompra(id, { estado: nuevoEstado });
-    setEstadoModal(false);
-    loadOrden();
-  };
-
   const updateItem = (i, key, value) => {
     setItems(prev => {
       const next = [...prev];
@@ -120,12 +100,11 @@ const OrdenDetail = () => {
 
   const getEstadoBadge = (estado) => {
     const colors = {
-      'Pendiente': 'bg-warning',
-      'Aprobada': 'bg-info',
-      'Enviada': 'bg-primary',
-      'Recibida': 'bg-success',
-      'Cancelada': 'bg-secondary',
-      'Anulada': 'bg-danger'
+      'borrador': 'bg-secondary',
+      'enviada': 'bg-info',
+      'confirmada': 'bg-primary',
+      'recibida': 'bg-success',
+      'cancelada': 'bg-danger'
     };
     return colors[estado] || 'bg-secondary';
   };
@@ -138,13 +117,13 @@ const OrdenDetail = () => {
           <i className="fas fa-arrow-left"></i>
         </button>
         <div>
-          <h2 className="mb-0">{orden.numeroOrden}</h2>
+          <h2 className="mb-0">{orden.numeroOrden || `Orden #${orden.id}`}</h2>
           <span className={`badge ${getEstadoBadge(orden.estado)}`}>{orden.estado}</span>
         </div>
         <div className="ms-auto d-flex gap-2">
           {!editMode ? (
             <>
-              {orden.estado !== 'Anulada' && (
+              {orden.estado !== 'cancelada' && orden.estado !== 'recibida' && (
                 <>
                   <button className="btn btn-outline-primary btn-sm" onClick={() => setEditMode(true)}>
                     <i className="fas fa-edit me-1"></i>Editar
@@ -153,7 +132,7 @@ const OrdenDetail = () => {
                     <i className="fas fa-exchange-alt me-1"></i>Estado
                   </button>
                   <button className="btn btn-outline-danger btn-sm" onClick={() => setAnularModal(true)}>
-                    <i className="fas fa-times-circle me-1"></i>Anular
+                    <i className="fas fa-times-circle me-1"></i>Cancelar
                   </button>
                 </>
               )}
@@ -308,7 +287,7 @@ const OrdenDetail = () => {
                 <div className="mb-3">
                   <label className="form-label">Nuevo Estado</label>
                   <select className="form-select" value={nuevoEstado} onChange={(e) => setNuevoEstado(e.target.value)}>
-                    {ESTADOS_ORDEN.filter(e => e !== 'Anulada').map(e => (
+                    {ESTADOS_ORDEN.map(e => (
                       <option key={e} value={e}>{e}</option>
                     ))}
                   </select>

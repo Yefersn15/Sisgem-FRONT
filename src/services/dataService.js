@@ -1172,20 +1172,36 @@ export const seedRoles = async () => {
 };
 
 // ----------------------------------------------------------------------
-// CATÁLOGO
+// CATÁLOGO (Nueva tabla)
 // ----------------------------------------------------------------------
-export const getCatalogo = async () => {
-  const data = await request('/api/catalogo');
+export const getCatalogo = async (proveedorId) => {
+  const url = proveedorId ? `/api/catalogo?proveedorId=${proveedorId}` : '/api/catalogo';
+  const data = await request(url);
   return Array.isArray(data) ? data : [];
 };
 
-// Nota: el backend no tiene /api/catalogo/proveedor/:id
-// Usar getProductos() y filtrar por proveedorId en el frontend
+export const getCatalogoItemById = async (id) => {
+  const data = await request(`/api/catalogo/${id}`);
+  return data;
+};
+
+export const createCatalogoItem = async (item) => {
+  const data = await request('/api/catalogo', { method: 'POST', body: item });
+  return data;
+};
+
+export const updateCatalogoItem = async (id, item) => {
+  const data = await request(`/api/catalogo/${id}`, { method: 'PUT', body: item });
+  return data;
+};
+
+export const deleteCatalogoItem = async (id) => {
+  await request(`/api/catalogo/${id}`, { method: 'DELETE' });
+};
+
+// Alias para compatibilidad - usa la nueva tabla catalogo
 export const getCatalogoByProveedor = async (proveedorId) => {
-  // El backend no tiene esta ruta - devolver array vacío
-  // El componente CatalogoProveedorList debe usar getProductos().filter() en su lugar
-  console.warn('getCatalogoByProveedor: endpoint no existe en backend, use getProductos().filter(p => p.proveedorId === id)');
-  return [];
+  return await getCatalogo(proveedorId);
 };
 
 // ----------------------------------------------------------------------
@@ -1429,10 +1445,17 @@ export const clearProviderCart = (proveedorId) => {
 export const getProviderCartItemsWithDetails = async (proveedorId) => {
   const cart = getProviderCart(proveedorId);
   const productos = await getProductos();
-  // No hay catálogo separado - solo productos del proveedor
+  const catalogoItems = await getCatalogo(proveedorId);
+
   return cart.map(item => {
-    const producto = productos.find(p => String(p.id) === String(item.refId)) || { id: item.refId, nombre: '(desconocido)', precioUnitario: 0 };
-    return { source: 'producto', producto, cantidad: item.cantidad };
+    if (item.source === 'producto') {
+      const producto = productos.find(p => String(p.id) === String(item.refId)) || { id: item.refId, nombre: '(desconocido)', precioUnitario: 0 };
+      return { source: 'producto', producto, cantidad: item.cantidad, refId: item.refId };
+    } else if (item.source === 'catalogo') {
+      const catItem = catalogoItems.find(c => String(c.id) === String(item.refId)) || { id: item.refId, nombre: '(desconocido)', precioSugerido: 0 };
+      return { source: 'catalogo', catalogItem: catItem, cantidad: item.cantidad, refId: item.refId };
+    }
+    return item;
   });
 };
 
@@ -1461,7 +1484,7 @@ export const deleteDireccion = async (id) => {
 // ----------------------------------------------------------------//
 // CONSTANTES
 // ----------------------------------------------------------------//
-export const ESTADOS_ORDEN = ['Pendiente', 'Aprobada', 'Enviada', 'Recibida', 'Cancelada', 'Anulada'];
+export const ESTADOS_ORDEN = ['borrador', 'enviada', 'confirmada', 'recibida', 'cancelada'];
 export const ESTADOS_VENTA = ['Pendiente', 'PorValidar', 'Completada', 'Anulada', 'Rechazada', 'Cancelado'];
 export const METODOS_PAGO = ['Efectivo', 'Tarjeta', 'Abono', 'PagoTransferencia'];
 
@@ -2110,28 +2133,6 @@ export const importCatalogoProveedor = async (proveedorId, file, onSuccess, onEr
   // La importación de catálogo ya no existe como entidad separada
   // Se puede importar productos con las funciones existentes
   onError && onError(new Error('Importación de catálogo no disponible. Use importación de productos.'));
-};
-
-// DEPRECATED: El backend no tiene endpoint /api/catalogo
-// Estas funciones ya no se usan - el catálogo de proveedores son productos con proveedorId
-export const createCatalogoItem = async (item) => {
-  console.warn('createCatalogoItem: endpoint no existe en backend');
-  throw new Error('Catálogo separado no existe - use productos');
-};
-
-export const getCatalogoItemById = async (id) => {
-  console.warn('getCatalogoItemById: endpoint no existe en backend');
-  throw new Error('Catálogo separado no existe - use productos');
-};
-
-export const updateCatalogoItem = async (id, item) => {
-  console.warn('updateCatalogoItem: endpoint no existe en backend');
-  throw new Error('Catálogo separado no existe - use productos');
-};
-
-export const deleteCatalogoItem = async (id) => {
-  console.warn('deleteCatalogoItem: endpoint no existe en backend');
-  throw new Error('Catálogo separado no existe - use productos');
 };
 
 // ----------------------------------------------------------------//

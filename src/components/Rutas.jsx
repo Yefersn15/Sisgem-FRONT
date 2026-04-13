@@ -21,6 +21,7 @@ import OrdenDetail from '../pages/ordenes/OrdenDetail';
 import CatalogoProveedorList from '../pages/catalogo/CatalogoProveedorList';
 import CatalogoCreate from '../pages/catalogo/CatalogoCreate';
 import CatalogoEdit from '../pages/catalogo/CatalogoEdit';
+import CatalogoManage from '../pages/catalogo/CatalogoManage';
 import OrdenCompraDraft from '../pages/ordenes/OrdenCompraDraft';
 
 // Admin
@@ -32,6 +33,7 @@ import PagoCreate from '../pages/pagos/PagoCreate';
 import PagoDetail from '../pages/pagos/PagoDetail';
 import MisPagos from '../pages/pagos/MisPagos';
 import UsersList from '../pages/usuarios/UsersList';
+import UsuarioEdit from '../pages/usuarios/UsuarioEdit';
 import RolesList from '../pages/roles/RolesList';
 import RoleCreate from '../pages/roles/RoleCreate';
 import RoleEdit from '../pages/roles/RoleEdit';
@@ -88,6 +90,7 @@ const Rutas = () => {
 
       {/* === CATÁLOGO DE PROVEEDORES === */}
       <Route path="/proveedores/:id/catalogo" element={<PrivateRoute module="Proveedores"><CatalogoProveedorList /></PrivateRoute>} />
+      <Route path="/proveedores/:id/catalogo/gestionar" element={<PrivateRoute module="Proveedores"><CatalogoManage /></PrivateRoute>} />
       <Route path="/proveedores/:id/catalogo/nuevo" element={<PrivateRoute module="Proveedores"><CatalogoCreate /></PrivateRoute>} />
       <Route path="/proveedores/:id/orden" element={<PrivateRoute module="Proveedores"><OrdenCompraDraft /></PrivateRoute>} />
       <Route path="/catalogo/editar/:id" element={<PrivateRoute module="Proveedores"><CatalogoEdit /></PrivateRoute>} />

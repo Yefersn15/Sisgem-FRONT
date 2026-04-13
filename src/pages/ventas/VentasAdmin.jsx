@@ -1,13 +1,19 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { getVentas, createVenta, updateVenta, formatPrice, exportToExcel, getTotalPagadoByVenta } from '../../services/dataService';
+import { getVentas, createVenta, updateVenta, formatPrice, exportToExcel, getTotalPagadoByVenta, getUsuarios, getProductos } from '../../services/dataService';
 import useDebounce from '../../hooks/useDebounce';
 
 const METODOS_PAGO = ['Efectivo', 'Transferencia', 'Abono'];
 const ESTADOS_VENTA = ['pendiente', 'por_validar', 'completada', 'anulada', 'rechazada', 'cancelado'];
+const TIPOS_PEDIDO = [
+  { value: 'mostrador', label: 'Mostrador' },
+  { value: 'domicilio', label: 'Domicilio' }
+];
 
 const VentasAdmin = () => {
   const [ventas, setVentas] = useState([]);
+  const [usuarios, setUsuarios] = useState([]);
+  const [productos, setProductos] = useState([]);
   const [filterEstado, setFilterEstado] = useState('');
   const [filterMetodo, setFilterMetodo] = useState('');
   const [query, setQuery] = useState('');
@@ -16,12 +22,41 @@ const VentasAdmin = () => {
   const itemsPerPage = 20;
   const [modal, setModal] = useState(null);
   const [ventaSeleccionada, setVentaSeleccionada] = useState(null);
-  const [form, setForm] = useState({ metodoPago: 'Efectivo', items: [], notas: '', delivery: false, direccion: '', telefono: '' });
-  const [item, setItem] = useState({ nombre: '', cantidad: '', precio: '', productoId: '' });
+  const [form, setForm] = useState({ 
+    metodoPago: 'Efectivo', 
+    items: [], 
+    notas: '', 
+    delivery: false, 
+    direccion: '', 
+    telefono: '',
+    tipoVenta: 'mostrador',
+    usuarioId: '',
+    nombreComprador: ''
+  });
+  const [item, setItem] = useState({ productoId: '', nombre: '', cantidad: 1, precio: 0 });
+  const [seleccionarUsuario, setSeleccionarUsuario] = useState(true);
 
   useEffect(() => {
     cargarVentas();
+    cargarUsuarios();
+    cargarProductos();
   }, [debounced, filterEstado, filterMetodo]);
+
+  const cargarUsuarios = async () => {
+    const lista = await getUsuarios();
+    setUsuarios(lista);
+  };
+
+  const cargarProductos = async () => {
+    try {
+      let lista = await getProductos();
+      if (!Array.isArray(lista)) lista = lista?.data || lista || [];
+      setProductos(lista);
+    } catch (e) {
+      console.error('Error cargando productos:', e);
+      setProductos([]);
+    }
+  };
 
   const cargarVentas = async () => {
     let lista = await getVentas();
@@ -79,20 +114,48 @@ const VentasAdmin = () => {
   const getTotalVentas = () => ventas.reduce((sum, v) => sum + (v.total || 0), 0);
 
   const handleCreate = () => {
-    setForm({ metodoPago: 'Efectivo', items: [], notas: '', delivery: false, direccion: '', telefono: '' });
+    setForm({ 
+      metodoPago: 'Efectivo', 
+      items: [], 
+      notas: '', 
+      delivery: false, 
+      direccion: '', 
+      telefono: '',
+      tipoVenta: 'mostrador',
+      usuarioId: '',
+      nombreComprador: ''
+    });
+    setItem({ productoId: '', nombre: '', cantidad: 1, precio: 0 });
+    setSeleccionarUsuario(true);
     setModal('crear');
+  };
+
+  const handleSelectProducto = (productoId) => {
+    const producto = productos.find(p => p._id === productoId || p.id === productoId);
+    if (producto) {
+      setItem({
+        productoId: producto._id || producto.id,
+        nombre: producto.nombre,
+        cantidad: 1,
+        precio: producto.precioVenta || producto.precio || 0
+      });
+    }
   };
 
   const handleEdit = (venta) => {
     setVentaSeleccionada(venta);
     setForm({
       metodoPago: venta.metodoPago,
-      items: venta.detalleVenta.map(i => ({ ...i, id: Date.now() })),
+      items: venta.detalleVenta?.map(i => ({ ...i, id: Date.now() })) || [],
       notas: venta.observaciones || '',
       delivery: venta.delivery,
       direccion: venta.direccion || '',
-      telefono: venta.telefono || ''
+      telefono: venta.telefono || '',
+      tipoVenta: venta.tipo_venta === 'domicilio' ? 'domicilio' : 'mostrador',
+      usuarioId: venta.usuarioId || '',
+      nombreComprador: ''
     });
+    setSeleccionarUsuario(true);
     setModal('editar');
   };
 
@@ -111,7 +174,7 @@ const VentasAdmin = () => {
         id: Date.now()
       }]
     }));
-    setItem({ nombre: '', cantidad: '', precio: '', productoId: '' });
+    setItem({ productoId: '', nombre: '', cantidad: 1, precio: 0 });
   };
 
   const removeItem = (id) => setForm(prev => ({ ...prev, items: prev.items.filter(i => i.id !== id) }));
@@ -120,9 +183,16 @@ const VentasAdmin = () => {
 
   const guardarVenta = async () => {
     if (form.items.length === 0) return alert('Agregue al menos un producto');
+    if (!seleccionarUsuario && !form.nombreComprador.trim()) return alert('Ingrese nombre del comprador');
+    if (seleccionarUsuario && !form.usuarioId) return alert('Seleccione un usuario');
+    if (form.delivery && !form.direccion.trim()) return alert('Ingrese dirección de entrega');
+    if (form.delivery && !form.telefono.trim()) return alert('Ingrese teléfono de contacto');
+    
     try {
       const nueva = await createVenta({
-        usuarioId: ventaSeleccionada?.usuarioId || null,
+        usuarioId: seleccionarUsuario ? form.usuarioId : null,
+        nombre_comprador: seleccionarUsuario ? undefined : form.nombreComprador.trim(),
+        tipo_venta: form.delivery ? 'domicilio' : 'mostrador',
         metodoPago: form.metodoPago,
         detalleVenta: form.items.map(i => ({
           productoId: i.productoId,
@@ -400,35 +470,70 @@ const VentasAdmin = () => {
       {/* Modal Crear/Editar */}
       {(modal === 'crear' || modal === 'editar') && (
         <div className="modal fade show" style={{ display: 'block', backgroundColor: 'rgba(0,0,0,0.5)' }}>
-          <div className="modal-dialog modal-dialog-centered modal-lg">
+          <div className="modal-dialog modal-dialog-centered modal-lg m-auto">
             <div className="modal-content">
-              <div className="modal-header">
-                <h5 className="modal-title">{modal === 'crear' ? 'Nueva Venta' : 'Editar Venta'}</h5>
-                <button type="button" className="btn-close" onClick={() => setModal(null)}></button>
-              </div>
-              <div className="modal-body">
+              <div className="modal-body p-3" style={{ maxHeight: '90vh', overflowY: 'auto' }}>
+                <button type="button" className="btn-close position-absolute top-0 end-0 m-3" onClick={() => setModal(null)}></button>
                 <div className="row g-3">
-                  <div className="col-md-4">
+                  <div className="col-12 mb-3">
+                    <label className="form-label fw-bold">¿Quién compra?</label>
+                    <div className="d-flex gap-3">
+                      <div className="form-check">
+                        <input type="radio" className="form-check-input" id="selUserV" checked={seleccionarUsuario} onChange={() => setSeleccionarUsuario(true)} disabled={modal === 'editar'} />
+                        <label className="form-check-label" htmlFor="selUserV">Usuario registrado</label>
+                      </div>
+                      <div className="form-check">
+                        <input type="radio" className="form-check-input" id="selNombreV" checked={!seleccionarUsuario} onChange={() => setSeleccionarUsuario(false)} disabled={modal === 'editar'} />
+                        <label className="form-check-label" htmlFor="selNombreV">Solo nombre del comprador</label>
+                      </div>
+                    </div>
+                  </div>
+
+                  {seleccionarUsuario ? (
+                    <div className="col-md-6">
+                      <label className="form-label">Seleccionar Usuario</label>
+                      <select className="form-select" value={form.usuarioId} onChange={(e) => setForm({ ...form, usuarioId: e.target.value })} disabled={modal === 'editar'}>
+                        <option value="">Seleccione...</option>
+                        {usuarios.map(u => (
+                          <option key={u.id} value={u.id}>{u.nombre} {u.apellido} ({u.documento})</option>
+                        ))}
+                      </select>
+                    </div>
+                  ) : (
+                    <div className="col-md-6">
+                      <label className="form-label">Nombre del Comprador</label>
+                      <input className="form-control" value={form.nombreComprador} onChange={(e) => setForm({ ...form, nombreComprador: e.target.value })} placeholder="Nombre completo" disabled={modal === 'editar'} />
+                    </div>
+                  )}
+
+                  <div className="col-md-3">
+                    <label className="form-label">Tipo de Venta</label>
+                    <select className="form-select" value={form.tipoVenta} onChange={(e) => setForm({ ...form, tipoVenta: e.target.value, delivery: e.target.value === 'domicilio' })}>
+                      {TIPOS_PEDIDO.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
+                    </select>
+                  </div>
+
+                  <div className="col-md-3">
                     <label className="form-label">Método de Pago</label>
                     <select className="form-select" value={form.metodoPago} onChange={(e) => setForm({ ...form, metodoPago: e.target.value })}>
                       {METODOS_PAGO.map(m => <option key={m} value={m}>{m}</option>)}
                     </select>
                   </div>
 
-                  <div className="col-md-4">
+                  <div className="col-md-6">
                     <div className="form-check mt-4">
-                      <input type="checkbox" className="form-check-input" id="delivery" checked={!!form.delivery} onChange={(e) => setForm({ ...form, delivery: e.target.checked })} />
-                      <label className="form-check-label" htmlFor="delivery">Delivery</label>
+                      <input type="checkbox" className="form-check-input" id="deliveryV" checked={!!form.delivery} onChange={(e) => setForm({ ...form, delivery: e.target.checked, tipoVenta: e.target.checked ? 'domicilio' : 'mostrador' })} />
+                      <label className="form-check-label" htmlFor="deliveryV">Requiere Delivery/Domicilio</label>
                     </div>
                   </div>
 
                   {form.delivery && (
                     <>
-                      <div className="col-md-6">
+                      <div className="col-md-4">
                         <label className="form-label">Dirección</label>
                         <input className="form-control" value={form.direccion} onChange={(e) => setForm({ ...form, direccion: e.target.value })} />
                       </div>
-                      <div className="col-md-6">
+                      <div className="col-md-4">
                         <label className="form-label">Teléfono</label>
                         <input className="form-control" value={form.telefono} onChange={(e) => setForm({ ...form, telefono: e.target.value })} />
                       </div>
@@ -436,20 +541,28 @@ const VentasAdmin = () => {
                   )}
 
                   <div className="col-12">
-                    <label className="form-label">Productos</label>
+                    <label className="form-label fw-bold">Agregar Productos</label>
                     <div className="card mb-2">
                       <div className="card-body py-2">
                         <div className="row g-2 align-items-end">
-                          <div className="col-md-5">
-                            <input className="form-control form-control-sm" placeholder="Producto" value={item.nombre} onChange={(e) => setItem({ ...item, nombre: e.target.value })} />
+                          <div className="col-md-4">
+                            <label className="form-label small mb-1">Producto</label>
+                            <select className="form-select form-select-sm" value={item.productoId} onChange={(e) => handleSelectProducto(e.target.value)}>
+                              <option value="">Seleccione producto...</option>
+                              {productos.map(p => (
+                                <option key={p._id || p.id} value={p._id || p.id}>{p.nombre}</option>
+                              ))}
+                            </select>
                           </div>
                           <div className="col-md-2">
-                            <input className="form-control form-control-sm" type="number" placeholder="Cant" value={item.cantidad} onChange={(e) => setItem({ ...item, cantidad: e.target.value })} />
+                            <label className="form-label small mb-1">Cantidad</label>
+                            <input className="form-control form-control-sm" type="number" min="1" value={item.cantidad} onChange={(e) => setItem({ ...item, cantidad: parseInt(e.target.value) || 1 })} />
                           </div>
                           <div className="col-md-2">
-                            <input className="form-control form-control-sm" type="number" placeholder="Precio" value={item.precio} onChange={(e) => setItem({ ...item, precio: e.target.value })} />
+                            <label className="form-label small mb-1">Precio</label>
+                            <input className="form-control form-control-sm" type="number" value={item.precio} onChange={(e) => setItem({ ...item, precio: parseFloat(e.target.value) || 0 })} />
                           </div>
-                          <div className="col-md-2">
+                          <div className="col-md-3">
                             <button className="btn btn-sm btn-primary w-100" onClick={addItem}>
                               <i className="fas fa-plus"></i> Agregar
                             </button>

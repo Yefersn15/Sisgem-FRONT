@@ -178,6 +178,15 @@ const AdminCategorias = () => {
       <div className="card mb-4">
         <div className="card-body">
           <div className="row g-3">
+                        <div className="col-md-4">
+              <input
+                type="text"
+                className="form-control"
+                placeholder="Buscar por nombre, descripción o ID..."
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+              />
+            </div>
             <div className="col-md-3">
               <select 
                 className="form-select" 
@@ -202,15 +211,6 @@ const AdminCategorias = () => {
                 <option value="productos-asc">Productos (menos a más)</option>
                 <option value="productos-desc">Productos (más a menos)</option>
               </select>
-            </div>
-            <div className="col-md-4">
-              <input
-                type="text"
-                className="form-control"
-                placeholder="Buscar por nombre, descripción o ID..."
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-              />
             </div>
             <div className="col-md-2">
               <button

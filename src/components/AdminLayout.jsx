@@ -8,6 +8,7 @@ import PagoCreate from '../pages/pagos/PagoCreate';
 import PagoDetail from '../pages/pagos/PagoDetail';
 import PedidosAdmin from '../pages/pedidos/PedidosAdmin';
 import UsersList from '../pages/usuarios/UsersList';
+import UsuarioEdit from '../pages/usuarios/UsuarioEdit';
 import RolesList from '../pages/roles/RolesList';
 import RoleCreate from '../pages/roles/RoleCreate';
 import RoleEdit from '../pages/roles/RoleEdit';
@@ -18,6 +19,7 @@ import ProveedoresList from '../pages/proveedores/ProveedoresList';
 import ProveedorCreate from '../pages/proveedores/ProveedorCreate';
 import ProveedorEdit from '../pages/proveedores/ProveedorEdit';
 import ProveedorDetail from '../pages/proveedores/ProveedorDetail';
+import CatalogoManage from '../pages/catalogo/CatalogoManage';
 import PrivateRoute from './PrivateRoute';
 import { useAuth } from '../context/AuthContext';
 
@@ -62,6 +64,8 @@ const AdminHeader = () => {
     if (location.pathname === '/admin/domicilios') return 'Gestión de Domicilios';
     if (location.pathname === '/admin/pagos') return 'Gestión de Pagos';
     if (location.pathname === '/admin/usuarios') return 'Gestión de Usuarios';
+    if (location.pathname === '/admin/usuarios/nuevo') return 'Nuevo Usuario';
+    if (location.pathname.startsWith('/admin/usuarios/editar')) return 'Editar Usuario';
     if (location.pathname === '/admin/roles') return 'Gestión de Roles';
     if (location.pathname === '/admin/productos') return 'Inventario';
     if (location.pathname === '/admin/marcas') return 'Inventario';
@@ -291,6 +295,8 @@ const AdminLayout = () => {
     if (location.pathname === '/admin/domicilios') return 'Gestión de Domicilios';
     if (location.pathname === '/admin/pagos') return 'Gestión de Pagos';
     if (location.pathname === '/admin/usuarios') return 'Gestión de Usuarios';
+    if (location.pathname === '/admin/usuarios/nuevo') return 'Nuevo Usuario';
+    if (location.pathname.startsWith('/admin/usuarios/editar')) return 'Editar Usuario';
     if (location.pathname === '/admin/roles') return 'Gestión de Roles';
     if (location.pathname === '/admin/roles/nuevo') return 'Nuevo Rol';
     if (location.pathname.startsWith('/admin/roles/editar')) return 'Editar Rol';
@@ -320,9 +326,12 @@ const AdminLayout = () => {
             <Route path="proveedores" element={<PrivateRoute module="Proveedores"><ProveedoresList /></PrivateRoute>} />
             <Route path="proveedores/nuevo" element={<PrivateRoute module="Proveedores"><ProveedorCreate /></PrivateRoute>} />
             <Route path="proveedores/editar/:id" element={<PrivateRoute module="Proveedores"><ProveedorEdit /></PrivateRoute>} />
-            <Route path="proveedores/:id" element={<PrivateRoute module="Proveedores"><ProveedorDetail /></PrivateRoute>} />
-
+<Route path="proveedores/:id" element={<PrivateRoute module="Proveedores"><ProveedorDetail /></PrivateRoute>} />
+            <Route path="proveedores/:id/catalogo/gestionar" element={<PrivateRoute module="Proveedores"><CatalogoManage /></PrivateRoute>} />
+            
             <Route path="usuarios" element={<PrivateRoute module="Usuarios"><UsersList /></PrivateRoute>} />
+            <Route path="usuarios/nuevo" element={<PrivateRoute module="Usuarios"><UsuarioEdit /></PrivateRoute>} />
+            <Route path="usuarios/editar/:id" element={<PrivateRoute module="Usuarios"><UsuarioEdit /></PrivateRoute>} />
             <Route path="roles" element={<PrivateRoute module="Configuración"><RolesList /></PrivateRoute>} />
             <Route path="roles/nuevo" element={<PrivateRoute module="Configuración"><RoleCreate /></PrivateRoute>} />
             <Route path="roles/editar/:id" element={<PrivateRoute module="Configuración"><RoleEdit /></PrivateRoute>} />
