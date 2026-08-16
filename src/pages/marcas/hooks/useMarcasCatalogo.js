@@ -2,7 +2,6 @@
 import { useState, useEffect } from 'react';
 import useDebounce from '../../../hooks/useDebounce';
 import { getMarcas } from '../services/marcasService';
-import { getProveedores } from '../../../services/dataService';
 
 export const useMarcasCatalogo = () => {
   const [marcas, setMarcas] = useState([]);
@@ -14,8 +13,6 @@ export const useMarcasCatalogo = () => {
     let lista = await getMarcas();
     if (!Array.isArray(lista)) lista = lista && lista.data ? lista.data : (lista || []);
 
-    const proveedores = await getProveedores().catch(() => []);
-
     if (debouncedSearch) {
       lista = (lista || []).filter((m) => (m.nombre || '').toLowerCase().includes(debouncedSearch.toLowerCase()));
     }
@@ -26,9 +23,7 @@ export const useMarcasCatalogo = () => {
       lista.sort((a, b) => (b.nombre || '').localeCompare(a.nombre || ''));
     }
 
-    const provMap = (proveedores || []).reduce((acc, p) => { acc[String(p.id)] = p; return acc; }, {});
-    const enriched = (lista || []).map((m) => ({ ...m, proveedorNombre: provMap[String(m.proveedorId)]?.nombre || '' }));
-    setMarcas(enriched);
+    setMarcas(lista || []);
   };
 
   useEffect(() => {

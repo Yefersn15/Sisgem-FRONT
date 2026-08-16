@@ -59,8 +59,6 @@ const AdminDashboard = () => {
         <StatCard label="Ventas del mes" value={formatPrice(stats.ventasMes)} icon="fa-chart-line" colorClass="success" />
         <StatCard label="Productos" value={stats.productos} icon="fa-box" colorClass="warning" footerTo="/productos" footerLabel="Ver productos" />
         <StatCard label="Usuarios" value={stats.usuarios} icon="fa-users" colorClass="info" footerTo="/admin/usuarios" footerLabel="Ver usuarios" />
-        <StatCard label="Proveedores" value={stats.proveedores} icon="fa-truck" colorClass="secondary" footerTo="/admin/proveedores" footerLabel="Ver proveedores" />
-        <StatCard label="Órdenes Compra" value={stats.ordenes} icon="fa-clipboard-list" colorClass="danger" footerTo="/ordenes" footerLabel="Ver órdenes" />
         <StatCard label="Domicilios Pendientes" value={stats.domiciliosPendientes} icon="fa-shipping-fast" colorClass="warning" footerTo="/admin/domicilios" footerLabel="Ver domicilios" />
       </div>
 

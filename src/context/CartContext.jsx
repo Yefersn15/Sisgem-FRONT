@@ -1,5 +1,5 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
-import { getCart, addToCart as add, removeFromCart as remove, updateCartItem as update, clearCart as clear, getProviderCartItemsWithDetails as getProviderCartItemsWithDetailsService, addToProviderCart as addToProviderCartService, removeFromProviderCart as removeFromProviderCartService, updateProviderCartItem as updateProviderCartItemService, getProviderCart as getProviderCartService, clearProviderCart as clearProviderCartService } from '../services/dataService';
+import { getCart, addToCart as add, removeFromCart as remove, updateCartItem as update, clearCart as clear } from '../services/dataService';
 import { useAuth } from './AuthContext';
 
 const CartContext = createContext();
@@ -11,7 +11,6 @@ export const CartProvider = ({ children }) => {
   const user = auth?.user;
   const [cart, setCart] = useState([]);
   const [cartItemsWithDetails, setCartItemsWithDetails] = useState([]);
-  const [providerCartsCache, setProviderCartsCache] = useState({});
   const [loading, setLoading] = useState(true);
 
   // Cargar carrito desde la API cuando el usuario esté autenticado
@@ -103,44 +102,6 @@ export const CartProvider = ({ children }) => {
     }
   };
 
-  // --- Funciones para carrito del proveedor (órdenes de compra) ---
-  const addToProviderCart = (proveedorId, refId, cantidad = 1, source = 'producto') => {
-    const newCart = addToProviderCartService(proveedorId, refId, cantidad, source);
-    setProviderCartsCache(prev => ({ ...prev, [proveedorId]: newCart }));
-    return newCart;
-  };
-
-  const removeFromProviderCart = (proveedorId, refId, source = 'producto') => {
-    const newCart = removeFromProviderCartService(proveedorId, refId, source);
-    setProviderCartsCache(prev => ({ ...prev, [proveedorId]: newCart }));
-    return newCart;
-  };
-
-  const updateProviderCartItem = (proveedorId, refId, cantidad, source = 'producto') => {
-    const newCart = updateProviderCartItemService(proveedorId, refId, cantidad, source);
-    setProviderCartsCache(prev => ({ ...prev, [proveedorId]: newCart }));
-    return newCart;
-  };
-
-  const getProviderCartItemsWithDetails = (proveedorId) => {
-    try {
-      return getProviderCartItemsWithDetailsService(proveedorId);
-    } catch (e) {
-      return [];
-    }
-  };
-
-  const getProviderCart = (proveedorId) => getProviderCartService(proveedorId);
-
-  const clearProviderCart = (proveedorId) => {
-    clearProviderCartService(proveedorId);
-    setProviderCartsCache(prev => {
-      const copy = { ...prev };
-      delete copy[proveedorId];
-      return copy;
-    });
-  };
-
   // Calcular total
   const subtotal = cartItemsWithDetails.reduce((acc, item) => {
     const precio = item.producto?.precio || item.producto?.precioUnitario || 0;
@@ -154,13 +115,6 @@ export const CartProvider = ({ children }) => {
     removeFromCart,
     updateCartItem,
     clearCart,
-    // provider cart API
-    addToProviderCart,
-    removeFromProviderCart,
-    updateProviderCartItem,
-    getProviderCartItemsWithDetails,
-    getProviderCart,
-    clearProviderCart,
     itemCount: cart.reduce((acc, item) => acc + item.cantidad, 0),
     subtotal,
     loading

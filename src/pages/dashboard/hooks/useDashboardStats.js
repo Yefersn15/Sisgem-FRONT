@@ -1,7 +1,7 @@
 // src/pages/dashboard/hooks/useDashboardStats.js
 import { useState, useEffect } from 'react';
 import { getTopProductos, getTopByBrand, getTopByCategory } from '../services/dashboardService';
-import { getVentas, getProductos, getProveedores, getUsuarios, getOrdenesCompra, getDomicilios } from '../../../services/dataService';
+import { getVentas, getProductos, getUsuarios, getDomicilios } from '../../../services/dataService';
 
 const DIAS_POR_FILTRO = { dia: 1, semana: 7, mes: 30, trimestre: 90, semestre: 180, año: 365 };
 
@@ -11,9 +11,7 @@ export const useDashboardStats = () => {
     ventasMes: 0,
     ventasSemana: 0,
     productos: 0,
-    proveedores: 0,
     usuarios: 0,
-    ordenes: 0,
     domiciliosPendientes: 0
   });
   const [ventasRecientes, setVentasRecientes] = useState([]);
@@ -28,9 +26,7 @@ export const useDashboardStats = () => {
     const cargarDatos = async () => {
       const ventas = (await getVentas()) || [];
       const productos = (await getProductos()) || [];
-      const proveedores = (await getProveedores()) || [];
       const usuarios = (await getUsuarios()) || [];
-      const ordenes = (await getOrdenesCompra()) || [];
       const domicilios = (await getDomicilios()) || [];
 
       const hoy = new Date();
@@ -61,9 +57,7 @@ export const useDashboardStats = () => {
         ventasMes: ventasMes.reduce((sum, v) => sum + (v.total || 0), 0),
         ventasSemana: ventasSemana.reduce((sum, v) => sum + (v.total || 0), 0),
         productos: productos.length,
-        proveedores: proveedores.length,
         usuarios: usuarios.length,
-        ordenes: ordenes.length,
         domiciliosPendientes: domPendientes.length
       });
 

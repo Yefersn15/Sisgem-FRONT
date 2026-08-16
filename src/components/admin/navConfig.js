@@ -35,15 +35,6 @@ export const NAV_GROUPS = [
     ],
   },
   {
-    key: 'proveedores',
-    label: 'Proveedores',
-    icon: 'fa-truck-loading',
-    permissions: ['Proveedores'],
-    items: [
-      { to: '/admin/proveedores', icon: 'fa-truck-loading', label: 'Proveedores' },
-    ],
-  },
-  {
     key: 'sistema',
     label: 'Sistema',
     icon: 'fa-cogs',

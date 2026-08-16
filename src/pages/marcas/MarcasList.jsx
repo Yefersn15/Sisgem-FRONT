@@ -67,9 +67,6 @@ const MarcasList = () => {
                   )}
                   <h5 className="card-title">{marca.nombre}</h5>
                   <p className="card-text text-muted small">{marca.descripcion}</p>
-                  {marca.proveedorId && (
-                    <p className="small text-muted mb-2">Proveedor: {marca.proveedorNombre || 'N/D'}</p>
-                  )}
                 </div>
               </div>
             </div>

@@ -1,16 +1,14 @@
-import { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { createProducto } from './services/productosService';
-import { getMarcasByProveedor } from '../../services/dataService';
-import { getMarcas } from '../marcas/services/marcasService';
 import { useProductoForm } from './hooks/useProductoForm';
 import { useProductoReferenceData } from './hooks/useProductoReferenceData';
 import ProductoFormFields from './components/ProductoFormFields';
 
 const ProductoCreate = () => {
   const navigate = useNavigate();
-  const { marcas, setMarcas, categorias, proveedores } = useProductoReferenceData();
-  const { formData, setFormData, errors, setErrors, handleChange, validate } = useProductoForm({
+  const { marcas, categorias } = useProductoReferenceData();
+  const { formData, errors, setErrors, handleChange, validate } = useProductoForm({
     nombre: '',
     descripcion: '',
     precioUnitario: '',
@@ -19,35 +17,10 @@ const ProductoCreate = () => {
     fotoUrl: '',
     categoriaId: '',
     marcaId: '',
-    proveedorId: '',
     activo: true,
     minStock: 1,
   });
   const [loading, setLoading] = useState(false);
-
-  // Si el usuario selecciona proveedor, limitar marcas a las vinculadas a ese proveedor (si hay)
-  useEffect(() => {
-    (async () => {
-      if (formData.proveedorId) {
-        const byProv = (await getMarcasByProveedor(formData.proveedorId)) || [];
-        setMarcas(byProv);
-        if (formData.marcaId) {
-          const ok = byProv.some(m => String(m.id) === String(formData.marcaId));
-          if (!ok) setFormData(prev => ({ ...prev, marcaId: '' }));
-        }
-      } else {
-        setMarcas((await getMarcas()) || []);
-      }
-    })();
-  }, [formData.proveedorId]);
-
-  // Preseleccionar proveedor si viene en la URL (ruta opcional /proveedores/:proveedorId/productos/nuevo)
-  const { proveedorId: proveedorParam } = useParams();
-  useEffect(() => {
-    if (proveedorParam) {
-      setFormData(prev => ({ ...prev, proveedorId: proveedorParam }));
-    }
-  }, [proveedorParam]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -88,7 +61,6 @@ const ProductoCreate = () => {
               onChange={handleChange}
               categorias={categorias}
               marcas={marcas}
-              proveedores={proveedores}
             />
 
             <div className="d-grid gap-2 d-md-flex justify-content-md-end">

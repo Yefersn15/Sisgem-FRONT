@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { createMarca, createMarcaAndLinkProveedor } from './services/marcasService';
+import { createMarca } from './services/marcasService';
 import { useMarcaForm } from './hooks/useMarcaForm';
 import MarcaFormFields from './components/MarcaFormFields';
 
@@ -14,8 +14,6 @@ const MarcaCreate = () => {
     activo: true,
   });
   const [loading, setLoading] = useState(false);
-  const [proveedores] = useState([]);
-  const [selectedProveedor, setSelectedProveedor] = useState('');
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -24,11 +22,7 @@ const MarcaCreate = () => {
 
     setLoading(true);
     try {
-      if (selectedProveedor) {
-        createMarcaAndLinkProveedor(formData, selectedProveedor);
-      } else {
-        createMarca(formData);
-      }
+      createMarca(formData);
     } finally {
       setLoading(false);
     }
@@ -47,9 +41,6 @@ const MarcaCreate = () => {
               formData={formData}
               errors={errors}
               onChange={handleChange}
-              proveedores={proveedores}
-              selectedProveedor={selectedProveedor}
-              onProveedorChange={(e) => setSelectedProveedor(e.target.value)}
             />
 
             <div className="d-grid gap-2 d-md-flex justify-content-md-end">

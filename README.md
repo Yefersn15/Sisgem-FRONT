@@ -147,7 +147,6 @@ El admin se sirve bajo `/admin/*` con un layout propio (`AdminLayout`, en `src/c
 - **Marcas** (`/admin/marcas`): CRUD completo de marcas.
 - **Productos** (`/admin/productos`): CRUD completo de productos.
 - **Banners** (`/admin/banners`): CRUD de los banners publicitarios del Home, con selector de plantilla/layout, posicionamiento de texto y subida de imágenes.
-- **Proveedores** (`/admin/proveedores`): CRUD completo de proveedores, con acceso al detalle, al catálogo y a la creación de órdenes de compra.
 
 ### 11. Sistema de Roles y Permisos
 
@@ -155,8 +154,8 @@ El sistema cuenta con un mecanismo de permisos que protege las rutas mediante el
 
 - **Rutas públicas**: Home, Productos (listado y filtros por marca/categoría), Carrito, Login, Register.
 - **Rutas protegidas**: Requieren autenticación y, en la mayoría de rutas administrativas, un permiso de módulo específico. Los usuarios con rol ADMIN tienen acceso a todo.
-- **Módulos usados para proteger rutas**: `Ventas`, `Inventario` (agrupa productos/marcas/categorías del admin), `Proveedores`, `Usuarios`, `Configuración` (roles), `Banners` y `Compras` (órdenes de compra), además de `Productos`, `Marcas` y `Categorías` para algunas rutas públicas de creación/edición.
-- **Roles**: El administrador puede crear y editar roles (`/admin/roles`) asignando permisos granulares con formato `modulo.accion` (por ejemplo `ventas.read`, `productos.write`, `proveedores.delete`, `reportes.read`).
+- **Módulos usados para proteger rutas**: `Ventas`, `Inventario` (agrupa productos/marcas/categorías del admin), `Usuarios`, `Configuración` (roles) y `Banners`, además de `Productos`, `Marcas` y `Categorías` para algunas rutas públicas de creación/edición.
+- **Roles**: El administrador puede crear y editar roles (`/admin/roles`) asignando permisos granulares con formato `modulo.accion` (por ejemplo `ventas.read`, `productos.write`, `reportes.read`).
 
 ### 12. Perfil de Usuario
 
@@ -345,7 +344,7 @@ El administrador también puede crear ventas directamente desde `/admin/ventas`:
 1. **Registro de cliente**: El cliente se registra en `/register` con datos personales y credenciales.
 2. **Login**: El cliente inicia sesión en `/login`.
 3. **Roles**: El administrador crea roles en `/admin/roles` con permisos específicos:
-   - **Permisos de módulo**: Inventario (productos/marcas/categorías en el admin), Productos, Marcas, Categorías, Proveedores, Compras, Ventas, Usuarios, Configuración, Reportes, Banners.
+   - **Permisos de módulo**: Inventario (productos/marcas/categorías en el admin), Productos, Marcas, Categorías, Ventas, Usuarios, Configuración, Reportes, Banners.
 4. **Protección de rutas**: Las rutas administrativas verifican que el usuario tenga el permiso correspondiente.
 
 ---
@@ -358,98 +357,9 @@ El administrador también puede crear ventas directamente desde `/admin/ventas`:
 
 ---
 
-### Proceso 5: Gestión de Proveedores y Órdenes de Compra
-
-Este proceso permite gestionar la relación con proveedores y generar órdenes de compra para reabastecimiento de inventario.
-
-#### 5.1 Proveedores
-
-Los proveedores son las empresas o personas que surten productos a la tienda. Se gestionan desde `/admin/proveedores`:
-
-**Datos del proveedor**:
-- Nombre / Razón social
-- Tipo de persona: Natural o Jurídica
-- Tipo de documento (CC, NIT, CE, Pasaporte)
-- Número de documento
-- Contacto (nombre de la persona de contacto)
-- Teléfono (con código de país)
-- Email
-- Dirección
-- Rubro (categoría del negocio)
-- Logo (URL de imagen)
-- Estado: Activo/Inactivo
-
-**Funcionalidades**:
-- CRUD completo de proveedores
-- Activar/Desactivar proveedores
-- Importar/Exportar proveedores desde Excel
-- Ver detalle del proveedor con sus marcas y catálogo asociado
-- Acceso directo al catálogo del proveedor
-
-#### 5.2 Catálogo del Proveedor
-
-Cada proveedor tiene un catálogo (`/proveedores/:id/catalogo`) que muestra dos tipos de items:
-
-1. **Productos propios**: Productos que ya están registrados en la tienda (con stock actual)
-2. **Items de catálogo**: Productos que el proveedor ofrece para comprar (precio sugerido de venta)
-
-**Funcionalidades del catálogo**:
-- Buscar productos por nombre, descripción, marca, categoría
-- Filtrar por marca o categoría
-- Agregar productos al carrito del proveedor
-- **Pedir más stock**: Para productos propios con poco stock, permite crear una orden de compra directamente para reabastecimiento
-- Importar/Exportar catálogo en Excel
-- Agregar nuevos items al catálogo manualmente
-
-#### 5.3 Órdenes de Compra
-
-El sistema utiliza un **carrito separado por proveedor** (a diferencia del carrito de compras del cliente que es global).
-
-**Flujo de creación de una orden**:
-
-1. **Agregar items al carrito del proveedor**:
-   - El admin navega al catálogo del proveedor (`/proveedores/:id/catalogo`)
-   - Selecciona productos y hace clic en "Agregar a Orden"
-   - Los items se guardan en el carrito de ese proveedor específico
-
-2. **Crear la orden de compra**:
-   - Va a `/ordenes/nueva` o directamente a `/proveedores/:id/orden`
-   - Selecciona el proveedor (si viene desde la URL ya está seleccionado)
-   - Visualiza los items del carrito del proveedor
-   - Puede modificar cantidades o quitar items
-   - Agrega notas/opciones (instrucciones de entrega, condiciones especiales)
-   - Calcula el total automáticamente
-
-3. **Enviar al proveedor**:
-   - Al hacer clic en "Crear y Enviar por WhatsApp":
-     - Se crea la orden de compra en el sistema
-     - Se genera un mensaje de WhatsApp con:
-       - ID de la orden
-       - Lista de items (cantidad, nombre, precio unitario)
-       - Total de la orden
-       - Notas adicionales
-     - Se abre WhatsApp con el mensaje listo para enviar
-     - El carrito del proveedor se limpia
-
-**Rutas relacionadas**:
-- `/admin/proveedores` - Lista de proveedores (gestión CRUD)
-- `/admin/proveedores/nuevo` - Crear proveedor
-- `/admin/proveedores/editar/:id` - Editar proveedor
-- `/admin/proveedores/:id` - Ver detalle del proveedor
-- `/proveedores/:id/catalogo` - Catálogo del proveedor
-- `/proveedores/:id/catalogo/gestionar` - Gestionar el catálogo del proveedor
-- `/proveedores/:id/catalogo/nuevo` - Agregar item al catálogo
-- `/catalogo/editar/:id` - Editar un item del catálogo
-- `/proveedores/:id/orden` - Crear orden de compra (borrador)
-- `/ordenes` - Lista de órdenes de compra
-- `/ordenes/nueva` - Nueva orden de compra
-- `/ordenes/:id` / `/ordenes/:id/editar` - Detalle / edición de una orden de compra
-
----
-
 ## Rutas del Sistema
 
-La aplicación tiene dos árboles de rutas independientes montados en `src/App.jsx`: `/admin/*` (resuelto por `AdminLayout`, en `src/components/AdminLayout.jsx`) y `/*` (resuelto por `Layout` + `Rutas`, en `src/components/Rutas.jsx`, para tienda/cliente/proveedores).
+La aplicación tiene dos árboles de rutas independientes montados en `src/App.jsx`: `/admin/*` (resuelto por `AdminLayout`, en `src/components/AdminLayout.jsx`) y `/*` (resuelto por `Layout` + `Rutas`, en `src/components/Rutas.jsx`, para tienda/cliente).
 
 ### Rutas Públicas y de Tienda
 
@@ -484,21 +394,6 @@ La aplicación tiene dos árboles de rutas independientes montados en `src/App.j
 | `/ventas`, `/mis-pagos` | Mis Pagos y Abonos - historial de pedidos/ventas del cliente (requiere sesión) |
 | `/ventas/:id`, `/pedidos/:id` | Detalle de un pedido/venta (componente `VentaDetails`) |
 
-### Proveedores y Órdenes de Compra
-
-Requieren sesión y el permiso de módulo "Proveedores" o "Compras" según la ruta.
-
-| Ruta | Descripción |
-|------|-------------|
-| `/proveedores/:id/catalogo` | Catálogo del proveedor |
-| `/proveedores/:id/catalogo/gestionar` | Gestión del catálogo del proveedor |
-| `/proveedores/:id/catalogo/nuevo` | Agregar item al catálogo |
-| `/catalogo/editar/:id` | Editar item del catálogo |
-| `/proveedores/:id/orden` | Crear orden de compra (borrador) para ese proveedor |
-| `/ordenes` | Lista de órdenes de compra |
-| `/ordenes/nueva` | Nueva orden de compra |
-| `/ordenes/:id`, `/ordenes/:id/editar` | Detalle / edición de una orden de compra |
-
 ### Panel de Administración (bajo `/admin`)
 
 Todas requieren sesión; las que indican un permiso están protegidas además por ese módulo (los usuarios ADMIN acceden a todas).
@@ -514,8 +409,6 @@ Todas requieren sesión; las que indican un permiso están protegidas además po
 | `/admin/marcas` | Administración de marcas (permiso "Inventario") |
 | `/admin/categorias` | Administración de categorías (permiso "Inventario") |
 | `/admin/banners`, `/admin/banners/nuevo`, `/admin/banners/editar/:id` | Administración de banners del Home (permiso "Banners") |
-| `/admin/proveedores`, `/admin/proveedores/nuevo`, `/admin/proveedores/editar/:id`, `/admin/proveedores/:id` | Administración de proveedores (permiso "Proveedores") |
-| `/admin/proveedores/:id/catalogo/gestionar` | Gestión del catálogo del proveedor desde el admin (permiso "Proveedores") |
 | `/admin/usuarios`, `/admin/usuarios/nuevo`, `/admin/usuarios/editar/:id` | Administración de usuarios (permiso "Usuarios") |
 | `/admin/roles`, `/admin/roles/nuevo`, `/admin/roles/editar/:id` | Administración de roles y permisos (permiso "Configuración") |
 
@@ -582,10 +475,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIs...
 | Direcciones | `/api/usuarios/direcciones`, `/api/usuarios/direcciones/:id` | GET, POST, PUT, DELETE |
 | Productos | `/api/productos`, `/api/productos/:id`, `/api/productos/:id/estado`, `/api/productos/export` | GET, POST, PUT, PATCH, DELETE |
 | Categorías | `/api/categorias`, `/api/categorias/:id`, `/api/categorias/:id/estado`, `/api/categorias/export` | GET, POST, PUT, PATCH, DELETE |
-| Marcas | `/api/marcas`, `/api/marcas/:id`, `/api/marcas/:id/estado`, `/api/marcas/:id/proveedor`, `/api/marcas/export` | GET, POST, PUT, PATCH, DELETE |
-| Proveedores | `/api/proveedores`, `/api/proveedores/:id`, `/api/proveedores/:id/estado` | GET, POST, PUT, PATCH, DELETE |
-| Catálogo | `/api/catalogo`, `/api/catalogo/:id` | GET, POST, PUT, DELETE |
-| Órdenes de Compra | `/api/ordenes-compra`, `/api/ordenes-compra/:id`, `/api/ordenes-compra/:id/estado`, `/api/ordenes-compra/verificar-productos`, `/api/ordenes-compra/pedir-mas-stock` | GET, POST, PUT, PATCH, DELETE |
+| Marcas | `/api/marcas`, `/api/marcas/:id`, `/api/marcas/:id/estado`, `/api/marcas/export` | GET, POST, PUT, PATCH, DELETE |
 | Pedidos / Ventas | `/api/pedidos`, `/api/pedidos/mis-pedidos`, `/api/pedidos/ventas`, `/api/pedidos/:id`, `/api/pedidos/:id/estado`, `/api/pedidos/:id/convertir-venta`, `/api/pedidos/:id/aprobar`, `/api/pedidos/:id/rechazar-abono` | GET, POST, PUT, PATCH, DELETE |
 | Pagos | `/api/pagos`, `/api/pagos/:id`, `/api/pagos/:id/estado` | GET, POST, PUT, PATCH, DELETE |
 | Domicilios | `/api/domicilios`, `/api/domicilios/:id/estado`, `/api/domicilios/:id/convertir`, `/api/domicilios/:id/tarifa`, `/api/domicilios/:id/repartidor` | GET, POST, PUT, PATCH |
@@ -613,7 +503,6 @@ El proyecto ya no usa LocalStorage como fallback de datos de negocio: productos,
 
 - **Sesión**: token JWT y datos del usuario (`auth_token`, `auth_user`).
 - **Preferencia de tema** claro/oscuro (`theme`).
-- **Carrito de proveedor** (`tienda_provider_carts`): el borrador de la orden de compra por proveedor (ver Proceso 5) se guarda localmente hasta que se envía como orden de compra real a la API.
 
 ---
 
@@ -626,7 +515,7 @@ El proyecto ya no usa LocalStorage como fallback de datos de negocio: productos,
 - **Estado global**: React Context (AuthContext, CartContext)
 - **HTTP Client**: Fetch API con `dataService`
 - **Gráficas**: Recharts, usado en el Dashboard de administración (`src/pages/dashboard/AdminDashboard.jsx`) para ventas por período y rankings (top productos/marcas/categorías)
-- **Excel**: `xlsx`, usado en `dataService` para importar y exportar catálogos completos (productos, categorías, marcas, proveedores, usuarios, pagos, domicilios, ventas) desde/hacia archivos `.xlsx`
+- **Excel**: `xlsx`, usado en `dataService` para importar y exportar catálogos completos (productos, categorías, marcas, usuarios, pagos, domicilios, ventas) desde/hacia archivos `.xlsx`
 - **Descarga de archivos**: `file-saver`, usado junto con `xlsx` para generar y descargar los archivos Excel exportados
 - **Generación de PDF**: `html2pdf.js`, usado en `src/services/printService.js` como respaldo para generar/descargar el voucher de una venta cuando el navegador bloquea la ventana de impresión
 - **Linting**: ESLint 9
@@ -643,7 +532,7 @@ src/
 │   ├── AdminLayout.jsx  # Layout y rutas internas de /admin/*
 │   ├── Layout.jsx       # Layout público (Header + Footer)
 │   ├── Header.jsx / Footer.jsx
-│   ├── Rutas.jsx        # Rutas públicas / tienda / proveedores (montadas en /*)
+│   ├── Rutas.jsx        # Rutas públicas / tienda (montadas en /*)
 │   ├── PrivateRoute.jsx # Guard de autenticación y permisos
 │   └── ImageUploadField.jsx / ImageGalleryModal.jsx  # Subida y selección de imágenes (Cloudinary)
 ├── context/           # Contextos (AuthContext, CartContext)
@@ -652,17 +541,14 @@ src/
 │   ├── auth/            # Login, ForgotPassword, ResetPassword
 │   ├── banners/         # CRUD de banners del Home (services/, hooks/, components/)
 │   ├── carrito/         # Carrito y Checkout (services/, hooks/, components/)
-│   ├── catalogo/        # Catálogo de items del proveedor (crear/editar/gestionar)
 │   ├── categorias/      # Categorías (público y admin) (services/, hooks/, components/)
 │   ├── dashboard/       # Dashboard admin (services/, hooks/, components/)
 │   ├── domicilios/      # Domicilios admin y "Mis Domicilios" (services/, hooks/, components/)
 │   ├── home/            # Home (services/, hooks/, components/)
 │   ├── marcas/          # Marcas (público y admin) (services/, hooks/, components/)
-│   ├── ordenes/         # Órdenes de compra (lista, crear, detalle, borrador)
 │   ├── pagos/           # Pagos admin y "Mis Pagos" (hooks/)
 │   ├── pedidos/         # Pedidos admin (services/, hooks/, components/)
 │   ├── productos/       # Productos (services/, hooks/, components/)
-│   ├── proveedores/     # Proveedores (lista, crear, editar, detalle)
 │   ├── roles/           # Roles y permisos (services/, hooks/, components/)
 │   ├── usuarios/        # Usuarios, Perfil, Registro, Cambiar contraseña
 │   └── ventas/          # Ventas y detalle de venta/pedido (services/, hooks/, components/)

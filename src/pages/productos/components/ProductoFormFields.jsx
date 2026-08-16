@@ -2,7 +2,7 @@
 import React from 'react';
 import ImageUploadField from '../../../components/ImageUploadField';
 
-const ProductoFormFields = ({ formData, errors, onChange, categorias, marcas, proveedores }) => (
+const ProductoFormFields = ({ formData, errors, onChange, categorias, marcas }) => (
   <>
     <div className="row mb-3">
       <div className="col-md-6">
@@ -72,20 +72,6 @@ const ProductoFormFields = ({ formData, errors, onChange, categorias, marcas, pr
           ))}
         </select>
         {errors.marcaId && <div className="invalid-feedback">{errors.marcaId}</div>}
-      </div>
-      <div className="col-md-6">
-        <label className="form-label">Proveedor</label>
-        <select
-          className="form-select"
-          name="proveedorId"
-          value={formData.proveedorId || ''}
-          onChange={onChange}
-        >
-          <option value="">-- Seleccione Proveedor (opcional) --</option>
-          {proveedores.filter(p => p.estado !== false).map(p => (
-            <option key={p.id} value={p.id}>{p.nombre} ({p.tipo_documento} {p.documento})</option>
-          ))}
-        </select>
       </div>
     </div>
 

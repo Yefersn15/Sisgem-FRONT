@@ -101,10 +101,6 @@ const MarcaDetail = () => {
                 </p>
               </div>
 
-              <div className="mb-3">
-                <label className="form-label small text-muted">Proveedor</label>
-                <p className="mb-0">{marca.proveedor?.nombre || 'Sin proveedor asignado'}</p>
-              </div>
             </div>
           </div>
         </div>

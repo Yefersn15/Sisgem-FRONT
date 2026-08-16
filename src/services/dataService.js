@@ -192,7 +192,6 @@ export const exportToExcel = (data, filename = 'datos.xlsx') => {
 const mapProductoToApi = (p) => ({
   categoria: p.categoriaId,
   marca: p.marcaId,
-  proveedor: p.proveedorId,
   nombre: p.nombre,
   descripcion: p.descripcion,
   codigo_barras: p.barcode || '',
@@ -216,14 +215,12 @@ const mapApiToProducto = (api) => ({
   activo: api.estado,
   categoriaId: api.categoria?.id || api.categoria,
   marcaId: api.marca?.id || api.marca,
-  proveedorId: api.proveedor?.id || api.proveedor,
   precioCompra: api.precio_compra,
   minStock: api.stock_minimo,
   unidadMedida: api.unidad_medida,
   // Nombres enriquecidos
   categoriaNombre: api.categoria?.nombre,
-  marcaNombre: api.marca?.nombre,
-  proveedorNombre: api.proveedor?.nombre
+  marcaNombre: api.marca?.nombre
 });
 
 // Categoría: Frontend -> API
@@ -247,7 +244,6 @@ const mapMarcaToApi = (m) => ({
   descripcion: m.descripcion,
   logo: m.logoUrl,
   sitio_web: m.sitioWeb,
-  proveedor_id: m.proveedorId,
   estado: m.activo !== undefined ? m.activo : true
 });
 
@@ -258,42 +254,7 @@ const mapApiToMarca = (api) => ({
   descripcion: api.descripcion,
   logoUrl: api.logo || api.logo_data,
   sitioWeb: api.sitio_web || '',
-  proveedorId: api.proveedor?.id || api.proveedorId || api.proveedor_id,
-  proveedor: api.proveedor ? { nombre: api.proveedor.nombre } : null,
   activa: api.estado !== false
-});
-
-// Proveedor: Frontend -> API
-const mapProveedorToApi = (p) => ({
-  nombre: p.nombre,
-  nit: p.documento,
-  tipo_persona: p.tipoPersona,
-  tipo_documento: p.tipoDocumento,
-  telefono: p.telefono,
-  telefono_pais: p.telefonoPais,
-  email: p.email,
-  direccion: p.direccion,
-  contacto: p.contacto,
-  rubro: p.rubro,
-  logo: p.logoUrl,
-  estado: p.estado !== false
-});
-
-// Proveedor: API -> Frontend
-const mapApiToProveedor = (api) => ({
-  id: api.id,
-  nombre: api.nombre,
-  documento: api.nit,
-  tipoPersona: api.tipo_persona,
-  tipoDocumento: api.tipo_documento,
-  telefono: api.telefono,
-  telefonoPais: api.telefono_pais,
-  email: api.email,
-  direccion: api.direccion,
-  contacto: api.contacto,
-  rubro: api.rubro,
-  logoUrl: api.logo,
-  estado: api.estado
 });
 
 // ----------------------------------------------------------------------
@@ -565,103 +526,6 @@ export const importMarcas = async (file, onSuccess, onError) => {
       const activo = parseBooleanCell(row.Activo || row.activo);
       if (nombre) {
         await createMarca({ nombre, descripcion, logoUrl, sitioWeb, activo });
-      }
-    }
-    onSuccess && onSuccess(rows.length);
-  } catch (err) {
-    onError && onError(err);
-  }
-};
-
-// ----------------------------------------------------------------------
-// PROVEEDORES
-// ----------------------------------------------------------------------
-export const getProveedores = async () => {
-  const data = await request('/api/proveedores');
-  return Array.isArray(data) ? data.map(mapApiToProveedor) : [];
-};
-
-export const getProveedorById = async (id) => {
-  const data = await request(`/api/proveedores/${id}`);
-  return mapApiToProveedor(data);
-};
-
-export const createProveedor = async (proveedor) => {
-  const payload = mapProveedorToApi(proveedor);
-  const data = await request('/api/proveedores', { method: 'POST', body: payload });
-  return mapApiToProveedor(data);
-};
-
-export const updateProveedor = async (id, proveedor) => {
-  const payload = mapProveedorToApi(proveedor);
-  const data = await request(`/api/proveedores/${id}`, { method: 'PUT', body: payload });
-  return mapApiToProveedor(data);
-};
-
-export const deleteProveedor = async (id) => {
-  await request(`/api/proveedores/${id}`, { method: 'DELETE' });
-};
-
-export const toggleProveedorEstado = async (id) => {
-  const proveedor = await getProveedorById(id);
-  if (proveedor) {
-    return await request(`/api/proveedores/${id}/estado`, { 
-      method: 'PATCH', 
-      body: { estado: !proveedor.estado } 
-    });
-  }
-  return null;
-};
-
-export const exportProveedores = async () => {
-  const proveedores = await getProveedores();
-  const data = proveedores.map(p => ({
-    Id: p.id,
-    Nombre: p.nombre,
-    Documento: p.documento,
-    Telefono: p.telefono,
-    Email: p.email,
-    Direccion: p.direccion,
-    Contacto: p.contacto,
-    Estado: p.estado ? 'Activo' : 'Inactivo'
-  }));
-  exportToExcel(data, 'proveedores.xlsx');
-};
-
-export const importProveedores = async (file, onSuccess, onError) => {
-  try {
-    const data = new Uint8Array(await file.arrayBuffer());
-    const workbook = XLSX.read(data, { type: 'array' });
-    const rows = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]]);
-    for (const row of rows) {
-      // Campos del Excel: Id, Tipo Persona, Tipo Documento, Documento, Nombre, Contacto, Teléfono, TelefonoPais, Email, Dirección, Rubro, LogoUrl, Estado
-      const nombre = row.Nombre || row.nombre || '';
-      const documento = row.Documento || row.documento || '';
-      const tipoPersona = row['Tipo Persona'] || row.tipoPersona || 'Natural';
-      const tipoDocumento = row['Tipo Documento'] || row.tipoDocumento || 'CC';
-      const telefono = row.Teléfono || row.telefono || row.Telefono || '';
-      const telefonoPais = row.TelefonoPais || row.telefonoPais || '';
-      const email = row.Email || row.email || '';
-      const direccion = row.Dirección || row.direccion || row.Direccion || '';
-      const contacto = row.Contacto || row.contacto || '';
-      const rubro = row.Rubro || row.rubro || '';
-      const logoUrl = row.LogoUrl || row.logoUrl || '';
-      const estado = parseBooleanCell(row.Estado || row.estado);
-      if (nombre && documento) {
-        await createProveedor({ 
-          nombre, 
-          documento, 
-          tipoPersona, 
-          tipoDocumento, 
-          telefono, 
-          telefonoPais, 
-          email, 
-          direccion, 
-          contacto, 
-          rubro, 
-          logoUrl, 
-          estado 
-        });
       }
     }
     onSuccess && onSuccess(rows.length);
@@ -1095,8 +959,6 @@ export const getUsuarios = async () => {
     rol: u.rol ? { id: u.rol.id, nombre: u.rol.nombre } : (u.rolId ? { id: u.rolId } : null),
     rol_id: u.rol?.id || u.rolId,
     rol_nombre: u.rol?.nombre,
-    proveedor_id: u.proveedor?._id || u.proveedorId,
-    proveedor_nombre: u.proveedor?.nombre,
     estado: u.estado,
     fecha_creacion: u.createdAt
   })) : [];
@@ -1179,8 +1041,6 @@ export const getPermisosDisponibles = async () => {
     'categorias.read', 'categorias.write', 'categorias.delete',
     // Marcas
     'marcas.read', 'marcas.write', 'marcas.delete',
-    // Proveedores
-    'proveedores.read', 'proveedores.write', 'proveedores.delete',
     // Usuarios
     'usuarios.read', 'usuarios.write', 'usuarios.delete',
     // Roles
@@ -1200,39 +1060,6 @@ export const getModulos = async () => {
 export const seedRoles = async () => {
   const data = await request('/api/roles/seed', { method: 'POST' });
   return data;
-};
-
-// ----------------------------------------------------------------------
-// CATÁLOGO (Nueva tabla)
-// ----------------------------------------------------------------------
-export const getCatalogo = async (proveedorId) => {
-  const url = proveedorId ? `/api/catalogo?proveedorId=${proveedorId}` : '/api/catalogo';
-  const data = await request(url);
-  return Array.isArray(data) ? data : [];
-};
-
-export const getCatalogoItemById = async (id) => {
-  const data = await request(`/api/catalogo/${id}`);
-  return data;
-};
-
-export const createCatalogoItem = async (item) => {
-  const data = await request('/api/catalogo', { method: 'POST', body: item });
-  return data;
-};
-
-export const updateCatalogoItem = async (id, item) => {
-  const data = await request(`/api/catalogo/${id}`, { method: 'PUT', body: item });
-  return data;
-};
-
-export const deleteCatalogoItem = async (id) => {
-  await request(`/api/catalogo/${id}`, { method: 'DELETE' });
-};
-
-// Alias para compatibilidad - usa la nueva tabla catalogo
-export const getCatalogoByProveedor = async (proveedorId) => {
-  return await getCatalogo(proveedorId);
 };
 
 // ----------------------------------------------------------------------
@@ -1329,57 +1156,6 @@ export const getCartItemsWithDetails = async () => {
   }));
 };
 
-// ----------------------------------------------------------------------
-// ÓRDENES DE COMPRA (Proveedores)
-// ----------------------------------------------------------------------
-export const getOrdenesCompra = async () => {
-  try {
-    const data = await request('/api/ordenes-compra');
-    return Array.isArray(data) ? data : [];
-  } catch (err) {
-    // Si el endpoint no existe en el servidor remoto, devolver lista vacía en el frontend
-    if (err && (err.status === 404 || String(err.message).includes('Ruta no encontrada'))) return [];
-    throw err;
-  }
-};
-
-export const createOrdenCompra = async (orden) => {
-  const data = await request('/api/ordenes-compra', { method: 'POST', body: orden });
-  return data;
-};
-
-export const updateOrdenCompra = async (id, orden) => {
-  const data = await request(`/api/ordenes-compra/${id}`, { method: 'PUT', body: orden });
-  return data;
-};
-
-export const getOrdenCompraById = async (id) => {
-  const data = await request(`/api/ordenes-compra/${id}`);
-  return data;
-};
-
-export const cambiarEstadoOrdenCompra = async (id, estado) => {
-  const data = await request(`/api/ordenes-compra/${id}/estado`, { method: 'PATCH', body: { estado } });
-  return data;
-};
-
-export const deleteOrdenCompra = async (id) => {
-  await request(`/api/ordenes-compra/${id}`, { method: 'DELETE' });
-};
-
-export const verificarProductosExistentes = async (productos) => {
-  const data = await request('/api/ordenes-compra/verificar-productos', { method: 'POST', body: { productos } });
-  return data;
-};
-
-export const pedirMasStock = async (productoId, cantidad, proveedorId, precio_unitario, observaciones) => {
-  const data = await request('/api/ordenes-compra/pedir-mas-stock', { 
-    method: 'POST', 
-    body: { productoId, cantidad, proveedorId, precio_unitario, observaciones } 
-  });
-  return data;
-};
-
 // ----------------------------------------------------------------//
 // BANNERS (Catálogo)
 // ----------------------------------------------------------------//
@@ -1425,93 +1201,6 @@ export const deleteTarifaDomicilio = async (id) => {
 };
 
 // ----------------------------------------------------------------//
-// CARRITO DE PROVEEDOR (LocalStorage)
-// ----------------------------------------------------------------//
-const STORAGE_KEYS_PROVIDER = {
-  PROVIDER_CARTS: 'tienda_provider_carts'
-};
-
-const getProviderCartsStorage = () => {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEYS_PROVIDER.PROVIDER_CARTS);
-    return raw ? JSON.parse(raw) : {};
-  } catch (e) {
-    return {};
-  }
-};
-
-const saveProviderCartsStorage = (obj) => {
-  try {
-    localStorage.setItem(STORAGE_KEYS_PROVIDER.PROVIDER_CARTS, JSON.stringify(obj));
-  } catch (e) {
-    console.error('Error saving provider carts:', e);
-  }
-};
-
-export const getProviderCart = (proveedorId) => {
-  const carts = getProviderCartsStorage();
-  return carts[String(proveedorId)] || [];
-};
-
-export const saveProviderCart = (proveedorId, cart) => {
-  const carts = getProviderCartsStorage();
-  carts[String(proveedorId)] = cart;
-  saveProviderCartsStorage(carts);
-};
-
-export const addToProviderCart = (proveedorId, refId, cantidad = 1, source = 'producto') => {
-  const cart = getProviderCart(proveedorId);
-  const existing = cart.find(item => item.refId === refId && item.source === source);
-  if (existing) {
-    existing.cantidad += cantidad;
-  } else {
-    cart.push({ refId, cantidad, source });
-  }
-  saveProviderCart(proveedorId, cart);
-  return cart;
-};
-
-export const removeFromProviderCart = (proveedorId, refId, source = 'producto') => {
-  let cart = getProviderCart(proveedorId);
-  cart = cart.filter(item => !(item.refId === refId && item.source === source));
-  saveProviderCart(proveedorId, cart);
-  return cart;
-};
-
-export const updateProviderCartItem = (proveedorId, refId, cantidad, source = 'producto') => {
-  const cart = getProviderCart(proveedorId);
-  const item = cart.find(i => i.refId === refId && i.source === source);
-  if (item) {
-    item.cantidad = cantidad;
-    saveProviderCart(proveedorId, cart);
-  }
-  return cart;
-};
-
-export const clearProviderCart = (proveedorId) => {
-  const carts = getProviderCartsStorage();
-  delete carts[String(proveedorId)];
-  saveProviderCartsStorage(carts);
-};
-
-export const getProviderCartItemsWithDetails = async (proveedorId) => {
-  const cart = getProviderCart(proveedorId);
-  const productos = await getProductos();
-  const catalogoItems = await getCatalogo(proveedorId);
-
-  return cart.map(item => {
-    if (item.source === 'producto') {
-      const producto = productos.find(p => String(p.id) === String(item.refId)) || { id: item.refId, nombre: '(desconocido)', precioUnitario: 0 };
-      return { source: 'producto', producto, cantidad: item.cantidad, refId: item.refId };
-    } else if (item.source === 'catalogo') {
-      const catItem = catalogoItems.find(c => String(c.id) === String(item.refId)) || { id: item.refId, nombre: '(desconocido)', precioSugerido: 0 };
-      return { source: 'catalogo', catalogItem: catItem, cantidad: item.cantidad, refId: item.refId };
-    }
-    return item;
-  });
-};
-
-// ----------------------------------------------------------------//
 // DIRECCIONES DEL USUARIO
 // ----------------------------------------------------------------//
 export const getDirecciones = async () => {
@@ -1536,7 +1225,6 @@ export const deleteDireccion = async (id) => {
 // ----------------------------------------------------------------//
 // CONSTANTES
 // ----------------------------------------------------------------//
-export const ESTADOS_ORDEN = ['borrador', 'enviada', 'confirmada', 'recibida', 'cancelada'];
 export const ESTADOS_VENTA = ['Pendiente', 'PorValidar', 'Completada', 'Anulada', 'Rechazada', 'Cancelado'];
 export const METODOS_PAGO = ['Efectivo', 'Tarjeta', 'Abono', 'PagoTransferencia'];
 
@@ -1945,32 +1633,6 @@ export const registrarAbono = async (ventaId, monto, metodo = 'Abono') => {
 };
 
 // ----------------------------------------------------------------//
-// MARCAS - Funciones adicionales para proveedores
-// ----------------------------------------------------------------//
-export const getMarcasByProveedor = async (proveedorId) => {
-  const marcas = await getMarcas();
-  return marcas.filter(m => String(m.proveedorId) === String(proveedorId));
-};
-
-export const createMarcaAndLinkProveedor = async (marca, proveedorId) => {
-  const nuevaMarca = await createMarca(marca);
-  if (proveedorId && nuevaMarca.id) {
-    await request(`/api/marcas/${nuevaMarca.id}/proveedor`, {
-      method: 'PATCH',
-      body: { proveedor: proveedorId }
-    });
-  }
-  return nuevaMarca;
-};
-
-export const assignProveedorToMarca = async (marcaId, proveedorId) => {
-  return await request(`/api/marcas/${marcaId}/proveedor`, {
-    method: 'PATCH',
-    body: { proveedor: proveedorId }
-  });
-};
-
-// ----------------------------------------------------------------//
 // DOMICILIOS - Import/Export
 // ----------------------------------------------------------------//
 export const importDomicilios = async (file, onSuccess, onError) => {
@@ -2126,45 +1788,6 @@ export const aceptarVenta = async (id) => {
 
 export const aprobarVenta = async (id) => {
   return await cambiarEstadoVenta(id, 'entregado');
-};
-
-// ----------------------------------------------------------------//
-// ÓRDENES DE COMPRA - Funciones adicionales
-// ----------------------------------------------------------------//
-
-export const generarReporteOrdenes = async () => {
-  const ordenes = await getOrdenCompra();
-  const data = ordenes.map(o => ({
-    Id: o.id,
-    Fecha: o.fecha,
-    Proveedor: o.proveedorId,
-    Total: o.total,
-    Estado: o.estado,
-  }));
-  exportToExcel(data, 'ordenes_compra.xlsx');
-};
-
-// ----------------------------------------------------------------//
-// CATÁLOGO - Export para proveedor (usa productos)
-// ----------------------------------------------------------------//
-export const exportCatalogoProveedor = async (proveedorId) => {
-  const productos = await getProductos();
-  const filtered = productos.filter(p => String(p.proveedorId) === String(proveedorId));
-  const data = filtered.map(p => ({
-    Id: p.id,
-    Nombre: p.nombre,
-    Precio: p.precioUnitario,
-    Stock: p.stockDisponible,
-    Categoria: p.categoriaNombre,
-    Marca: p.marcaNombre,
-  }));
-  exportToExcel(data, `catalogo_proveedor_${proveedorId}.xlsx`);
-};
-
-export const importCatalogoProveedor = async (proveedorId, file, onSuccess, onError) => {
-  // La importación de catálogo ya no existe como entidad separada
-  // Se puede importar productos con las funciones existentes
-  onError && onError(new Error('Importación de catálogo no disponible. Use importación de productos.'));
 };
 
 // ----------------------------------------------------------------//

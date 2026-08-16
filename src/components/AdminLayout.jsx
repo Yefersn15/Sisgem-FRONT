@@ -18,11 +18,6 @@ import AdminCategorias from '../pages/categorias/AdminCategorias';
 import AdminBanners from '../pages/banners/AdminBanners';
 import BannerCreate from '../pages/banners/BannerCreate';
 import BannerEdit from '../pages/banners/BannerEdit';
-import ProveedoresList from '../pages/proveedores/ProveedoresList';
-import ProveedorCreate from '../pages/proveedores/ProveedorCreate';
-import ProveedorEdit from '../pages/proveedores/ProveedorEdit';
-import ProveedorDetail from '../pages/proveedores/ProveedorDetail';
-import CatalogoManage from '../pages/catalogo/CatalogoManage';
 import PrivateRoute from './PrivateRoute';
 import { useAuth } from '../context/AuthContext';
 import { useAdminLayoutMode } from '../hooks/useAdminLayoutMode';
@@ -77,7 +72,6 @@ const AdminHeader = ({ layoutMode, onLayoutModeChange }) => {
     if (location.pathname === '/admin/productos') return 'Inventario';
     if (location.pathname === '/admin/marcas') return 'Inventario';
     if (location.pathname === '/admin/categorias') return 'Inventario';
-    if (location.pathname.startsWith('/admin/proveedores')) return 'Proveedores';
     // analytics removed from menu
     return 'Gestión';
   };
@@ -178,12 +172,7 @@ const AdminLayout = () => {
             <Route path="pagos/nuevo" element={<PrivateRoute module="Ventas"><PagoCreate /></PrivateRoute>} />
             <Route path="pagos/:id" element={<PrivateRoute module="Ventas"><PagoDetail /></PrivateRoute>} />
             <Route path="pedidos" element={<PrivateRoute module="Ventas"><PedidosAdmin /></PrivateRoute>} />
-            <Route path="proveedores" element={<PrivateRoute module="Proveedores"><ProveedoresList /></PrivateRoute>} />
-            <Route path="proveedores/nuevo" element={<PrivateRoute module="Proveedores"><ProveedorCreate /></PrivateRoute>} />
-            <Route path="proveedores/editar/:id" element={<PrivateRoute module="Proveedores"><ProveedorEdit /></PrivateRoute>} />
-<Route path="proveedores/:id" element={<PrivateRoute module="Proveedores"><ProveedorDetail /></PrivateRoute>} />
-            <Route path="proveedores/:id/catalogo/gestionar" element={<PrivateRoute module="Proveedores"><CatalogoManage /></PrivateRoute>} />
-            
+
             <Route path="usuarios" element={<PrivateRoute module="Usuarios"><UsersList /></PrivateRoute>} />
             <Route path="usuarios/nuevo" element={<PrivateRoute module="Usuarios"><UsuarioEdit /></PrivateRoute>} />
             <Route path="usuarios/editar/:id" element={<PrivateRoute module="Usuarios"><UsuarioEdit /></PrivateRoute>} />

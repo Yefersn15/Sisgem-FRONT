@@ -15,14 +15,6 @@ import Checkout from '../pages/carrito/Checkout';
 import MisPedidos from '../pages/pedidos/MisPedidos';
 import VentaDetails from '../pages/ventas/VentaDetails';
 import AdminDomicilios from '../pages/domicilios/AdminDomicilios';
-import OrdenesList from '../pages/ordenes/OrdenesList';
-import OrdenCreate from '../pages/ordenes/OrdenCreate';
-import OrdenDetail from '../pages/ordenes/OrdenDetail';
-import CatalogoProveedorList from '../pages/catalogo/CatalogoProveedorList';
-import CatalogoCreate from '../pages/catalogo/CatalogoCreate';
-import CatalogoEdit from '../pages/catalogo/CatalogoEdit';
-import CatalogoManage from '../pages/catalogo/CatalogoManage';
-import OrdenCompraDraft from '../pages/ordenes/OrdenCompraDraft';
 
 // Admin
 import AdminDashboard from '../pages/dashboard/AdminDashboard';
@@ -79,21 +71,6 @@ const Rutas = () => {
       <Route path="/categorias" element={<Navigate to="/productos" replace />} />
       <Route path="/categorias/nueva" element={<PrivateRoute module="Categorías"><CategoriaCreate /></PrivateRoute>} />
       <Route path="/categorias/editar/:id" element={<PrivateRoute module="Categorías"><CategoriaEdit /></PrivateRoute>} />
-
-      {/* === PROVEEDORES - ahora en /admin/proveedores === */}
-
-      {/* === ÓRDENES DE COMPRA === */}
-      <Route path="/ordenes" element={<PrivateRoute module="Compras"><OrdenesList /></PrivateRoute>} />
-      <Route path="/ordenes/nueva" element={<PrivateRoute module="Compras"><OrdenCreate /></PrivateRoute>} />
-      <Route path="/ordenes/:id" element={<PrivateRoute module="Compras"><OrdenDetail /></PrivateRoute>} />
-      <Route path="/ordenes/:id/editar" element={<PrivateRoute module="Compras"><OrdenDetail /></PrivateRoute>} />
-
-      {/* === CATÁLOGO DE PROVEEDORES === */}
-      <Route path="/proveedores/:id/catalogo" element={<PrivateRoute module="Proveedores"><CatalogoProveedorList /></PrivateRoute>} />
-      <Route path="/proveedores/:id/catalogo/gestionar" element={<PrivateRoute module="Proveedores"><CatalogoManage /></PrivateRoute>} />
-      <Route path="/proveedores/:id/catalogo/nuevo" element={<PrivateRoute module="Proveedores"><CatalogoCreate /></PrivateRoute>} />
-      <Route path="/proveedores/:id/orden" element={<PrivateRoute module="Proveedores"><OrdenCompraDraft /></PrivateRoute>} />
-      <Route path="/catalogo/editar/:id" element={<PrivateRoute module="Proveedores"><CatalogoEdit /></PrivateRoute>} />
 
       {/* === CARRITO Y TIENDA === */}
       <Route path="/carrito" element={<Cart />} />

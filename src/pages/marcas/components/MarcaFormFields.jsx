@@ -2,7 +2,7 @@
 import React from 'react';
 import ImageUploadField from '../../../components/ImageUploadField';
 
-const MarcaFormFields = ({ formData, errors, onChange, proveedores, selectedProveedor, onProveedorChange }) => (
+const MarcaFormFields = ({ formData, errors, onChange }) => (
   <>
     <div className="mb-3">
       <div className="col-md-6">
@@ -52,16 +52,6 @@ const MarcaFormFields = ({ formData, errors, onChange, proveedores, selectedProv
         />
         {errors.sitioWeb && <div className="invalid-feedback">{errors.sitioWeb}</div>}
       </div>
-    </div>
-
-    <div className="mb-3">
-      <label className="form-label">Proveedor asociado (opcional)</label>
-      <select className="form-select" value={selectedProveedor} onChange={onProveedorChange}>
-        <option value="">-- Sin proveedor --</option>
-        {proveedores.map((p) => (
-          <option key={p.id} value={p.id}>{p.nombre}</option>
-        ))}
-      </select>
     </div>
 
     <div className="mb-3">

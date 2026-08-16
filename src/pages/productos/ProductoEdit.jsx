@@ -9,7 +9,7 @@ import ProductoFormFields from './components/ProductoFormFields';
 const ProductoEdit = ({ esDetalle = false }) => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { marcas, categorias, proveedores } = useProductoReferenceData();
+  const { marcas, categorias } = useProductoReferenceData();
   const { formData, setFormData, errors, setErrors, handleChange, validate } = useProductoForm(null);
   const [loading, setLoading] = useState(false);
   const [fetchError, setFetchError] = useState('');
@@ -120,13 +120,6 @@ const ProductoEdit = ({ esDetalle = false }) => {
                       </td>
                     </tr>
                     <tr>
-                      <td className="text-muted fw-bold">Proveedor:</td>
-                      <td>
-                        {formData.proveedor?.nombre || formData.proveedorNombre ||
-                         (formData.proveedorId ? (proveedores.find(p => p.id == formData.proveedorId)?.nombre || 'Sin proveedor') : 'Sin proveedor')}
-                      </td>
-                    </tr>
-                    <tr>
                       <td className="text-muted fw-bold">Precio:</td>
                       <td className="fw-bold text-success">{formatPrice(formData.precioUnitario)}</td>
                     </tr>
@@ -175,7 +168,6 @@ const ProductoEdit = ({ esDetalle = false }) => {
               onChange={handleChange}
               categorias={categorias}
               marcas={marcas}
-              proveedores={proveedores}
             />
 
             <div className="d-grid gap-2 d-md-flex justify-content-md-end">

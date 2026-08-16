@@ -8,7 +8,4 @@ export {
   toggleMarcaEstado,
   exportMarcas,
   importMarcas,
-  createMarcaAndLinkProveedor,
-  assignProveedorToMarca,
-  getMarcasByProveedor,
 } from '../../../services/dataService';

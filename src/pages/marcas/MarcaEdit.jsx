@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { getMarcaById, updateMarca, assignProveedorToMarca } from './services/marcasService';
-import { getProveedores } from '../../services/dataService';
+import { getMarcaById, updateMarca } from './services/marcasService';
 import { useMarcaForm } from './hooks/useMarcaForm';
 import MarcaFormFields from './components/MarcaFormFields';
 
@@ -11,8 +10,6 @@ const MarcaEdit = () => {
   const { formData, setFormData, errors, handleChange, validate } = useMarcaForm(null);
   const [loading, setLoading] = useState(false);
   const [fetchError, setFetchError] = useState('');
-  const [proveedores, setProveedores] = useState([]);
-  const [selectedProveedor, setSelectedProveedor] = useState('');
 
   useEffect(() => {
     (async () => {
@@ -22,20 +19,8 @@ const MarcaEdit = () => {
         return;
       }
       setFormData(marca);
-      setSelectedProveedor(marca.proveedorId || '');
     })();
   }, [id]);
-
-  useEffect(() => {
-    (async () => {
-      try {
-        const list = (await getProveedores()) || [];
-        setProveedores(list);
-      } catch (e) {
-        setProveedores([]);
-      }
-    })();
-  }, []);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -46,10 +31,6 @@ const MarcaEdit = () => {
     (async () => {
       try {
         await updateMarca(id, formData);
-        const provId = selectedProveedor || null;
-        if (String(formData.proveedorId || '') !== String(provId || '')) {
-          await assignProveedorToMarca(id, provId, true);
-        }
       } catch (err) {
         console.error(err);
       } finally {
@@ -88,9 +69,6 @@ const MarcaEdit = () => {
               formData={formData}
               errors={errors}
               onChange={handleChange}
-              proveedores={proveedores}
-              selectedProveedor={selectedProveedor}
-              onProveedorChange={(e) => setSelectedProveedor(e.target.value)}
             />
 
             <div className="d-grid gap-2 d-md-flex justify-content-md-end">
