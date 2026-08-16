@@ -1,5 +1,6 @@
 // src/pages/marcas/components/MarcaFormFields.jsx
 import React from 'react';
+import ImageUploadField from '../../../components/ImageUploadField';
 
 const MarcaFormFields = ({ formData, errors, onChange, proveedores, selectedProveedor, onProveedorChange }) => (
   <>
@@ -31,14 +32,12 @@ const MarcaFormFields = ({ formData, errors, onChange, proveedores, selectedProv
 
     <div className="row mb-3">
       <div className="col-md-6">
-        <label className="form-label">Logo URL</label>
-        <input
-          type="url"
-          className="form-control"
+        <ImageUploadField
+          label="Logo"
           name="logoUrl"
-          value={formData.logoUrl || ''}
+          value={formData.logoUrl}
           onChange={onChange}
-          placeholder="https://ejemplo.com/logo.png"
+          folder="marcas"
         />
       </div>
       <div className="col-md-6">

@@ -40,8 +40,10 @@ const getAuthToken = () => {
 export const request = async (path, options = {}) => {
   const url = path.startsWith('http') ? path : `${API_BASE_URL.replace(/\/$/, '')}/${path.replace(/^\//, '')}`;
   
+  const isFormData = options.body instanceof FormData;
   const headers = {
-    'Content-Type': 'application/json',
+    // Con FormData el navegador debe fijar su propio Content-Type (con boundary)
+    ...(isFormData ? {} : { 'Content-Type': 'application/json' }),
     ...(options.headers || {}),
   };
   
@@ -98,6 +100,20 @@ export const request = async (path, options = {}) => {
   }
   
   return data;
+};
+
+// ----------------------------------------------------------------------
+// Subida de imágenes (Cloudinary)
+// ----------------------------------------------------------------------
+export const uploadImagen = async (file, folder = 'general') => {
+  const formData = new FormData();
+  formData.append('imagen', file);
+  formData.append('folder', folder);
+  return await request('/api/upload', { method: 'POST', body: formData });
+};
+
+export const eliminarImagenCloudinary = async (publicId) => {
+  await request('/api/upload', { method: 'DELETE', body: { publicId } });
 };
 
 // ----------------------------------------------------------------------

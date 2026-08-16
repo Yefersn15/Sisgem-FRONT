@@ -1,5 +1,6 @@
 // src/pages/productos/components/ProductoFormFields.jsx
 import React from 'react';
+import ImageUploadField from '../../../components/ImageUploadField';
 
 const ProductoFormFields = ({ formData, errors, onChange, categorias, marcas, proveedores }) => (
   <>
@@ -120,14 +121,12 @@ const ProductoFormFields = ({ formData, errors, onChange, categorias, marcas, pr
     </div>
 
     <div className="mb-3">
-      <label className="form-label">URL de la Imagen</label>
-      <input
-        type="url"
-        className="form-control"
+      <ImageUploadField
+        label="Imagen del producto"
         name="fotoUrl"
-        value={formData.fotoUrl || ''}
+        value={formData.fotoUrl}
         onChange={onChange}
-        placeholder="https://ejemplo.com/imagen.jpg"
+        folder="productos"
       />
     </div>
 

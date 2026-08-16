@@ -2,6 +2,7 @@
 import React from 'react';
 import BannerTemplatePicker from './BannerTemplatePicker';
 import BannerCollage from './BannerCollage';
+import ImageUploadField from '../../../components/ImageUploadField';
 
 const TEXT_POSITIONS = [
   { value: 'none', label: 'Sin texto' },
@@ -20,16 +21,15 @@ const BannerFormFields = ({ form, errors, setLayout, setImageUrl, setField }) =>
     <div className="mb-4">
       <label className="form-label fw-bold">Imágenes</label>
       {errors.images && <div className="alert alert-danger py-2">{errors.images}</div>}
-      <div className="row g-2">
+      <div className="row g-3">
         {form.images.map((img, i) => (
           <div className="col-md-6" key={i}>
-            <label className="form-label small">Imagen {i + 1}</label>
-            <input
-              type="url"
-              className="form-control"
-              placeholder="https://ejemplo.com/imagen.jpg"
+            <ImageUploadField
+              label={`Imagen ${i + 1}`}
               value={img.url}
-              onChange={(e) => setImageUrl(i, e.target.value)}
+              onValueChange={(url) => setImageUrl(i, url)}
+              folder="banners"
+              size={64}
             />
           </div>
         ))}
