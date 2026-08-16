@@ -8,12 +8,12 @@ Este proyecto es una aplicación web de comercio electrónico (e-commerce) desar
 
 ## Configuración de conexión al API remoto
 
-Para conectar el frontend con el API remoto (por ejemplo `https://sisgem-api.onrender.com`) utiliza variables de entorno de Vite:
+El frontend se conecta a la API mediante variables de entorno de Vite:
 
-- `VITE_API_BASE_URL` — URL base del API.
-- `VITE_USE_REMOTE_API` — `true` o `false`. Si es `false`, el frontend usará los fallbacks locales (LocalStorage).
+- `VITE_API_BASE_URL` — URL base del API. Si no se define, `src/services/dataService.js` usa `http://localhost:3000` en desarrollo (`vite dev`) y `https://sisgem-api.onrender.com` en producción como valores por defecto.
+- `VITE_USE_REMOTE_API` — Variable heredada (`true`/`false`). Actualmente **no tiene efecto** en el comportamiento de la app: todas las peticiones (productos, categorías, marcas, carrito, pedidos, etc.) se hacen siempre contra la API a través de `dataService`; ya no existen fallbacks de datos en LocalStorage.
 
-Agrega estas variables en un archivo `.env.local` en la carpeta `sisgem/` o usa el `.env.example` provisto.
+Agrega estas variables en un archivo `.env.local` en la raíz del proyecto. El repositorio no incluye actualmente un archivo `.env.example`.
 
 ---
 
@@ -52,15 +52,15 @@ La página de productos (`/productos`) muestra el catálogo completo con:
 
 ### 3. Marcas
 
-Página pública (`/marcas`) que lista todas las marcas activas de la tienda. Cada marca es un enlace a la página de productos filtrados por esa marca.
+Ya no existe una página pública independiente de listado de marcas: la ruta `/marcas` redirige automáticamente a `/productos`. La navegación por marca se hace desde el carrusel de marcas del Home y desde los enlaces de marca del modal de producto, que llevan a `/productos/por-marca/:id`.
 
-Existe también el panel de administración de marcas (`/admin/marcas`) para crear, editar y gestionar marcas.
+Existe el panel de administración de marcas (`/admin/marcas`) para crear, editar y gestionar marcas, y una vista de detalle de marca en `/marcas/:id` (protegida, requiere el permiso "Marcas").
 
 ### 4. Categorías
 
-Página pública (`/categorias`) que lista todas las categorías activas. Cada categoría es un enlace a la página de productos filtrados por esa categoría.
+Al igual que Marcas, ya no existe una página pública `/categorias`: la ruta redirige a `/productos`. La navegación por categoría se hace desde los enlaces de categoría del modal de producto, que llevan a `/productos/por-categoria/:id`.
 
-Existe también el panel de administración de categorías (`/admin/categorias`) para crear, editar y gestionar categorías.
+Existe el panel de administración de categorías (`/admin/categorias`) para crear, editar y gestionar categorías.
 
 ### 5. Carrito de Compras
 
@@ -97,6 +97,15 @@ La página de login (`/login`) permite autenticar usuarios:
   - Link a registro para nuevos usuarios.
   - Link a recuperación de contraseña.
 
+#### 7.1 Recuperación de Contraseña
+
+El flujo tiene dos pasos, contra los endpoints reales del backend (`POST /api/auth/forgot-password` y `POST /api/auth/reset-password`, ver `src/pages/auth/hooks/useForgotPasswordForm.js` y `useResetPasswordForm.js`):
+
+1. **Solicitar recuperación** (`/forgot-password`): el usuario ingresa su email (validado con una expresión regular antes de enviarlo). Sin importar si la cuenta existe o no, la app siempre muestra el mismo mensaje genérico ("Si el correo está registrado, recibirás un enlace...") — este comportamiento lo define el backend a propósito, para no revelar qué correos están registrados en el sistema.
+2. **Restablecer contraseña** (`/reset-password?token=...`): el enlace enviado por correo trae un token de un solo uso (válido 1 hora). La página valida que la nueva contraseña tenga al menos 6 caracteres y coincida con su confirmación, y envía el `token` junto con la nueva contraseña al backend. Si el token es inválido o expiró, se muestra el error devuelto por la API con opción de solicitar un enlace nuevo.
+
+El envío real del correo lo hace el backend (SMTP vía `nodemailer`); el frontend no tiene lógica de envío, solo consume los dos endpoints.
+
 ### 8. Checkout (Confirmar Pedido)
 
 El checkout (`/checkout`) es el proceso de confirmación del pedido:
@@ -114,20 +123,20 @@ El checkout (`/checkout`) es el proceso de confirmación del pedido:
 - **Resumen del pedido**: Lista de productos con cantidades y precios, subtotal, envío (si aplica), y total.
 - **Confirmación**: Al confirmar, se crea el pedido y se redirige a la página de detalles del pedido.
 
-### 9. Pedidos (Mis Pedidos)
+### 9. Pedidos y Pagos del Cliente
 
-La página de pedidos del cliente (`/mis-pedidos` o `/pedidos`) muestra el historial:
+No existe una ruta `/pedidos` o `/mis-pedidos` con un listado propio: el historial del cliente se consulta desde **Mis Pagos y Abonos** (`/mis-pagos`, con alias `/ventas`), a la que se accede desde el menú de usuario del Header:
 
-- **Tabla de pedidos**: Muestra ID, fecha, total, tipo (venta/pedido), estado, método de pago, tipo de entrega.
-- **Filtros**: Por método de pago y búsqueda por ID, dirección, teléfono, estado.
+- **Tabla de pedidos/ventas**: Muestra ID, fecha, total, saldo pendiente (cuando es un abono), método de pago, estado y tipo de entrega.
+- **Filtros**: Por búsqueda (ID o método de pago) y por estado de pago (Pendiente/Pagado).
 - **Estados del pedido**: Pendiente, Aprobado, Asignado, En camino, Entregado, Recibido, Cancelado, Anulado.
-- **Detalle del pedido**: Al hacer clic en "Ver", navega a `/pedidos/:id` para ver los detalles completos.
+- **Detalle del pedido**: Al hacer clic en "Ver", navega a `/pedidos/:id` (o `/ventas/:id`, ambas rutas usan el mismo componente `VentaDetails`) para ver el detalle completo, la línea de tiempo del domicilio y la gestión de abonos.
 
 ### 10. Panel de Administración
 
-El admin (`/admin`) incluye múltiples secciones:
+El admin se sirve bajo `/admin/*` con un layout propio (`AdminLayout`, en `src/components/AdminLayout.jsx`) que permite alternar entre modo barra lateral y modo barra superior (`LayoutModeSwitcher`). Incluye:
 
-- **Dashboard** (`/admin`): Panel principal con estadísticas y métricas.
+- **Dashboard** (`/admin`): Panel principal con estadísticas, gráficas (Recharts) y accesos rápidos.
 - **Ventas** (`/admin/ventas`): Lista de todas las ventas realizadas.
 - **Pedidos** (`/admin/pedidos`): Gestión de pedidos de clientes.
 - **Domicilios** (`/admin/domicilios`): Gestión de entregas a domicilio.
@@ -137,14 +146,17 @@ El admin (`/admin`) incluye múltiples secciones:
 - **Categorías** (`/admin/categorias`): CRUD completo de categorías.
 - **Marcas** (`/admin/marcas`): CRUD completo de marcas.
 - **Productos** (`/admin/productos`): CRUD completo de productos.
+- **Banners** (`/admin/banners`): CRUD de los banners publicitarios del Home, con selector de plantilla/layout, posicionamiento de texto y subida de imágenes.
+- **Proveedores** (`/admin/proveedores`): CRUD completo de proveedores, con acceso al detalle, al catálogo y a la creación de órdenes de compra.
 
 ### 11. Sistema de Roles y Permisos
 
-El sistema cuenta con un mecanismo de permisos que protege las rutas:
+El sistema cuenta con un mecanismo de permisos que protege las rutas mediante el componente `PrivateRoute` y `AuthContext.hasPermission`:
 
-- **Rutas públicas**: Home, Productos, Marcas, Categorías, Carrito, Login, Register.
-- **Rutas protegidas**: Requieren autenticación y/o permisos específicos según el módulo.
-- **Roles**: El administrador puede crear y editar roles con permisos específicos.
+- **Rutas públicas**: Home, Productos (listado y filtros por marca/categoría), Carrito, Login, Register.
+- **Rutas protegidas**: Requieren autenticación y, en la mayoría de rutas administrativas, un permiso de módulo específico. Los usuarios con rol ADMIN tienen acceso a todo.
+- **Módulos usados para proteger rutas**: `Ventas`, `Inventario` (agrupa productos/marcas/categorías del admin), `Proveedores`, `Usuarios`, `Configuración` (roles), `Banners` y `Compras` (órdenes de compra), además de `Productos`, `Marcas` y `Categorías` para algunas rutas públicas de creación/edición.
+- **Roles**: El administrador puede crear y editar roles (`/admin/roles`) asignando permisos granulares con formato `modulo.accion` (por ejemplo `ventas.read`, `productos.write`, `proveedores.delete`, `reportes.read`).
 
 ### 12. Perfil de Usuario
 
@@ -333,7 +345,7 @@ El administrador también puede crear ventas directamente desde `/admin/ventas`:
 1. **Registro de cliente**: El cliente se registra en `/register` con datos personales y credenciales.
 2. **Login**: El cliente inicia sesión en `/login`.
 3. **Roles**: El administrador crea roles en `/admin/roles` con permisos específicos:
-   - **Permisos de módulo**: Productos, Marcas, Categorías, Proveedores, Compras, Ventas, Usuarios, Configuración, Reportes, Banners.
+   - **Permisos de módulo**: Inventario (productos/marcas/categorías en el admin), Productos, Marcas, Categorías, Proveedores, Compras, Ventas, Usuarios, Configuración, Reportes, Banners.
 4. **Protección de rutas**: Las rutas administrativas verifican que el usuario tenga el permiso correspondiente.
 
 ---
@@ -352,7 +364,7 @@ Este proceso permite gestionar la relación con proveedores y generar órdenes d
 
 #### 5.1 Proveedores
 
-Los proveedores son las empresas o personas que surten productos a la tienda. Se gestionan desde `/proveedores`:
+Los proveedores son las empresas o personas que surten productos a la tienda. Se gestionan desde `/admin/proveedores`:
 
 **Datos del proveedor**:
 - Nombre / Razón social
@@ -420,42 +432,92 @@ El sistema utiliza un **carrito separado por proveedor** (a diferencia del carri
      - El carrito del proveedor se limpia
 
 **Rutas relacionadas**:
-- `/proveedores` - Lista de proveedores
-- `/proveedores/nuevo` - Crear proveedor
-- `/proveedores/:id` - Ver detalle del proveedor
+- `/admin/proveedores` - Lista de proveedores (gestión CRUD)
+- `/admin/proveedores/nuevo` - Crear proveedor
+- `/admin/proveedores/editar/:id` - Editar proveedor
+- `/admin/proveedores/:id` - Ver detalle del proveedor
 - `/proveedores/:id/catalogo` - Catálogo del proveedor
+- `/proveedores/:id/catalogo/gestionar` - Gestionar el catálogo del proveedor
 - `/proveedores/:id/catalogo/nuevo` - Agregar item al catálogo
+- `/catalogo/editar/:id` - Editar un item del catálogo
 - `/proveedores/:id/orden` - Crear orden de compra (borrador)
 - `/ordenes` - Lista de órdenes de compra
 - `/ordenes/nueva` - Nueva orden de compra
-- `/ordenes/:id` - Detalle de una orden de compra
+- `/ordenes/:id` / `/ordenes/:id/editar` - Detalle / edición de una orden de compra
 
 ---
 
 ## Rutas del Sistema
 
+La aplicación tiene dos árboles de rutas independientes montados en `src/App.jsx`: `/admin/*` (resuelto por `AdminLayout`, en `src/components/AdminLayout.jsx`) y `/*` (resuelto por `Layout` + `Rutas`, en `src/components/Rutas.jsx`, para tienda/cliente/proveedores).
+
+### Rutas Públicas y de Tienda
+
 | Ruta | Descripción |
 |------|-------------|
 | `/` | Home - Página principal |
 | `/productos` | Catálogo de productos |
-| `/productos/por-categoria/:id` | Productos por categoría |
-| `/productos/por-marca/:id` | Productos por marca |
-| `/marcas` | Lista de marcas |
-| `/categorias` | Lista de categorías |
+| `/productos/:id`, `/productos/ver/:id` | Detalle de producto (requiere permiso "Productos") |
+| `/productos/nuevo` | Crear producto (requiere permiso "Productos") |
+| `/productos/editar/:id` | Editar producto (requiere permiso "Productos") |
+| `/productos/por-categoria/:id` | Productos filtrados por categoría |
+| `/productos/por-marca/:id` | Productos filtrados por marca |
+| `/marcas` | Redirige a `/productos` |
+| `/marcas/:id` | Detalle de marca (requiere permiso "Marcas") |
+| `/marcas/nueva`, `/marcas/editar/:id` | Crear / editar marca (requiere permiso "Marcas") |
+| `/categorias` | Redirige a `/productos` |
+| `/categorias/nueva`, `/categorias/editar/:id` | Crear / editar categoría (requiere permiso "Categorías") |
 | `/carrito` | Carrito de compras |
 | `/checkout` | Confirmar pedido |
-| `/pedidos` | Mis pedidos |
-| `/pedidos/:id` | Detalle de pedido |
-| `/login` | Iniciar sesión |
-| `/register` | Registro de usuario |
-| `/perfil` | Perfil del usuario |
-| `/admin` | Panel de administración |
-| `/admin/ventas` | Administración de ventas |
-| `/admin/pedidos` | Administración de pedidos |
-| `/admin/usuarios` | Administración de usuarios |
-| `/admin/productos` | Administración de productos |
-| `/admin/categorias` | Administración de categorías |
-| `/admin/marcas` | Administración de marcas |
+
+### Autenticación y Cuenta
+
+| Ruta | Descripción |
+|------|-------------|
+| `/login` | Iniciar sesión (solo invitados) |
+| `/register` | Registro de usuario (solo invitados) |
+| `/forgot-password` | Solicitar recuperación de contraseña (solo invitados) |
+| `/reset-password` | Restablecer contraseña (solo invitados) |
+| `/auth-router` | Redirección post-login según el rol del usuario |
+| `/perfil` | Perfil del usuario (requiere sesión) |
+| `/cambiar-password` | Cambiar contraseña (requiere sesión) |
+| `/ventas`, `/mis-pagos` | Mis Pagos y Abonos - historial de pedidos/ventas del cliente (requiere sesión) |
+| `/ventas/:id`, `/pedidos/:id` | Detalle de un pedido/venta (componente `VentaDetails`) |
+
+### Proveedores y Órdenes de Compra
+
+Requieren sesión y el permiso de módulo "Proveedores" o "Compras" según la ruta.
+
+| Ruta | Descripción |
+|------|-------------|
+| `/proveedores/:id/catalogo` | Catálogo del proveedor |
+| `/proveedores/:id/catalogo/gestionar` | Gestión del catálogo del proveedor |
+| `/proveedores/:id/catalogo/nuevo` | Agregar item al catálogo |
+| `/catalogo/editar/:id` | Editar item del catálogo |
+| `/proveedores/:id/orden` | Crear orden de compra (borrador) para ese proveedor |
+| `/ordenes` | Lista de órdenes de compra |
+| `/ordenes/nueva` | Nueva orden de compra |
+| `/ordenes/:id`, `/ordenes/:id/editar` | Detalle / edición de una orden de compra |
+
+### Panel de Administración (bajo `/admin`)
+
+Todas requieren sesión; las que indican un permiso están protegidas además por ese módulo (los usuarios ADMIN acceden a todas).
+
+| Ruta | Descripción |
+|------|-------------|
+| `/admin` | Dashboard con estadísticas y gráficas (permiso "Ventas") |
+| `/admin/ventas` | Administración de ventas (permiso "Ventas") |
+| `/admin/pedidos` | Administración de pedidos (permiso "Ventas") |
+| `/admin/domicilios` | Administración de domicilios (permiso "Ventas") |
+| `/admin/pagos`, `/admin/pagos/nuevo`, `/admin/pagos/:id` | Administración de pagos/abonos (permiso "Ventas") |
+| `/admin/productos` | Administración de productos (permiso "Inventario") |
+| `/admin/marcas` | Administración de marcas (permiso "Inventario") |
+| `/admin/categorias` | Administración de categorías (permiso "Inventario") |
+| `/admin/banners`, `/admin/banners/nuevo`, `/admin/banners/editar/:id` | Administración de banners del Home (permiso "Banners") |
+| `/admin/proveedores`, `/admin/proveedores/nuevo`, `/admin/proveedores/editar/:id`, `/admin/proveedores/:id` | Administración de proveedores (permiso "Proveedores") |
+| `/admin/proveedores/:id/catalogo/gestionar` | Gestión del catálogo del proveedor desde el admin (permiso "Proveedores") |
+| `/admin/usuarios`, `/admin/usuarios/nuevo`, `/admin/usuarios/editar/:id` | Administración de usuarios (permiso "Usuarios") |
+| `/admin/roles`, `/admin/roles/nuevo`, `/admin/roles/editar/:id` | Administración de roles y permisos (permiso "Configuración") |
 
 ---
 
@@ -469,32 +531,33 @@ El frontend Sisgem se conecta a la API REST del proyecto `API_PROYECTO`. La comu
 
 | Variable | Descripción | Valor por defecto |
 |----------|-------------|-------------------|
-| `VITE_API_BASE_URL` | URL base del API | `http://localhost:3000` |
-| `VITE_USE_REMOTE_API` | Habilitar API remoto | `false` |
+| `VITE_API_BASE_URL` | URL base del API | `http://localhost:3000` en desarrollo, `https://sisgem-api.onrender.com` en producción |
+| `VITE_USE_REMOTE_API` | Variable heredada, sin efecto actual en el comportamiento de la app | `false` |
 
 #### Funcionamiento del dataService
 
-El archivo `src/services/dataService.js` centraliza todas las peticiones al API:
+El archivo `src/services/dataService.js` centraliza todas las peticiones al API a través de una única función `request(path, options)` (no hay métodos `get/post/put/...` separados):
 
 ```javascript
-const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api';
+export const request = async (path, options = {}) => {
+  const url = path.startsWith('http')
+    ? path
+    : `${API_BASE_URL.replace(/\/$/, '')}/${path.replace(/^\//, '')}`;
 
-// Cabeceras por defecto
-const headers = {
-  'Content-Type': 'application/json',
-  'Authorization': `Bearer ${token}`
+  const headers = {
+    'Content-Type': 'application/json', // se omite si el body es FormData
+    ...(options.headers || {}),
+  };
+  const token = localStorage.getItem('auth_token');
+  if (token) headers['Authorization'] = `Bearer ${token}`;
+
+  const res = await fetch(url, { ...options, headers });
+  // La API responde { success, message, data }; request() devuelve solo `data`
+  // y lanza un Error (con `err.status`) si `success` es false o la respuesta no es 2xx.
 };
 ```
 
-**Métodos disponibles:**
-
-| Método | Descripción |
-|--------|-------------|
-| `get(endpoint)` | GET request |
-| `post(endpoint, data)` | POST request |
-| `put(endpoint, data)` | PUT request |
-| `patch(endpoint, data)` | PATCH request |
-| `delete(endpoint)` | DELETE request |
+Todas las funciones exportadas por `dataService` (`getProductos`, `createPedido`, `getPagos`, etc.) usan internamente `request()` indicando el `method` y, si aplica, el `body`.
 
 #### Autenticación
 
@@ -514,16 +577,24 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIs...
 
 | Módulo | Endpoint | Métodos |
 |--------|----------|---------|
-| Auth | `/api/auth/login`, `/api/auth/register`, `/api/auth/me` | POST, GET |
-| Usuarios | `/api/usuarios` | GET, PUT, PATCH |
-| Productos | `/api/productos` | GET, POST, PUT, DELETE |
-| Categorías | `/api/categorias` | GET, POST, PUT, DELETE |
-| Marcas | `/api/marcas` | GET, POST, PUT, DELETE |
-| Pedidos | `/api/pedidos`, `/api/pedidos/mis-pedidos` | GET, POST, PUT, PATCH |
-| Pagos | `/api/pagos`, `/api/pagos/mis-pagos` | GET, POST, PATCH |
-| Carrito | `/api/carrito` | GET, POST, PUT, DELETE |
+| Auth | `/api/auth/login`, `/api/auth/register`, `/api/auth/me`, `/api/auth/change-password`, `/api/auth/forgot-password`, `/api/auth/reset-password` | POST, GET |
+| Usuarios | `/api/usuarios`, `/api/usuarios/:id`, `/api/usuarios/:id/estado`, `/api/usuarios/email/:email` | GET, POST, PUT, PATCH, DELETE |
+| Direcciones | `/api/usuarios/direcciones`, `/api/usuarios/direcciones/:id` | GET, POST, PUT, DELETE |
+| Productos | `/api/productos`, `/api/productos/:id`, `/api/productos/:id/estado`, `/api/productos/export` | GET, POST, PUT, PATCH, DELETE |
+| Categorías | `/api/categorias`, `/api/categorias/:id`, `/api/categorias/:id/estado`, `/api/categorias/export` | GET, POST, PUT, PATCH, DELETE |
+| Marcas | `/api/marcas`, `/api/marcas/:id`, `/api/marcas/:id/estado`, `/api/marcas/:id/proveedor`, `/api/marcas/export` | GET, POST, PUT, PATCH, DELETE |
+| Proveedores | `/api/proveedores`, `/api/proveedores/:id`, `/api/proveedores/:id/estado` | GET, POST, PUT, PATCH, DELETE |
+| Catálogo | `/api/catalogo`, `/api/catalogo/:id` | GET, POST, PUT, DELETE |
+| Órdenes de Compra | `/api/ordenes-compra`, `/api/ordenes-compra/:id`, `/api/ordenes-compra/:id/estado`, `/api/ordenes-compra/verificar-productos`, `/api/ordenes-compra/pedir-mas-stock` | GET, POST, PUT, PATCH, DELETE |
+| Pedidos / Ventas | `/api/pedidos`, `/api/pedidos/mis-pedidos`, `/api/pedidos/ventas`, `/api/pedidos/:id`, `/api/pedidos/:id/estado`, `/api/pedidos/:id/convertir-venta`, `/api/pedidos/:id/aprobar`, `/api/pedidos/:id/rechazar-abono` | GET, POST, PUT, PATCH, DELETE |
+| Pagos | `/api/pagos`, `/api/pagos/:id`, `/api/pagos/:id/estado` | GET, POST, PUT, PATCH, DELETE |
+| Domicilios | `/api/domicilios`, `/api/domicilios/:id/estado`, `/api/domicilios/:id/convertir`, `/api/domicilios/:id/tarifa`, `/api/domicilios/:id/repartidor` | GET, POST, PUT, PATCH |
+| Tarifas de Domicilio | `/api/tarifas-domicilio`, `/api/tarifas-domicilio/:id` | GET, POST, PUT, DELETE |
+| Carrito | `/api/carrito`, `/api/carrito/items`, `/api/carrito/items/:id` | GET, POST, PUT, DELETE |
 | Dashboard | `/api/dashboard` | GET |
-| Banners | `/api/banners` | GET, POST, PUT, DELETE |
+| Banners | `/api/banners`, `/api/banners/:id` | GET, POST, PUT, DELETE |
+| Roles | `/api/roles`, `/api/roles/:id`, `/api/roles/seed` | GET, POST, PUT, DELETE |
+| Subida de imágenes | `/api/upload` (Cloudinary) | GET, POST, DELETE |
 
 #### Manejo de Errores
 
@@ -536,26 +607,29 @@ El dataService maneja errores HTTP comunes:
 | 404 | Mostrar "Recurso no encontrado" |
 | 500 | Mostrar "Error del servidor" |
 
-#### Fallbacks Locales
+#### Uso de LocalStorage
 
-Si `VITE_USE_REMOTE_API` es `false`, el sistema usa datos guardados en localStorage como fallback:
+El proyecto ya no usa LocalStorage como fallback de datos de negocio: productos, categorías, marcas, pedidos, pagos y el carrito del cliente siempre se leen y escriben contra la API (la variable `VITE_USE_REMOTE_API` está definida pero no cambia este comportamiento). LocalStorage se usa únicamente para:
 
-- **Productos**: Se cachean en localStorage
-- **Carrito**: Se guarda en localStorage
-- **Categorías/Marcas**: Se cachean para navegación offline
-
-Esto permite que la tienda funcione parcialmente sin conexión al API.
+- **Sesión**: token JWT y datos del usuario (`auth_token`, `auth_user`).
+- **Preferencia de tema** claro/oscuro (`theme`).
+- **Carrito de proveedor** (`tienda_provider_carts`): el borrador de la orden de compra por proveedor (ver Proceso 5) se guarda localmente hasta que se envía como orden de compra real a la API.
 
 ---
 
 ## Tecnologías Utilizadas
 
-- **Frontend**: React 18 + Vite
-- **Enrutamiento**: React Router DOM
+- **Frontend**: React 19 + Vite
+- **Enrutamiento**: React Router DOM 7
 - **Estilos**: Bootstrap 5 + CSS personalizado
-- **Iconos**: Font Awesome
+- **Iconos**: Font Awesome (`@fortawesome/fontawesome-free`)
 - **Estado global**: React Context (AuthContext, CartContext)
-- **HTTP Client**: Fetch API con dataService
+- **HTTP Client**: Fetch API con `dataService`
+- **Gráficas**: Recharts, usado en el Dashboard de administración (`src/pages/dashboard/AdminDashboard.jsx`) para ventas por período y rankings (top productos/marcas/categorías)
+- **Excel**: `xlsx`, usado en `dataService` para importar y exportar catálogos completos (productos, categorías, marcas, proveedores, usuarios, pagos, domicilios, ventas) desde/hacia archivos `.xlsx`
+- **Descarga de archivos**: `file-saver`, usado junto con `xlsx` para generar y descargar los archivos Excel exportados
+- **Generación de PDF**: `html2pdf.js`, usado en `src/services/printService.js` como respaldo para generar/descargar el voucher de una venta cuando el navegador bloquea la ventana de impresión
+- **Linting**: ESLint 9
 
 ---
 
@@ -563,23 +637,37 @@ Esto permite que la tienda funcione parcialmente sin conexión al API.
 
 ```
 src/
-├── components/       # Componentes reutilizables (Layout, Header, Footer, Rutas)
-├── context/          # Contextos (AuthContext, CartContext)
-├── hooks/            # Hooks personalizados (useDebounce)
-├── pages/            # Páginas del sistema
-│   ├── auth/         # Login,ForgotPassword, ResetPassword
-│   ├── carrito/      # Carrito
-│   ├── categorias/   # Categorías (público y admin)
-│   ├── dashboard/    # Dashboard admin
-│   ├── domicilios/   # Domicilios
-│   ├── home/         # Home
-│   ├── marcas/       # Marcas (público y admin)
-│   ├── ordenes/      # Órdenes de compra
-│   ├── pagos/        # Pagos
-│   ├── pedidos/     # Pedidos
-│   ├── productos/   # Productos
-│   ├── usuarios/    # Usuarios, Perfil, Registro
-│   └── ventas/      # Ventas, Checkout
-├── services/         # Servicios (dataService, printService)
-└── main.jsx          # Punto de entrada
+├── assets/            # Imágenes estáticas
+├── components/        # Componentes reutilizables y layouts
+│   ├── admin/           # Navegación del admin (AdminSidebarNav, AdminTopNav, LayoutModeSwitcher, navConfig)
+│   ├── AdminLayout.jsx  # Layout y rutas internas de /admin/*
+│   ├── Layout.jsx       # Layout público (Header + Footer)
+│   ├── Header.jsx / Footer.jsx
+│   ├── Rutas.jsx        # Rutas públicas / tienda / proveedores (montadas en /*)
+│   ├── PrivateRoute.jsx # Guard de autenticación y permisos
+│   └── ImageUploadField.jsx / ImageGalleryModal.jsx  # Subida y selección de imágenes (Cloudinary)
+├── context/           # Contextos (AuthContext, CartContext)
+├── hooks/             # Hooks compartidos (useDebounce, useAdminLayoutMode, useImageUpload)
+├── pages/             # Páginas del sistema, organizadas por módulo
+│   ├── auth/            # Login, ForgotPassword, ResetPassword
+│   ├── banners/         # CRUD de banners del Home (services/, hooks/, components/)
+│   ├── carrito/         # Carrito y Checkout (services/, hooks/, components/)
+│   ├── catalogo/        # Catálogo de items del proveedor (crear/editar/gestionar)
+│   ├── categorias/      # Categorías (público y admin) (services/, hooks/, components/)
+│   ├── dashboard/       # Dashboard admin (services/, hooks/, components/)
+│   ├── domicilios/      # Domicilios admin y "Mis Domicilios" (services/, hooks/, components/)
+│   ├── home/            # Home (services/, hooks/, components/)
+│   ├── marcas/          # Marcas (público y admin) (services/, hooks/, components/)
+│   ├── ordenes/         # Órdenes de compra (lista, crear, detalle, borrador)
+│   ├── pagos/           # Pagos admin y "Mis Pagos" (hooks/)
+│   ├── pedidos/         # Pedidos admin (services/, hooks/, components/)
+│   ├── productos/       # Productos (services/, hooks/, components/)
+│   ├── proveedores/     # Proveedores (lista, crear, editar, detalle)
+│   ├── roles/           # Roles y permisos (services/, hooks/, components/)
+│   ├── usuarios/        # Usuarios, Perfil, Registro, Cambiar contraseña
+│   └── ventas/          # Ventas y detalle de venta/pedido (services/, hooks/, components/)
+├── services/          # dataService (API + Excel) y printService (voucher en PDF)
+└── main.jsx           # Punto de entrada
 ```
+
+> La mayoría de los módulos dentro de `pages/` siguen el mismo patrón: el componente de página en la raíz del módulo, con subcarpetas `services/` (llamadas a `dataService`), `hooks/` (lógica de estado) y `components/` (piezas de UI del propio módulo).

@@ -1,13 +1,16 @@
 // src/components/ImageUploadField.jsx
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import { useImageUpload } from '../hooks/useImageUpload';
+import ImageGalleryModal from './ImageGalleryModal';
 
-// Campo de imagen reutilizable: sube el archivo a Cloudinary y expone la URL resultante.
+// Campo de imagen reutilizable: sube el archivo a Cloudinary (o reutiliza una ya
+// subida antes en la misma carpeta) y expone la URL resultante.
 // Uso con hooks de formulario tipo handleChange(e) -> pasar `name` + `onChange`.
 // Uso con un setter directo (ej. un slot de collage) -> pasar `onValueChange(url)`.
-const ImageUploadField = ({ label, name, value, onChange, onValueChange, folder = 'general', size = 84 }) => {
-  const { upload, uploading, error, setError } = useImageUpload(folder);
+const ImageUploadField = ({ label, name, value, onChange, onValueChange, folder = 'general', maxWidth, size = 84 }) => {
+  const { upload, uploading, error, setError } = useImageUpload(folder, maxWidth);
   const inputRef = useRef(null);
+  const [showGallery, setShowGallery] = useState(false);
 
   const applyValue = (url) => {
     if (onValueChange) onValueChange(url);
@@ -25,6 +28,12 @@ const ImageUploadField = ({ label, name, value, onChange, onValueChange, folder 
   const handleRemove = () => {
     setError('');
     applyValue('');
+  };
+
+  const handleSelectFromGallery = (img) => {
+    setError('');
+    applyValue(img.url);
+    setShowGallery(false);
   };
 
   return (
@@ -55,14 +64,25 @@ const ImageUploadField = ({ label, name, value, onChange, onValueChange, folder 
           </div>
         )}
         <div className="flex-grow-1">
-          <input
-            ref={inputRef}
-            type="file"
-            accept="image/*"
-            className="form-control"
-            onChange={handleFileChange}
-            disabled={uploading}
-          />
+          <div className="d-flex gap-2">
+            <input
+              ref={inputRef}
+              type="file"
+              accept="image/*"
+              className="form-control"
+              onChange={handleFileChange}
+              disabled={uploading}
+            />
+            <button
+              type="button"
+              className="btn btn-outline-secondary text-nowrap"
+              onClick={() => setShowGallery(true)}
+              disabled={uploading}
+              title="Elegir una imagen ya subida"
+            >
+              <i className="fas fa-images"></i>
+            </button>
+          </div>
           {uploading && <small className="text-muted d-block mt-1"><i className="fas fa-spinner fa-spin me-1"></i>Subiendo imagen...</small>}
           {error && <small className="text-danger d-block mt-1">{error}</small>}
           {value && !uploading && (
@@ -72,6 +92,14 @@ const ImageUploadField = ({ label, name, value, onChange, onValueChange, folder 
           )}
         </div>
       </div>
+
+      {showGallery && (
+        <ImageGalleryModal
+          folder={folder}
+          onSelect={handleSelectFromGallery}
+          onClose={() => setShowGallery(false)}
+        />
+      )}
     </div>
   );
 };

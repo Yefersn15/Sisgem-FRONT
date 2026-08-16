@@ -70,8 +70,17 @@ export const request = async (path, options = {}) => {
     } catch (e) {
       txt = 'No se pudo leer el cuerpo de la respuesta';
     }
+    // La API responde { success: false, message } en JSON; si se puede parsear,
+    // usamos ese mensaje en vez del texto crudo para mostrar errores legibles.
+    let message = txt;
+    try {
+      const parsed = JSON.parse(txt);
+      if (parsed && parsed.message) message = parsed.message;
+    } catch {
+      // txt no era JSON, se deja tal cual
+    }
     // No borrar token automáticamente en 401/400 - el usuario puede re-autenticarse si es necesario
-    const err = new Error(`API error ${res.status} ${res.statusText}: ${txt}`);
+    const err = new Error(message || `Error ${res.status} ${res.statusText}`);
     err.status = res.status;
     throw err;
   }
@@ -105,15 +114,21 @@ export const request = async (path, options = {}) => {
 // ----------------------------------------------------------------------
 // Subida de imágenes (Cloudinary)
 // ----------------------------------------------------------------------
-export const uploadImagen = async (file, folder = 'general') => {
+export const uploadImagen = async (file, folder = 'general', maxWidth) => {
   const formData = new FormData();
   formData.append('imagen', file);
   formData.append('folder', folder);
+  if (maxWidth) formData.append('maxWidth', maxWidth);
   return await request('/api/upload', { method: 'POST', body: formData });
 };
 
 export const eliminarImagenCloudinary = async (publicId) => {
   await request('/api/upload', { method: 'DELETE', body: { publicId } });
+};
+
+export const listarImagenes = async (folder = 'general') => {
+  const data = await request(`/api/upload?folder=${encodeURIComponent(folder)}`);
+  return Array.isArray(data) ? data : [];
 };
 
 // ----------------------------------------------------------------------
@@ -1252,6 +1267,22 @@ export const getCurrentUser = async () => {
   return data;
 };
 
+export const forgotPassword = async (email) => {
+  const data = await request('/api/auth/forgot-password', {
+    method: 'POST',
+    body: { email }
+  });
+  return data;
+};
+
+export const resetPassword = async (token, password) => {
+  const data = await request('/api/auth/reset-password', {
+    method: 'POST',
+    body: { token, password }
+  });
+  return data;
+};
+
 // ----------------------------------------------------------------------
 // CARRITO (Usa endpoints del backend)
 // ----------------------------------------------------------------------
@@ -2141,13 +2172,6 @@ export const importCatalogoProveedor = async (proveedorId, file, onSuccess, onEr
 // ----------------------------------------------------------------//
 export const hashPassword = async (password) => {
   return password;
-};
-
-// ----------------------------------------------------------------//
-// USUARIOS - Por email
-// ----------------------------------------------------------------//
-export const getUsuarioByEmail = async (email) => {
-  return await request(`/api/usuarios/email/${email}`);
 };
 
 // ----------------------------------------------------------------//

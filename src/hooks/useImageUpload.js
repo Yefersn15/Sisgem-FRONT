@@ -4,7 +4,7 @@ import { uploadImagen } from '../services/dataService';
 
 const MAX_SIZE_MB = 8;
 
-export const useImageUpload = (folder = 'general') => {
+export const useImageUpload = (folder = 'general', maxWidth) => {
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState('');
 
@@ -20,7 +20,7 @@ export const useImageUpload = (folder = 'general') => {
     }
     setUploading(true);
     try {
-      const result = await uploadImagen(file, folder);
+      const result = await uploadImagen(file, folder, maxWidth);
       return result;
     } catch (err) {
       setError(err.message || 'Error al subir la imagen');

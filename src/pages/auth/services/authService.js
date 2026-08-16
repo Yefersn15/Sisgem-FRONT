@@ -4,6 +4,6 @@ export {
   registerUser,
   getCurrentUser,
   changePassword,
-  getUsuarioByEmail,
-  updateUsuario,
+  forgotPassword,
+  resetPassword,
 } from '../../../services/dataService';

@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { useResetPasswordForm } from './hooks/useResetPasswordForm';
 
 const ResetPassword = () => {
-  const { email, password, setPassword, confirmPassword, setConfirmPassword, error, success, handleSubmit } = useResetPasswordForm();
+  const { token, password, setPassword, confirmPassword, setConfirmPassword, error, loading, success, handleSubmit } = useResetPasswordForm();
 
   if (success) {
     return (
@@ -23,7 +23,7 @@ const ResetPassword = () => {
     );
   }
 
-  if (error && !email) {
+  if (!token) {
     return (
       <div className="container mt-5 login-container" style={{ maxWidth: 400 }}>
         <div className="card login-card">
@@ -43,17 +43,19 @@ const ResetPassword = () => {
         <div className="card-header">Nueva Contraseña</div>
         <div className="card-body">
           {error && <div className="alert alert-danger">{error}</div>}
-          <p className="text-muted">Ingresa tu nueva contraseña para <strong>{email}</strong></p>
+          <p className="text-muted">Ingresa tu nueva contraseña.</p>
           <form onSubmit={handleSubmit}>
             <div className="mb-3">
               <label className="form-label">Nueva Contraseña</label>
-              <input type="password" className="form-control" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={6} />
+              <input type="password" className="form-control" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={6} disabled={loading} />
             </div>
             <div className="mb-3">
               <label className="form-label">Confirmar Contraseña</label>
-              <input type="password" className="form-control" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required />
+              <input type="password" className="form-control" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required disabled={loading} />
             </div>
-            <button type="submit" className="btn btn-primary w-100" disabled={!!error}>Cambiar Contraseña</button>
+            <button type="submit" className="btn btn-primary w-100" disabled={loading}>
+              {loading ? 'Guardando...' : 'Cambiar Contraseña'}
+            </button>
           </form>
         </div>
       </div>

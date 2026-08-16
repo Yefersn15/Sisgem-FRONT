@@ -3,6 +3,7 @@ import React from 'react';
 import BannerTemplatePicker from './BannerTemplatePicker';
 import BannerCollage from './BannerCollage';
 import ImageUploadField from '../../../components/ImageUploadField';
+import { getTemplate } from '../hooks/bannerTemplates';
 
 const TEXT_POSITIONS = [
   { value: 'none', label: 'Sin texto' },
@@ -11,7 +12,10 @@ const TEXT_POSITIONS = [
   { value: 'center', label: 'Texto centrado' },
 ];
 
-const BannerFormFields = ({ form, errors, setLayout, setImageUrl, setField }) => (
+const BannerFormFields = ({ form, errors, setLayout, setImageUrl, setField }) => {
+  const template = getTemplate(form.layout);
+
+  return (
   <>
     <div className="mb-4">
       <label className="form-label fw-bold">Plantilla de collage</label>
@@ -29,6 +33,7 @@ const BannerFormFields = ({ form, errors, setLayout, setImageUrl, setField }) =>
               value={img.url}
               onValueChange={(url) => setImageUrl(i, url)}
               folder="banners"
+              maxWidth={template.maxWidth}
               size={64}
             />
           </div>
@@ -95,6 +100,7 @@ const BannerFormFields = ({ form, errors, setLayout, setImageUrl, setField }) =>
       <label className="form-check-label" htmlFor="bannerEstado">Banner activo (visible en la tienda)</label>
     </div>
   </>
-);
+  );
+};
 
 export default BannerFormFields;
