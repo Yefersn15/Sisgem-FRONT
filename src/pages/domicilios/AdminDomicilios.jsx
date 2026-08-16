@@ -1,255 +1,42 @@
-// src/pages/domicilios/AdminDomicilios.jsx
-import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { getDomicilios, asignarRepartidor, editarRepartidor, saveDomicilio, updateDomicilioEstado, getVentas, getVentaById, editarTarifaDomicilio, exportToExcel, importDomicilios, getUsuarios, formatPrice } from '../../services/dataService';
-import { openPrintVoucher } from '../../services/printService';
+import React, { useRef } from 'react';
 import { Link } from 'react-router-dom';
-
-const ESTADOS_DOMICILIO = ['pendiente', 'aprobado', 'asignado', 'en_camino', 'entregado', 'cancelado'];
-const TRANSICIONES_DOMICILIO = {
-  'pendiente': ['aprobado', 'cancelado'],
-  'aprobado': ['asignado', 'cancelado'],
-  'asignado': ['en_camino', 'cancelado'],
-  'en_camino': ['entregado'],
-  'entregado': [],
-  'cancelado': []
-};
-const ESTADOS_DOMICILIO_FINALES = ['entregado', 'cancelado'];
-
-const getSiguientesEstadosDomicilio = (estadoActual) => TRANSICIONES_DOMICILIO[String(estadoActual || '').toLowerCase()] || [];
-const isEstadoFinalDomicilio = (estado) => ESTADOS_DOMICILIO_FINALES.includes(String(estado || '').toLowerCase());
+import { useAdminDomicilios } from './hooks/useAdminDomicilios';
+import RepartidorModal from './components/RepartidorModal';
+import DomicilioCard from './components/DomicilioCard';
 
 const AdminDomicilios = () => {
-  const [domicilios, setDomicilios] = useState([]);
-  const [repartidoresList, setRepartidoresList] = useState([]);
-  const [selectedRepartidorId, setSelectedRepartidorId] = useState('');
-  const [search, setSearch] = useState('');
-  const [ventas, setVentas] = useState([]);
-  const [filter, setFilter] = useState('Todos');
-  const [showRepartidorModal, setShowRepartidorModal] = useState(false);
-  const [currentVentaId, setCurrentVentaId] = useState(null);
-  const [repartidorForm, setRepartidorForm] = useState({ nombre: '', telefono: '', tipoVehiculo: '', placa: '' });
-
-  useEffect(() => {
-    cargarDatos();
-  }, []);
-
-  const cargarDatos = async () => {
-    const doms = (await getDomicilios()) || [];
-    setDomicilios(doms);
-    setVentas((await getVentas()) || []);
-    try {
-      const users = await getUsuarios();
-      const reps = Array.isArray(users) ? users.filter(u => {
-        const rn = (u.rol_nombre || '').toString().toUpperCase();
-        return rn.includes('REPART') || rn === 'EMPLEADO' || rn === 'DOMICILIARIO';
-      }) : [];
-      setRepartidoresList(reps);
-    } catch (e) {
-      setRepartidoresList([]);
-    }
-  };
-
-  const normalizeNumber = (num, defaultCountry = '57') => {
-    if (!num) return '';
-    let s = String(num).replace(/\D/g, '');
-    s = s.replace(/^0+/, '');
-    if (s.length <= 10) s = `${defaultCountry}${s}`;
-    return s;
-  };
-
-  const openRepartidorModal = (ventaId) => {
-    const dom = domicilios.find(d => String(d.ventaId) === String(ventaId));
-    setCurrentVentaId(ventaId);
-    const rep = dom?.repartidor;
-    setRepartidorForm({
-      nombre: (typeof rep === 'object' ? rep?.nombre : rep) || '',
-      telefono: (typeof rep === 'object' ? rep?.telefono : dom?.telefono_repartidor) || '',
-      tipoVehiculo: (typeof rep === 'object' ? rep?.tipoVehiculo : '') || '',
-      placa: (typeof rep === 'object' ? rep?.placa : '') || '',
-      tarifa: (dom?.tarifaAplicada ?? dom?.tarifa_aplicada ?? dom?.tarifa) ?? 0
-    });
-    setSelectedRepartidorId('');
-    setShowRepartidorModal(true);
-  };
-
-  const handleRepartidorInput = (e) => {
-    const { name, value } = e.target;
-    setRepartidorForm(prev => ({ ...prev, [name]: value }));
-  };
-
-  const handleSelectRepartidor = (e) => {
-    const id = e.target.value;
-    setSelectedRepartidorId(id);
-    if (!id) {
-      setRepartidorForm({ nombre: '', telefono: '', tipoVehiculo: '', placa: '', tarifa: repartidorForm.tarifa });
-      return;
-    }
-    const user = repartidoresList.find(r => String(r.id || r._id) === String(id));
-    if (user) {
-      setRepartidorForm({ nombre: user.nombre || '', telefono: user.telefono || '', tipoVehiculo: user.tipoVehiculo || '', placa: user.placa || '', tarifa: repartidorForm.tarifa });
-    }
-  };
-
-  const handleSaveRepartidor = async () => {
-    if (!currentVentaId) return;
-    const token = localStorage.getItem('auth_token');
-    if (!token) {
-      alert('No hay sesión activa. Por favor, inicia sesión nuevamente.');
-      return;
-    }
-    const { nombre, telefono, tipoVehiculo, placa, tarifa } = repartidorForm;
-    if (!nombre || !telefono) return alert('Nombre y teléfono son obligatorios');
-    
-    const dom = domicilios.find(d => String(d.ventaId) === String(currentVentaId));
-    let res = null;
-    const payload = {
-      repartidor: {
-        nombre,
-        telefono,
-        tipoVehiculo: tipoVehiculo || '',
-        placa: placa || ''
-      },
-      tarifa: tarifa !== undefined ? parseFloat(tarifa) : undefined
-    };
-    if (selectedRepartidorId) payload.repartidorId = selectedRepartidorId;
-    
-    try {
-      console.log('Asignando repartidor a venta:', currentVentaId, 'payload:', payload);
-      if (dom?.repartidor?.nombre) {
-        res = await editarRepartidor(currentVentaId, payload);
-      } else {
-        res = await asignarRepartidor(currentVentaId, payload);
-      }
-      console.log('Respuesta asignarRepartidor:', res);
-    } catch (err) {
-      console.error('Error asignando repartidor:', err);
-      alert('No se puede asignar/editar repartidor: ' + (err?.message || err));
-      return;
-    }
-    if (!res) {
-      alert('No se puede asignar/editar repartidor: el pedido puede requerir aprobación previa o no existe un domicilio creado.');
-      return;
-    }
-    try {
-      const venta = ventas.find(v => String(v.id) === String(currentVentaId));
-      if (venta && res) openPrintVoucher(venta, res, { forBag: true });
-    } catch (e) {}
-    setShowRepartidorModal(false);
-    setCurrentVentaId(null);
-    cargarDatos();
-  };
-
-  const handleCambiarEstado = async (ventaId, nextState) => {
-    const dom = domicilios.find(d => String(d.ventaId) === String(ventaId));
-    const estadoActual = dom?.estado;
-    
-    if (estadoActual && isEstadoFinalDomicilio(estadoActual)) {
-      alert(`No se puede cambiar el estado: El domicilio ya está en estado "${estadoActual}" que es un estado final.`);
-      return;
-    }
-    const siguientes = getSiguientesEstadosDomicilio(estadoActual);
-    if (estadoActual && !siguientes.includes(nextState)) {
-      alert(`No se puede cambiar de "${estadoActual}" a "${nextState}".\n\nEstados válidos siguientes: ${siguientes.join(', ') || 'Ninguno'}`);
-      return;
-    }
-    if ((nextState === 'en_preparacion' || nextState === 'asignado') && (!dom?.repartidor || !dom.repartidor.nombre)) {
-      alert('Debe asignar un repartidor antes de cambiar el estado a En Preparación o Asignado.');
-      return;
-    }
-    try {
-      await updateDomicilioEstado(ventaId, nextState);
-      await cargarDatos();
-    } catch (error) {
-      alert('Error al cambiar estado: ' + error.message);
-    }
-  };
-
-  const handleEditarTarifa = async (ventaId, tarifaActual) => {
-    const nuevaTarifa = prompt('Ingrese la tarifa de envío:', tarifaActual || '0');
-    if (nuevaTarifa === null) return;
-    const tarifaNum = parseFloat(String(nuevaTarifa).replace(/[^0-9.\-]/g, ''));
-    if (isNaN(tarifaNum) || tarifaNum < 0) {
-      alert('Tarifa inválida. Ingrese un número válido.');
-      return;
-    }
-    const dom = domicilios.find(d => String(d.ventaId) === String(ventaId));
-    if (!dom) {
-      alert('No se encontró el domicilio para la venta');
-      return;
-    }
-    try {
-      dom.tarifa = tarifaNum;
-      const res = await saveDomicilio(dom);
-      alert('Tarifa guardada correctamente');
-      await cargarDatos();
-      return res;
-    } catch (err) {
-      alert('Error guardando tarifa: ' + (err?.message || err));
-    }
-  };
-
-  const handleNotas = (ventaId, notasActuales) => {
-    const nuevasNotas = prompt('Notas para el domicilio (se guardará como nota de admin):', notasActuales || '');
-    if (nuevasNotas !== null) {
-      const dom = domicilios.find(d => String(d.ventaId) === String(ventaId));
-      if (dom) {
-        dom.notas = nuevasNotas;
-        dom.notasAutor = 'admin';
-        saveDomicilio(dom);
-        cargarDatos();
-      }
-    }
-  };
-
+  const {
+    domiciliosConVenta,
+    repartidoresList,
+    selectedRepartidorId,
+    search,
+    setSearch,
+    filter,
+    setFilter,
+    clearFilters,
+    showRepartidorModal,
+    setShowRepartidorModal,
+    repartidorForm,
+    openRepartidorModal,
+    handleRepartidorInput,
+    handleSelectRepartidor,
+    handleSaveRepartidor,
+    handleCambiarEstado,
+    handleConvertirAVenta,
+    handleEditarTarifa,
+    handleNotas,
+    handleImprimir,
+    handleWhatsapp,
+    handleExportar,
+    handleImport,
+  } = useAdminDomicilios();
   const fileInputRef = useRef(null);
 
-  const handleExportar = () => {
-    const data = domicilios.map(d => ({
-      Venta: d.ventaId,
-      Dirección: `${d.direccion} ${d.direccion2 || ''}, ${d.barrio || ''}`,
-      Tipo: d.tipo || '',
-      Teléfono: normalizeNumber(d.telefono) || d.telefono,
-      Estado: d.estado,
-      Tarifa: formatPrice((d.tarifaAplicada ?? d.tarifa_aplicada ?? d.tarifa) ?? 0),
-      Repartidor: d.repartidor?.nombre || '',
-      TelRepartidor: normalizeNumber(d.repartidor?.telefono) || d.repartidor?.telefono || '',
-      TipoVehiculo: d.repartidor?.tipoVehiculo || '',
-      Placa: d.repartidor?.placa || '',
-      Notas: d.notas,
-      FechaAsignación: d.updatedAt ? new Date(d.updatedAt).toLocaleString() : ''
-    }));
-    exportToExcel(data, 'domicilios.xlsx');
-  };
-
-  const handleImport = (e) => {
+  const onImportChange = (e) => {
     const file = e.target.files[0];
-    if (!file) return;
-    importDomicilios(file, () => {
-      alert('Importación de domicilios completada');
-      cargarDatos();
-      if (fileInputRef.current) fileInputRef.current.value = '';
-    }, (err) => {
-      alert('Error al importar domicilios: ' + (err?.message || err));
-    });
+    handleImport(file);
+    if (fileInputRef.current) fileInputRef.current.value = '';
   };
-
-  const filtered = useMemo(() => {
-    const q = search.trim().toLowerCase();
-    return domicilios.filter(d => {
-      if (filter !== 'Todos' && d.estado !== filter) return false;
-      if (!q) return true;
-      const venta = ventas.find(v => String(v.id) === String(d.ventaId));
-      const fields = [d.ventaId, d.direccion, d.telefono, d.estado, venta?.metodoPago, venta?.id, venta?.usuarioNombre]
-        .filter(Boolean).join(' ').toLowerCase();
-      return fields.includes(q);
-    });
-  }, [domicilios, ventas, filter, search]);
-
-  const mapDomicilio = dom => {
-    const pedidoId = dom.pedido?.id || dom.ventaId || dom.pedidoId;
-    return { ...dom, pedidoId, venta: ventas.find(v => String(v.id) === String(pedidoId)) };
-  };
-  const domiciliosConVenta = filtered.map(mapDomicilio);
 
   return (
     <div className="container-fluid py-4">
@@ -259,7 +46,7 @@ const AdminDomicilios = () => {
           <p className="text-muted mb-0">Gestiona los envíos y repartidores</p>
         </div>
         <div className="d-flex gap-2">
-          <input type="file" ref={fileInputRef} accept=".xlsx, .xls" style={{ display: 'none' }} onChange={handleImport} />
+          <input type="file" ref={fileInputRef} accept=".xlsx, .xls" style={{ display: 'none' }} onChange={onImportChange} />
           <button className="btn btn-outline-primary" onClick={handleExportar}>
             <i className="fas fa-file-export me-1"></i>Exportar
           </button>
@@ -270,7 +57,7 @@ const AdminDomicilios = () => {
             <i className="fas fa-arrow-left me-1"></i> Volver a Ventas
           </Link>
         </div>
-      </div> {/* Cierra el header row */}
+      </div>
 
       <div className="card mb-4">
         <div className="card-body">
@@ -290,7 +77,7 @@ const AdminDomicilios = () => {
               </select>
             </div>
             <div className="col-md-4 d-flex align-items-end">
-              <button className="btn btn-secondary w-100" onClick={() => { setSearch(''); setFilter('Todos'); }}>
+              <button className="btn btn-secondary w-100" onClick={clearFilters}>
                 <i className="fas fa-eraser me-1"></i>Limpiar
               </button>
             </div>
@@ -299,164 +86,32 @@ const AdminDomicilios = () => {
       </div>
 
       <div className="row">
-        {domiciliosConVenta.map(dom => {
-          const key = String(dom.id || dom.pedidoId);
-          const estadoNorm = String(dom.estado || 'pendiente').toLowerCase();
-          const badgeColor = estadoNorm === 'entregado' ? 'success'
-            : estadoNorm === 'en_camino' || estadoNorm === 'asignado' || estadoNorm === 'en_preparacion' || estadoNorm === 'aprobado' ? 'warning'
-            : estadoNorm === 'cancelado' ? 'danger' : 'secondary';
-          return (
-            <div className="col-md-6 col-lg-4 mb-3" key={key}>
-              <div className="card domicilioCard">
-                <div className="card-body">
-                  <h5 className="card-title">Venta #{dom.pedidoId || dom.venta?.id || 'N/A'}</h5>
-                  {dom.venta?.usuarioNombre && (
-                    <p className="mb-1"><i className="fas fa-user me-2"></i>{dom.venta.usuarioNombre}</p>
-                  )}
-                  <p className="mb-1"><i className="fas fa-map-marker-alt me-2"></i>{dom.direccion || dom.venta?.direccion}{dom.barrio ? ` (${dom.barrio})` : ''}{dom.tipo ? ` [${dom.tipo.charAt(0).toUpperCase() + dom.tipo.slice(1)}]` : ''}</p>
-                  <p className="mb-1"><i className="fas fa-phone me-2"></i>{dom.telefono || dom.venta?.telefono || dom.venta?.telefonoContacto || 'Sin teléfono'}</p>
-                  <div className="d-flex justify-content-between align-items-center mt-2">
-                    <span className={`badge bg-${badgeColor}`}>{dom.estado || dom.venta?.estadoPedido || 'Pendiente'}</span>
-                    <div className="d-flex align-items-center gap-2">
-                      {dom.estado !== 'entregado' && (
-                        <button className="btn btn-sm btn-outline-warning py-0 px-1" onClick={() => handleEditarTarifa(dom.pedidoId, dom.tarifa)} title="Editar tarifa">
-                          <i className="fas fa-dollar-sign"></i>
-                        </button>
-                      )}
-                      <span className="fw-bold">{formatPrice((dom.tarifaAplicada ?? dom.tarifa_aplicada) ?? dom.tarifa ?? 0)}</span>
-                    </div>
-                  </div>
-                  {dom.repartidor ? (
-                    <div className="mt-2 p-2 repartidorInfo">
-                      <div>
-                        <i className="fas fa-motorcycle me-1"></i>
-                        <strong>{typeof dom.repartidor === 'object' ? (dom.repartidor.nombre ? String(dom.repartidor.nombre).split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ') : '') : String(dom.repartidor)}</strong>
-                      </div>
-                      {typeof dom.repartidor === 'object' && dom.repartidor.tipoVehiculo && (
-                        <div><span className="badge bg-secondary me-1">{dom.repartidor.tipoVehiculo}</span></div>
-                      )}
-                      {typeof dom.repartidor === 'object' && dom.repartidor.placa && (
-                        <div><span className="badge bg-primary me-1">Placa: {dom.repartidor.placa}</span></div>
-                      )}
-                      {typeof dom.repartidor === 'object' && dom.repartidor.telefono && (
-                        <div><span className="text-muted">📞 {dom.repartidor.telefono}</span></div>
-                      )}
-                    </div>
-                  ) : (
-                    <div className="mt-2 text-muted">
-                      <small>Sin repartidor asignado</small>
-                    </div>
-                  )}
-                  <div className="mt-3">
-                    {isEstadoFinalDomicilio(dom.estado) ? (
-                      <span className={`badge ${dom.estado === 'entregado' ? 'bg-success' : 'bg-danger'} mb-2`}>
-                        Domicilio: {String(dom.estado || '').charAt(0).toUpperCase() + String(dom.estado || '').slice(1)}
-                      </span>
-                    ) : (
-                      <select 
-                        className="form-select form-select-sm mb-2" 
-                        value={dom.estado} 
-                        onChange={(e) => handleCambiarEstado(dom.pedidoId, e.target.value)}
-                      >
-                        <option value="pendiente">Pendiente</option>
-                        <option value="aprobado">Aprobado</option>
-                        <option value="asignado">Asignado</option>
-                        <option value="en_camino">En camino</option>
-                        <option value="entregado">Entregado</option>
-                        <option value="cancelado">Cancelado</option>
-                      </select>
-                    )}
-                  </div>
-                  <div className="mt-2 d-flex gap-2">
-                    {dom.estado !== 'entregado' && (
-                      <button className="btn btn-sm btn-outline-primary" onClick={() => openRepartidorModal(dom.pedidoId)}>
-                        <i className="fas fa-user-plus me-1"></i>{dom.repartidor ? 'Editar' : 'Asignar'} Repartidor
-                      </button>
-                    )}
-                    <button className="btn btn-sm btn-outline-secondary" onClick={async () => {
-                      try {
-                        let ventaData = dom.venta;
-                        if (!ventaData || !ventaData.id) {
-                          ventaData = await getVentaById(dom.pedidoId);
-                        }
-                        if (ventaData && ventaData.id) {
-                          await openPrintVoucher(ventaData, dom, { forBag: true });
-                        } else {
-                          alert('No se pudo obtener la información de la venta para imprimir');
-                        }
-                      } catch (err) {
-                        console.error('Error al imprimir:', err);
-                        alert('Error al generar el voucher: ' + (err.message || err));
-                      }
-                    }}>
-                      <i className="fas fa-print"></i>
-                    </button>
-                    <button className="btn btn-sm btn-outline-success" onClick={() => { const target = dom.repartidor?.telefono ? normalizeNumber(dom.repartidor.telefono) : normalizeNumber(dom.telefono); if (target) window.open(`https://wa.me/${target}`, '_blank'); else alert('Teléfono inválido para WhatsApp'); }}>
-                      <i className="fab fa-whatsapp"></i>
-                    </button>
-                    <button className="btn btn-sm btn-outline-info" onClick={() => handleNotas(dom.pedidoId, dom.notas)}>
-                      <i className="fas fa-sticky-note"></i>
-                    </button>
-                    {dom.estado === 'entregado' && dom.venta?.esVenta === false && (
-                      <button className="btn btn-sm btn-outline-success" onClick={async () => { if (confirm('¿Convertir pedido a venta?')) { await updateDomicilioEstado(dom.pedidoId, 'entregado', true); cargarDatos(); } }} title="Convertir a venta">
-                        <i className="fas fa-check-circle"></i>
-                      </button>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </div>
-          );
-        })}
+        {domiciliosConVenta.map(dom => (
+          <div className="col-md-6 col-lg-4 mb-3" key={String(dom.id || dom.pedidoId)}>
+            <DomicilioCard
+              dom={dom}
+              onCambiarEstado={handleCambiarEstado}
+              onEditarTarifa={handleEditarTarifa}
+              onAsignarRepartidor={openRepartidorModal}
+              onImprimir={handleImprimir}
+              onWhatsapp={handleWhatsapp}
+              onNotas={handleNotas}
+              onConvertirAVenta={handleConvertirAVenta}
+            />
+          </div>
+        ))}
       </div>
 
       {showRepartidorModal && (
-        <div className="modal-backdrop d-flex align-items-center justify-content-center" style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 1050 }}>
-          <div className="card p-3" style={{ width: 520 }}>
-            <div className="d-flex justify-content-between align-items-center mb-2">
-              <h5 className="mb-0">Asignar / editar repartidor</h5>
-              <button className="btn-close" onClick={() => setShowRepartidorModal(false)}></button>
-            </div>
-            <div className="mb-2">
-              <label className="form-label">Seleccionar repartidor existente (opcional)</label>
-              <select className="form-select" value={selectedRepartidorId} onChange={handleSelectRepartidor}>
-                <option value="">-- Seleccionar repartidor --</option>
-                {repartidoresList.map(r => (
-                  <option key={r.id || r._id} value={r.id || r._id}>{r.nombre} {r.telefono ? `(${r.telefono})` : ''} - {r.rol_nombre || ''}</option>
-                ))}
-              </select>
-            </div>
-
-            <div className="mb-2">
-              <label className="form-label">Nombre</label>
-              <input className="form-control" name="nombre" value={repartidorForm.nombre} onChange={handleRepartidorInput} />
-            </div>
-            <div className="mb-2">
-              <label className="form-label">Teléfono</label>
-              <input className="form-control" name="telefono" value={repartidorForm.telefono} onChange={handleRepartidorInput} />
-            </div>
-            <div className="mb-2">
-              <label className="form-label">Tipo de vehículo</label>
-              <input className="form-control" name="tipoVehiculo" value={repartidorForm.tipoVehiculo} onChange={handleRepartidorInput} />
-            </div>
-            <div className="mb-3">
-              <label className="form-label">Placa</label>
-              <input className="form-control" name="placa" value={repartidorForm.placa} onChange={handleRepartidorInput} />
-            </div>
-            <div className="mb-3">
-              <label className="form-label">Tarifa (opcional)</label>
-              <input className="form-control" name="tarifa" value={repartidorForm.tarifa} onChange={handleRepartidorInput} type="number" step="0.01" />
-            </div>
-            <div className="d-flex justify-content-end gap-2">
-              <button className="btn btn-secondary" onClick={() => setShowRepartidorModal(false)}>
-                <i className="fas fa-times me-1"></i>Cancelar
-              </button>
-              <button className="btn btn-primary" onClick={handleSaveRepartidor}>
-                <i className="fas fa-save me-1"></i>Guardar
-              </button>
-            </div>
-          </div>
-        </div>
+        <RepartidorModal
+          repartidoresList={repartidoresList}
+          selectedRepartidorId={selectedRepartidorId}
+          repartidorForm={repartidorForm}
+          onSelectRepartidor={handleSelectRepartidor}
+          onInputChange={handleRepartidorInput}
+          onSave={handleSaveRepartidor}
+          onClose={() => setShowRepartidorModal(false)}
+        />
       )}
     </div>
   );

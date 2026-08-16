@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import PagoForm from './PagoForm';
-import { createPago } from '../../services/dataService';
+import PagoForm from './components/PagoForm';
+import { createPago } from './services/pagosService';
 
 const PagoCreate = () => {
   const navigate = useNavigate();

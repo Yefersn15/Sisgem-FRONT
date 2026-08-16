@@ -1,75 +1,14 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
-import { getPagoById, getVentaById, formatPrice, getDomicilioByVentaId, getPagosByVenta, getPagos } from '../../services/dataService';
+import { formatPrice } from '../../services/dataService';
+import { usePagoDetalle } from './hooks/usePagoDetalle';
 
 const PagoDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const [pago, setPago] = useState(null);
-  const [venta, setVenta] = useState(null);
-  const [domicilio, setDomicilio] = useState(null);
-  const [pagosVenta, setPagosVenta] = useState([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    (async () => {
-      let ventaId = id;
-      
-      // 1. Cargar todos los pagos y filtrar por ventaId (el ID de la URL)
-      try {
-        const todosLosPagos = await getPagos();
-        const misPagos = todosLosPagos.filter(pg => String(pg.ventaId) === String(id));
-        if (misPagos.length > 0) {
-          setPagosVenta(misPagos.sort((a, b) => new Date(b.fecha) - new Date(a.fecha)));
-          if (misPagos.length === 1) {
-            setPago(misPagos[0]);
-          }
-        }
-      } catch (e) {
-        console.log('Error cargando pagos');
-      }
-      
-      // 2. Cargar datos del pedido/venta usando el ID de la URL
-      try {
-        const v = await getVentaById(id);
-        setVenta(v);
-      } catch (e) {
-        console.log('Error cargando venta');
-      }
-      
-      try {
-        const dom = await getDomicilioByVentaId(id);
-        setDomicilio(dom);
-      } catch (e) {
-        console.log('No hay domicilio');
-      }
-      
-      setLoading(false);
-    })();
-  }, [id]);
+  const { pago, venta, domicilio, pagosVenta, loading, shipping, totalVenta, totalPagado, saldoPendiente } = usePagoDetalle(id);
 
   if (loading) return <div className="container mt-4">Cargando...</div>;
-
-  const getBadgeClass = (estado) => {
-    switch (estado?.toLowerCase()) {
-      case 'aplicado': return 'bg-success';
-      case 'pendiente': return 'bg-warning text-dark';
-      case 'anulado': return 'bg-danger';
-      default: return 'bg-secondary';
-    }
-  };
-
-  const shipping = domicilio?.costo ? parseFloat(domicilio.costo) : (venta?.shipping || 0);
-  const totalVenta = (venta?.subtotal || 0) + shipping;
-  
-  // Calcular total pagado: incluir tanto aplicados como pendientes
-  const totalPagado = pagosVenta
-    .filter(p => {
-      const estado = String(p.estado)?.toLowerCase();
-      return estado === 'aplicado' || estado === 'pendiente';
-    })
-    .reduce((sum, p) => sum + (parseFloat(p.monto) || 0), 0);
-  const saldoPendiente = Math.max(0, totalVenta - totalPagado);
 
   const ventaId = venta?.id || id;
 

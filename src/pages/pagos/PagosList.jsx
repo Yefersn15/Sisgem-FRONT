@@ -1,112 +1,26 @@
-import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { getPedidos, getVentas, getPagos, getDomicilios, exportPagos, importPagos, formatPrice } from '../../services/dataService';
+import React from 'react';
+import { Link } from 'react-router-dom';
+import { formatPrice } from '../../services/dataService';
+import { usePagosAdmin } from './hooks/usePagosAdmin';
 
 const PagosList = () => {
-  const [pedidosData, setPedidosData] = useState([]);
-  const [ventasData, setVentasData] = useState([]);
-  const [pagos, setPagos] = useState([]);
-  const [domicilios, setDomicilios] = useState([]);
-  const [search, setSearch] = useState('');
-  const [filterEstadoPago, setFilterEstadoPago] = useState('Todos');
-  const [importStatus, setImportStatus] = useState({});
-  const fileInputRef = useRef(null);
-  const navigate = useNavigate();
+  const {
+    search,
+    setSearch,
+    filterEstadoPago,
+    setFilterEstadoPago,
+    clearFilters,
+    importStatus,
+    fileInputRef,
+    filtered,
+    handleExport,
+    handleImport,
+    handleAbonar,
+  } = usePagosAdmin();
 
-  useEffect(() => {
-    const cargarDatos = async () => {
-      const pedidos = await getPedidos();
-      const ventas = await getVentas();
-      const pagosData = await getPagos();
-      const domiciliosData = await getDomicilios();
-      setPedidosData(pedidos);
-      setVentasData(ventas);
-      setPagos(pagosData);
-      setDomicilios(domiciliosData);
-    };
-    cargarDatos();
-  }, []);
-
-  const todasLasVentas = useMemo(() => {
-    return [...pedidosData, ...ventasData];
-  }, [pedidosData, ventasData]);
-
-  const ventasConPagos = useMemo(() => {
-    const estadosExcluidos = ['rechazado', 'cancelado', 'anulado', 'pendiente'];
-    const abonos = todasLasVentas.filter(venta => {
-      const estadoLower = String(venta.estadoPedido || '').toLowerCase();
-      const esExcluido = estadosExcluidos.includes(estadoLower);
-      if (esExcluido) return false;
-      if (venta.metodoPago !== 'Abono') return false;
-      return true;
-    });
-    return abonos.map(venta => {
-      const shipping = parseFloat(venta.shipping) || 0;
-      const totalVenta = (venta.subtotal || 0) + shipping;
-      const pagosVenta = pagos.filter(p => String(p.ventaId) === String(venta.id));
-      const totalPagado = pagosVenta
-        .filter(p => {
-          const estado = String(p.estado).toLowerCase();
-          return estado === 'aplicado' || estado === 'pendiente';
-        })
-        .reduce((sum, p) => sum + (parseFloat(p.monto) || 0), 0);
-      const saldoPendiente = Math.max(0, totalVenta - totalPagado);
-      const estadoPago = saldoPendiente <= 0 ? 'Pagado' : 'Pendiente';
-      const primerPagoId = pagosVenta.length > 0 ? pagosVenta[0].id : null;
-      return {
-        ...venta,
-        totalVenta,
-        totalPagado,
-        saldoPendiente,
-        estadoPago,
-        primerPagoId,
-        ultimoPago: pagosVenta.length > 0 ? pagosVenta[0].fecha : venta.fecha,
-        shipping
-      };
-    });
-  }, [todasLasVentas, pagos]);
-
-  const filtered = useMemo(() => {
-    let lista = ventasConPagos;
-    if (filterEstadoPago !== 'Todos') {
-      lista = lista.filter(v => v.estadoPago === filterEstadoPago);
-    }
-    if (search.trim()) {
-      const q = search.toLowerCase();
-      lista = lista.filter(v =>
-        String(v.id).includes(q) ||
-        (v.usuarioNombre || '').toLowerCase().includes(q) ||
-        (v.metodoPago || '').toLowerCase().includes(q)
-      );
-    }
-    return lista.sort((a, b) => new Date(b.ultimoPago) - new Date(a.ultimoPago));
-  }, [ventasConPagos, filterEstadoPago, search]);
-
-  const handleExport = () => exportPagos();
-
-  const handleImport = (e) => {
+  const onImportChange = (e) => {
     const file = e.target.files[0];
-    if (!file) return;
-    importPagos(file, () => {
-      setImportStatus({ message: 'Importación exitosa', type: 'success' });
-      (async () => {
-        const pedidos = await getPedidos();
-        const ventas = await getVentas();
-        const pagosData = await getPagos();
-        setPedidosData(pedidos);
-        setVentasData(ventas);
-        setPagos(pagosData);
-      })();
-      if (fileInputRef.current) fileInputRef.current.value = '';
-      setTimeout(() => setImportStatus({}), 3000);
-    }, (err) => {
-      setImportStatus({ message: 'Error importando: ' + (err?.message || err), type: 'danger' });
-      setTimeout(() => setImportStatus({}), 5000);
-    });
-  };
-
-  const handleAbonar = (venta) => {
-    navigate('/admin/pagos/nuevo', { state: { ventaId: venta.id } });
+    handleImport(file);
   };
 
   return (
@@ -120,7 +34,7 @@ const PagosList = () => {
           <button className="btn btn-outline-primary" onClick={handleExport}>
             <i className="fas fa-file-export me-1"></i>Exportar
           </button>
-          <input type="file" ref={fileInputRef} accept=".xlsx,.xls" style={{ display: 'none' }} onChange={handleImport} />
+          <input type="file" ref={fileInputRef} accept=".xlsx,.xls" style={{ display: 'none' }} onChange={onImportChange} />
           <button className="btn btn-outline-primary" onClick={() => fileInputRef.current && fileInputRef.current.click()}>
             <i className="fas fa-file-import me-1"></i>Importar
           </button>
@@ -150,7 +64,7 @@ const PagosList = () => {
               </select>
             </div>
             <div className="col-md-3">
-              <button className="btn btn-secondary w-100" onClick={() => { setSearch(''); setFilterEstadoPago('Todos'); }}>
+              <button className="btn btn-secondary w-100" onClick={clearFilters}>
                 <i className="fas fa-eraser me-1"></i>Limpiar
               </button>
             </div>

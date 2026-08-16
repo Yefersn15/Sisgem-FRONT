@@ -1,41 +1,22 @@
-import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { createCategoria } from '../../services/dataService';
+import { createCategoria } from './services/categoriasService';
+import { useCategoriaForm } from './hooks/useCategoriaForm';
+import CategoriaFormFields from './components/CategoriaFormFields';
+import { useState } from 'react';
 
 const CategoriaCreate = () => {
   const navigate = useNavigate();
-  const [formData, setFormData] = useState({
+  const { formData, errors, handleChange, validate } = useCategoriaForm({
     nombre: '',
     descripcion: '',
-    activo: true
+    activo: true,
   });
-  const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
-
-  const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: type === 'checkbox' ? checked : value
-    }));
-    if (errors[name]) setErrors(prev => ({ ...prev, [name]: '' }));
-  };
-
-  const validate = () => {
-    const newErrors = {};
-    if (!String(formData.nombre || '').trim()) newErrors.nombre = 'El nombre es obligatorio';
-    else if (String(formData.nombre).length > 100) newErrors.nombre = 'Máximo 100 caracteres';
-    if (formData.descripcion && String(formData.descripcion).length > 500) newErrors.descripcion = 'Máximo 500 caracteres';
-    return newErrors;
-  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
     const validationErrors = validate();
-    if (Object.keys(validationErrors).length > 0) {
-      setErrors(validationErrors);
-      return;
-    }
+    if (Object.keys(validationErrors).length > 0) return;
 
     setLoading(true);
     createCategoria(formData);
@@ -51,44 +32,7 @@ const CategoriaCreate = () => {
         </div>
         <div className="card-body">
           <form onSubmit={handleSubmit}>
-            <div className="mb-3">
-              <div className="col-md-6">
-                <label className="form-label">Nombre de la Categoría *</label>
-                <input
-                  type="text"
-                  className={`form-control ${errors.nombre ? 'is-invalid' : ''}`}
-                  name="nombre"
-                  value={formData.nombre}
-                  onChange={handleChange}
-                />
-                {errors.nombre && <div className="invalid-feedback">{errors.nombre}</div>}
-              </div>
-            </div>
-
-            <div className="mb-3">
-              <label className="form-label">Descripción</label>
-              <textarea
-                className={`form-control ${errors.descripcion ? 'is-invalid' : ''}`}
-                name="descripcion"
-                rows="3"
-                value={formData.descripcion}
-                onChange={handleChange}
-              ></textarea>
-              {errors.descripcion && <div className="invalid-feedback">{errors.descripcion}</div>}
-            </div>
-
-            <div className="mb-3">
-              <div className="form-check">
-                <input
-                  className="form-check-input"
-                  type="checkbox"
-                  name="activo"
-                  checked={formData.activo}
-                  onChange={handleChange}
-                />
-                <label className="form-check-label">Categoría activa</label>
-              </div>
-            </div>
+            <CategoriaFormFields formData={formData} errors={errors} onChange={handleChange} />
 
             <div className="d-grid gap-2 d-md-flex justify-content-md-end">
               <button type="submit" className="btn btn-primary me-md-2" disabled={loading}>

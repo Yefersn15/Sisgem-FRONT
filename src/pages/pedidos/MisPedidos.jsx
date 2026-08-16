@@ -1,72 +1,20 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
-import { getMisPedidos, formatPrice } from '../../services/dataService';
-import { useAuth } from '../../context/AuthContext';
+import { formatPrice } from '../../services/dataService';
+import { useMisPedidos, getBadgeClass } from './hooks/useMisPedidos';
 
 const MisPedidos = () => {
-  const { user } = useAuth();
-  const [todosRegistros, setTodosRegistros] = useState([]);
-  const [search, setSearch] = useState('');
-  const [estadoFilter, setEstadoFilter] = useState('');
-  const [metodoFilter, setMetodoFilter] = useState('');
-
-  useEffect(() => {
-    const load = async () => {
-      if (user) {
-        try {
-          const data = await getMisPedidos();
-          setTodosRegistros(Array.isArray(data) ? data : []);
-        } catch (err) {
-          console.error('Error cargando pedidos:', err);
-          setTodosRegistros([]);
-        }
-      } else {
-        setTodosRegistros([]);
-      }
-    };
-    load();
-  }, [user]);
-
-  const getEstadoEfectivo = (registro) => {
-    return registro.estado_pedido || registro.estado_venta || '';
-  };
-
-  const getBadgeClass = (estado) => {
-    switch (estado) {
-      case 'pendiente': return 'bg-warning text-dark';
-      case 'aprobado': return 'bg-info';
-      case 'asignado': return 'bg-primary';
-      case 'en_camino': return 'bg-primary';
-      case 'entregado': return 'bg-success';
-      case 'recibido': return 'bg-success';
-      case 'cancelado': return 'bg-danger';
-      case 'anulado': return 'bg-secondary';
-      case 'completada': return 'bg-success';
-      default: return 'bg-secondary';
-    }
-  };
-
-  const estados = useMemo(() => {
-    const s = todosRegistros.map(p => getEstadoEfectivo(p));
-    return [...new Set(s)].filter(Boolean);
-  }, [todosRegistros]);
-
-  const metodos = useMemo(() => [...new Set(todosRegistros.map(p => p.metodo_pago))], [todosRegistros]);
-
-  const filtered = useMemo(() => {
-    const q = search.trim().toLowerCase();
-    return todosRegistros
-      .filter(p => {
-        const estadoEfectivo = getEstadoEfectivo(p);
-        if (estadoFilter && estadoEfectivo !== estadoFilter) return false;
-        if (metodoFilter && p.metodo_pago !== metodoFilter) return false;
-        if (!q) return true;
-        const fields = [p.id, p.direccion?.direccion, p.telefono_contacto, p.metodo_pago, estadoEfectivo]
-          .filter(Boolean).join(' ').toLowerCase();
-        return fields.includes(q);
-      })
-      .sort((a, b) => new Date(b.fecha_pedido) - new Date(a.fecha_pedido));
-  }, [todosRegistros, search, estadoFilter, metodoFilter]);
+  const {
+    user,
+    search,
+    setSearch,
+    metodoFilter,
+    setMetodoFilter,
+    metodos,
+    filtered,
+    clearFilters,
+    getEstadoEfectivo,
+  } = useMisPedidos();
 
   if (!user) {
     return (
@@ -100,7 +48,7 @@ const MisPedidos = () => {
               </select>
             </div>
             <div className="col-md-1 mb-2 text-end">
-              <button className="btn btn-secondary" onClick={() => { setSearch(''); setEstadoFilter(''); setMetodoFilter(''); }}>
+              <button className="btn btn-secondary" onClick={clearFilters}>
                 Limpiar
               </button>
             </div>

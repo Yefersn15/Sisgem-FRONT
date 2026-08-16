@@ -15,6 +15,9 @@ import RoleEdit from '../pages/roles/RoleEdit';
 import AdminProductos from '../pages/productos/AdminProductos';
 import AdminMarcas from '../pages/marcas/AdminMarcas';
 import AdminCategorias from '../pages/categorias/AdminCategorias';
+import AdminBanners from '../pages/banners/AdminBanners';
+import BannerCreate from '../pages/banners/BannerCreate';
+import BannerEdit from '../pages/banners/BannerEdit';
 import ProveedoresList from '../pages/proveedores/ProveedoresList';
 import ProveedorCreate from '../pages/proveedores/ProveedorCreate';
 import ProveedorEdit from '../pages/proveedores/ProveedorEdit';
@@ -22,8 +25,12 @@ import ProveedorDetail from '../pages/proveedores/ProveedorDetail';
 import CatalogoManage from '../pages/catalogo/CatalogoManage';
 import PrivateRoute from './PrivateRoute';
 import { useAuth } from '../context/AuthContext';
+import { useAdminLayoutMode } from '../hooks/useAdminLayoutMode';
+import AdminSidebarNav from './admin/AdminSidebarNav';
+import AdminTopNav from './admin/AdminTopNav';
+import LayoutModeSwitcher from './admin/LayoutModeSwitcher';
 
-const AdminHeader = () => {
+const AdminHeader = ({ layoutMode, onLayoutModeChange }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const auth = useAuth();
@@ -98,6 +105,8 @@ const AdminHeader = () => {
             <i className={`fas ${isDark ? 'fa-sun' : 'fa-moon'}`}></i>
           </button>
 
+          <LayoutModeSwitcher layoutMode={layoutMode} onChange={onLayoutModeChange} />
+
           <div className="dropdown">
             <button className="btn btn-outline-theme dropdown-toggle btn-sm" data-bs-toggle="dropdown">
               <i className="fas fa-cog"></i>
@@ -113,158 +122,6 @@ const AdminHeader = () => {
           </div>
         </div>
       </div>
-    </nav>
-  );
-};
-
-const AdminSidebar = () => {
-  const location = useLocation();
-  const { hasPermission } = useAuth();
-
-  const isActive = (path) => location.pathname === path || location.pathname.startsWith(path + '/');
-
-  return (
-    <nav className="app-admin-sidebar p-3" style={{ width: '250px', minHeight: 'calc(100vh - var(--topbar-height) - 50px)' }}>
-      <div className="mb-3 d-none d-lg-block">
-        <small className="text-muted fw-bold">Menú principal</small>
-      </div>
-
-      <ul className="nav flex-column">
-        <li className="nav-item">
-          <Link 
-            to="/admin" 
-            className={`nav-link ${location.pathname === '/admin' ? 'active' : ''}`}
-          >
-            <i className="fas fa-home me-2"></i> Dashboard
-          </Link>
-        </li>
-
-        {/* Inventario - Productos, Marcas, Categorías */}
-        {(hasPermission('Inventario') || hasPermission('Productos')) && (
-          <>
-            <li className="nav-item mt-3">
-              <small className="text-muted fw-bold d-none d-lg-block">Inventario</small>
-            </li>
-            <li className="nav-item">
-              <Link 
-                to="/admin/productos" 
-                className={`nav-link ${isActive('/admin/productos') ? 'active' : ''}`}
-              >
-                <i className="fas fa-boxes me-2"></i> Productos
-              </Link>
-            </li>
-            <li className="nav-item">
-              <Link 
-                to="/admin/marcas" 
-                className={`nav-link ${isActive('/admin/marcas') ? 'active' : ''}`}
-              >
-                <i className="fas fa-tag me-2"></i> Marcas
-              </Link>
-            </li>
-            <li className="nav-item">
-              <Link 
-                to="/admin/categorias" 
-                className={`nav-link ${isActive('/admin/categorias') ? 'active' : ''}`}
-              >
-                <i className="fas fa-folder me-2"></i> Categorías
-              </Link>
-            </li>
-          </>
-        )}
-
-        {hasPermission('Ventas') && (
-          <>
-            <li className="nav-item mt-3">
-              <small className="text-muted fw-bold d-none d-lg-block">Ventas</small>
-            </li>
-            <li className="nav-item">
-              <Link 
-                to="/admin/ventas" 
-                className={`nav-link ${isActive('/admin/ventas') ? 'active' : ''}`}
-              >
-                <i className="fas fa-shopping-cart me-2"></i> Ventas
-              </Link>
-            </li>
-            <li className="nav-item">
-              <Link 
-                to="/admin/pedidos" 
-                className={`nav-link ${isActive('/admin/pedidos') ? 'active' : ''}`}
-              >
-                <i className="fas fa-box me-2"></i> Pedidos
-              </Link>
-            </li>
-            <li className="nav-item">
-              <Link 
-                to="/admin/domicilios" 
-                className={`nav-link ${isActive('/admin/domicilios') ? 'active' : ''}`}
-              >
-                <i className="fas fa-truck me-2"></i> Domicilios
-              </Link>
-            </li>
-            <li className="nav-item">
-              <Link 
-                to="/admin/pagos" 
-                className={`nav-link ${isActive('/admin/pagos') ? 'active' : ''}`}
-              >
-                <i className="fas fa-money-bill-wave me-2"></i> Pagos
-              </Link>
-            </li>
-          </>
-        )}
-
-        {/* Proveedores */}
-        {hasPermission('Proveedores') && (
-          <>
-            <li className="nav-item mt-3">
-              <small className="text-muted fw-bold d-none d-lg-block">Proveedores</small>
-            </li>
-            <li className="nav-item">
-              <Link 
-                to="/admin/proveedores" 
-                className={`nav-link ${isActive('/admin/proveedores') ? 'active' : ''}`}
-              >
-                <i className="fas fa-truck-loading me-2"></i> Proveedores
-              </Link>
-            </li>
-          </>
-        )}
-
-        {hasPermission('Usuarios') && (
-          <li className="nav-item mt-3">
-            <small className="text-muted fw-bold d-none d-lg-block">Sistema</small>
-          </li>
-        )}
-
-        {hasPermission('Usuarios') && (
-          <li className="nav-item">
-              <Link 
-                to="/admin/usuarios" 
-                className={`nav-link ${isActive('/admin/usuarios') ? 'active' : ''}`}
-              >
-              <i className="fas fa-users me-2"></i> Usuarios
-            </Link>
-          </li>
-        )}
-
-        {hasPermission('Configuración') && (
-          <li className="nav-item">
-              <Link 
-                to="/admin/roles" 
-                className={`nav-link ${isActive('/admin/roles') ? 'active' : ''}`}
-              >
-              <i className="fas fa-user-shield me-2"></i> Roles
-            </Link>
-          </li>
-        )}
-
-        {/* Reportes/Analytics removed from admin menu */}
-      </ul>
-
-      <hr className="border-secondary my-3" />
-
-      <Link to="/" className="btn btn-outline-theme btn-sm w-100">
-        <i className="fas fa-store me-2"></i> Volver a la tienda
-      </Link>
     </nav>
   );
 };
@@ -287,6 +144,7 @@ const AdminFooter = () => {
 // Layout principal del admin
 const AdminLayout = () => {
   const location = useLocation();
+  const { layoutMode, setLayoutMode, isTopbar, isCompact } = useAdminLayoutMode();
 
   const getPageTitle = () => {
     if (location.pathname === '/admin') return 'Dashboard';
@@ -304,20 +162,17 @@ const AdminLayout = () => {
     return 'Administración';
   };
 
-  return (
-    <div>
-      <AdminHeader />
-      <div className="d-flex">
-        <AdminSidebar />
-        <div className="flex-grow-1 p-4 admin-main-content">
-          {/* Admin child routes rendered here (centralizadas) */}
-          <Routes>
+  const routes = (
+    <Routes>
             <Route index element={<PrivateRoute module="Ventas"><AdminDashboard /></PrivateRoute>} />
 
             <Route path="ventas" element={<PrivateRoute module="Ventas"><VentasAdmin /></PrivateRoute>} />
             <Route path="productos" element={<PrivateRoute module="Inventario"><AdminProductos /></PrivateRoute>} />
             <Route path="marcas" element={<PrivateRoute module="Inventario"><AdminMarcas /></PrivateRoute>} />
             <Route path="categorias" element={<PrivateRoute module="Inventario"><AdminCategorias /></PrivateRoute>} />
+            <Route path="banners" element={<PrivateRoute module="Banners"><AdminBanners /></PrivateRoute>} />
+            <Route path="banners/nuevo" element={<PrivateRoute module="Banners"><BannerCreate /></PrivateRoute>} />
+            <Route path="banners/editar/:id" element={<PrivateRoute module="Banners"><BannerEdit /></PrivateRoute>} />
             <Route path="domicilios" element={<PrivateRoute module="Ventas"><AdminDomicilios /></PrivateRoute>} />
             <Route path="pagos" element={<PrivateRoute module="Ventas"><PagosList /></PrivateRoute>} />
             <Route path="pagos/nuevo" element={<PrivateRoute module="Ventas"><PagoCreate /></PrivateRoute>} />
@@ -336,10 +191,24 @@ const AdminLayout = () => {
             <Route path="roles/nuevo" element={<PrivateRoute module="Configuración"><RoleCreate /></PrivateRoute>} />
             <Route path="roles/editar/:id" element={<PrivateRoute module="Configuración"><RoleEdit /></PrivateRoute>} />
 
-            {/* analytics route removed */}
-          </Routes>
+      {/* analytics route removed */}
+    </Routes>
+  );
+
+  return (
+    <div>
+      <AdminHeader layoutMode={layoutMode} onLayoutModeChange={setLayoutMode} />
+      {isTopbar ? (
+        <>
+          <AdminTopNav compact={isCompact} />
+          <div className="admin-main-content p-4">{routes}</div>
+        </>
+      ) : (
+        <div className="d-flex">
+          <AdminSidebarNav compact={isCompact} />
+          <div className="flex-grow-1 p-4 admin-main-content">{routes}</div>
         </div>
-      </div>
+      )}
       <AdminFooter />
     </div>
   );

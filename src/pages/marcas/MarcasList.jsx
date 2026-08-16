@@ -1,47 +1,9 @@
-import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import useDebounce from '../../hooks/useDebounce';
-import { getMarcas, getProveedores } from '../../services/dataService';
+import { useMarcasCatalogo } from './hooks/useMarcasCatalogo';
 
 const MarcasList = () => {
   const navigate = useNavigate();
-  const [marcas, setMarcas] = useState([]);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [sortBy, setSortBy] = useState('');
-
-  const debouncedSearch = useDebounce(searchQuery, 500);
-
-  useEffect(() => {
-    const init = async () => {
-      await cargarMarcas();
-    };
-    init();
-  }, [debouncedSearch, sortBy]);
-
-  const cargarMarcas = async () => {
-    let lista = await getMarcas();
-    if (!Array.isArray(lista)) lista = lista && lista.data ? lista.data : (lista || []);
-
-    // Cargar proveedores para mostrar nombre
-    const proveedores = await getProveedores().catch(() => []);
-
-    // Búsqueda
-    if (debouncedSearch) {
-      lista = (lista || []).filter(m => (m.nombre || '').toLowerCase().includes(debouncedSearch.toLowerCase()));
-    }
-
-    // Ordenamiento
-    if (sortBy === 'nombre') {
-      lista.sort((a, b) => (a.nombre || '').localeCompare(b.nombre || ''));
-    } else if (sortBy === '-nombre') {
-      lista.sort((a, b) => (b.nombre || '').localeCompare(a.nombre || ''));
-    }
-
-    // Enriquecer con nombre de proveedor si aplica
-    const provMap = (proveedores || []).reduce((acc, p) => { acc[String(p.id)] = p; return acc; }, {});
-    const enriched = (lista || []).map(m => ({ ...m, proveedorNombre: provMap[String(m.proveedorId)]?.nombre || '' }));
-    setMarcas(enriched);
-  };
+  const { marcas, searchQuery, setSearchQuery, sortBy, setSortBy, clearFilters } = useMarcasCatalogo();
 
   return (
     <div className="container my-4">
@@ -76,14 +38,7 @@ const MarcasList = () => {
           />
         </div>
         <div className="col-md-2">
-          <button
-            type="button"
-            className="btn btn-outline-secondary w-100"
-            onClick={() => {
-              setSearchQuery('');
-              setSortBy('');
-            }}
-          >
+          <button type="button" className="btn btn-outline-secondary w-100" onClick={clearFilters}>
             <i className="fas fa-eraser me-1"></i>Limpiar
           </button>
         </div>

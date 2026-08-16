@@ -1,83 +1,17 @@
-import React, { useState, useEffect } from 'react';
-import { getVentaById, getTotalPagadoByVenta, getTotalRecibidoByVenta, formatPrice } from '../../services/dataService';
+import React from 'react';
+import { formatPrice } from '../../../services/dataService';
+import { usePagoForm } from '../hooks/usePagoForm';
 
 const PagoForm = ({ initial = {}, onSubmit, onCancel }) => {
-  const isAbono = Boolean(initial.ventaId);
-  const [form, setForm] = useState({
-    ventaId: initial.ventaId || '',
-    fecha: initial.fecha ? new Date(initial.fecha).toISOString().slice(0,16) : new Date().toISOString().slice(0,16),
-    monto: initial.monto != null ? Math.round(Number(initial.monto) || 0) : 0,
-    metodo: initial.metodo || 'Efectivo',
-    estado: initial.estado || 'Pendiente',
-    notas: initial.notas || ''
-  });
-  const [errors, setErrors] = useState({});
-  const [deuda, setDeuda] = useState(null);
-
-  useEffect(() => {
-    (async () => {
-      if (form.ventaId) {
-        const venta = await getVentaById(form.ventaId);
-        const subtotal = Math.round(parseFloat(venta?.subtotal || venta?.total || 0) || 0);
-        const shipping = Math.round(parseFloat(venta?.shipping || 0) || 0);
-        const total = subtotal + shipping;
-        const recibido = await getTotalRecibidoByVenta(form.ventaId) || 0;
-        setDeuda(Math.max(0, Math.round(total - recibido)));
-      } else {
-        setDeuda(null);
-      }
-    })();
-  }, [form.ventaId]);
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    let newValue = value;
-    if (name === 'monto') {
-      // prevenir que el usuario ingrese un monto mayor a la deuda cuando es abono
-      if (isAbono && deuda !== null) {
-        const num = parseFloat(value);
-        if (!isNaN(num) && num > deuda) {
-          newValue = String(Math.round(deuda));
-        }
-      }
-      // siempre usar enteros
-      if (newValue !== '' && !isNaN(parseFloat(newValue))) {
-        newValue = String(Math.round(parseFloat(newValue)));
-      }
-    }
-    setForm(prev => ({ ...prev, [name]: newValue }));
-    if (errors[name]) setErrors({ ...errors, [name]: '' });
-  };
-
-  const validate = () => {
-    const newErrors = {};
-    if (!form.ventaId) newErrors.ventaId = 'ID de venta requerido';
-    if (!form.fecha) newErrors.fecha = 'Fecha requerida';
-    if (!form.monto || parseFloat(form.monto) <= 0) newErrors.monto = 'Monto debe ser mayor a 0';
-    // Si es abono, monto no puede superar la deuda restante
-    if (isAbono && deuda !== null) {
-      const montoVal = parseFloat(form.monto) || 0;
-      if (montoVal > deuda) newErrors.monto = `El monto no puede ser mayor a la deuda (${deuda.toFixed(2)})`;
-    }
-    return newErrors;
-  };
+  const { isAbono, form, errors, deuda, handleChange, validate, buildPayload } = usePagoForm(initial);
 
   const handleSubmit = (e) => {
     e.preventDefault();
     const validationErrors = validate();
     if (Object.keys(validationErrors).length > 0) {
-      setErrors(validationErrors);
       return;
     }
-    const payload = {
-      ...form,
-      monto: Math.round(parseFloat(form.monto) || 0),
-      fecha: isAbono ? new Date().toISOString() : new Date(form.fecha).toISOString(),
-      metodo: (form.metodo || '').toLowerCase(),
-      tipo: isAbono ? 'abono' : 'pago_total',
-      estado: isAbono ? 'aplicado' : (form.estado || '').toLowerCase()
-    };
-    onSubmit && onSubmit(payload);
+    onSubmit && onSubmit(buildPayload());
   };
 
   return (

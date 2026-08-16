@@ -1,68 +1,8 @@
 // src/pages/usuarios/Perfil.jsx
-import { useState, useEffect } from 'react';
-import { useAuth } from '../../context/AuthContext';
-import { updateUsuario } from '../../services/dataService';
+import { usePerfilForm } from './hooks/usePerfilForm';
 
 const Perfil = () => {
-  const { user, refreshUser } = useAuth();
-  const [perfil, setPerfil] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [editMode, setEditMode] = useState(false);
-  const [form, setForm] = useState({
-    nombre: '',
-    apellido: '',
-    telefono: '',
-    email: '',
-    documento: ''
-  });
-  const [success, setSuccess] = useState('');
-  const [error, setError] = useState('');
-
-  useEffect(() => {
-    const fetchPerfil = async () => {
-      if (user && user.documento) {
-        setPerfil(user);
-        setForm({
-          nombre: user.nombre || '',
-          apellido: user.apellido || '',
-          telefono: user.telefono || '',
-          email: user.email || '',
-          documento: user.documento || ''
-        });
-      }
-      setLoading(false);
-    };
-    fetchPerfil();
-  }, [user]);
-
-  const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError('');
-    setSuccess('');
-
-    try {
-      // Actualizar usuario en la API
-      // Se permite actualizar: nombre, apellido, telefono, email
-      const updated = await updateUsuario(user.documento, {
-        nombre: form.nombre,
-        apellido: form.apellido,
-        telefono: form.telefono,
-        email: form.email
-      });
-
-      // Refrescar el contexto para que refleje los cambios
-      await refreshUser();
-
-      setSuccess('Información actualizada correctamente');
-      setEditMode(false);
-    } catch (err) {
-      setError('Error al actualizar la información: ' + err.message);
-    }
-  };
+  const { perfil, loading, editMode, setEditMode, form, success, error, handleChange, handleSubmit, cancelEdit } = usePerfilForm();
 
   if (loading) {
     return <div className="container mt-4"><p>Cargando...</p></div>;
@@ -89,10 +29,9 @@ const Perfil = () => {
 
           <form onSubmit={handleSubmit}>
             <div className="row">
-              {/* Columna 1: Información Personal */}
               <div className="col-md-6">
                 <h6 className="text-primary mb-3 border-bottom pb-2">Información Personal</h6>
-                
+
                 <div className="mb-3">
                   <label className="form-label">Número de Documento</label>
                   <input
@@ -115,7 +54,7 @@ const Perfil = () => {
                     required
                   />
                 </div>
-                
+
                 <div className="mb-3">
                   <label className="form-label">Apellido</label>
                   <input
@@ -140,7 +79,7 @@ const Perfil = () => {
                     placeholder="Número de teléfono"
                   />
                 </div>
-                
+
                 <div className="mb-3">
                   <label className="form-label">Correo Electrónico</label>
                   <input
@@ -154,10 +93,9 @@ const Perfil = () => {
                 </div>
               </div>
 
-              {/* Columna 2: Información de la Cuenta */}
               <div className="col-md-6">
                 <h6 className="text-primary mb-3 border-bottom pb-2">Información de la Cuenta</h6>
-                
+
                 <div className="mb-3">
                   <label className="form-label">Rol</label>
                   <input
@@ -199,16 +137,7 @@ const Perfil = () => {
                   <button
                     type="button"
                     className="btn btn-secondary"
-                    onClick={() => {
-                      setEditMode(false);
-                      setForm({
-                        nombre: perfil.nombre || '',
-                        apellido: perfil.apellido || '',
-                        telefono: perfil.telefono || '',
-                        email: perfil.email || '',
-                        documento: perfil.documento || ''
-                      });
-                    }}
+                    onClick={cancelEdit}
                   >
                     Cancelar
                   </button>

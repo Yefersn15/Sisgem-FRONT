@@ -1,12 +1,15 @@
 // src/pages/roles/RolesList.jsx
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { getRoles, deleteRol, getPermisosDisponibles } from '../../services/dataService';
+import { getRoles, deleteRol, getPermisosDisponibles } from './services/rolesService';
+import { usePermisosPorCategoria } from './hooks/usePermisosPorCategoria';
+import PermisosViewer from './components/PermisosViewer';
 
 const RolesList = () => {
   const [roles, setRoles] = useState([]);
   const [permisosDisponibles, setPermisosDisponibles] = useState([]);
   const [showPermisos, setShowPermisos] = useState(null);
+  const categoriasPermisos = usePermisosPorCategoria(permisosDisponibles);
 
   const loadData = async () => {
     const [rolesData, permisosData] = await Promise.all([getRoles(), getPermisosDisponibles()]);
@@ -33,21 +36,7 @@ const RolesList = () => {
     }
   };
 
-  const getPermisosAsignados = (rol) => {
-    return rol.permisos || [];
-  };
-
-  const getPermisosPorCategoria = () => {
-    const categorias = {};
-    permisosDisponibles.forEach(p => {
-      const [categoria] = p.split('.');
-      if (!categorias[categoria]) categorias[categoria] = [];
-      categorias[categoria].push(p);
-    });
-    return categorias;
-  };
-
-  const categoriasPermisos = getPermisosPorCategoria();
+  const getPermisosAsignados = (rol) => rol.permisos || [];
 
   return (
     <div className="container-fluid py-4">
@@ -121,36 +110,7 @@ const RolesList = () => {
                     {showPermisos === r.id && (
                       <tr>
                         <td colSpan="6" className="bg-light">
-                          <div className="p-3">
-                            <h6>Permisos de {r.nombre}:</h6>
-                            <div className="row">
-                              {Object.entries(categoriasPermisos).map(([categoria, permisos]) => (
-                                <div key={categoria} className="col-md-4 mb-3">
-                                  <div className="card border-secondary">
-                                    <div className="card-header bg-light border-secondary py-2 fw-bold text-dark">
-                                      {categoria.charAt(0).toUpperCase() + categoria.slice(1)}
-                                    </div>
-                                    <div className="card-body py-2">
-                                      {permisos.map(p => (
-                                        <div key={p} className="form-check">
-                                          <input
-                                            type="checkbox"
-                                            className="form-check-input"
-                                            id={`${r.id}-${p}`}
-                                            checked={getPermisosAsignados(r).includes(p)}
-                                            disabled
-                                          />
-                                          <label className={`form-check-label fw-bold ${getPermisosAsignados(r).includes(p) ? 'text-white bg-success px-2 rounded' : 'text-muted'}`} htmlFor={`${r.id}-${p}`} style={{ fontSize: '0.8rem' }}>
-                                            {p.split('.')[1].replace('read', 'Leer').replace('write', 'Escribir').replace('delete', 'Eliminar')}
-                                          </label>
-                                        </div>
-                                      ))}
-                                    </div>
-                                  </div>
-                                </div>
-                              ))}
-                            </div>
-                          </div>
+                          <PermisosViewer rol={r} categoriasPermisos={categoriasPermisos} />
                         </td>
                       </tr>
                     )}

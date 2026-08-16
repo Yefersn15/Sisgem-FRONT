@@ -1,40 +1,9 @@
-import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import useDebounce from '../../hooks/useDebounce';
-import { getCategorias } from '../../services/dataService';
+import { useCategoriasCatalogo } from './hooks/useCategoriasCatalogo';
 
 const CategoriasList = () => {
   const navigate = useNavigate();
-  const [categorias, setCategorias] = useState([]);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [sortBy, setSortBy] = useState('');
-
-  const debouncedSearch = useDebounce(searchQuery, 500);
-  useEffect(() => {
-    const init = async () => {
-      await cargarCategorias();
-    };
-    init();
-  }, [debouncedSearch, sortBy]);
-
-  const cargarCategorias = async () => {
-    let lista = await getCategorias();
-    if (!Array.isArray(lista)) lista = lista && lista.data ? lista.data : (lista || []);
-
-    // Búsqueda
-    if (debouncedSearch) {
-      lista = (lista || []).filter(c => (c.nombre || '').toLowerCase().includes(debouncedSearch.toLowerCase()));
-    }
-
-    // Ordenamiento
-    if (sortBy === 'nombre') {
-      lista.sort((a, b) => (a.nombre || '').localeCompare(b.nombre || ''));
-    } else if (sortBy === '-nombre') {
-      lista.sort((a, b) => (b.nombre || '').localeCompare(a.nombre || ''));
-    }
-
-    setCategorias(lista);
-  };
+  const { categorias, searchQuery, setSearchQuery, sortBy, setSortBy, clearFilters } = useCategoriasCatalogo();
 
   return (
     <div className="container my-4">
@@ -69,14 +38,7 @@ const CategoriasList = () => {
           />
         </div>
         <div className="col-md-2">
-          <button
-            type="button"
-            className="btn btn-outline-secondary w-100"
-            onClick={() => {
-              setSearchQuery('');
-              setSortBy('');
-            }}
-          >
+          <button type="button" className="btn btn-outline-secondary w-100" onClick={clearFilters}>
             <i className="fas fa-eraser me-1"></i>Limpiar
           </button>
         </div>

@@ -1,303 +1,28 @@
-import { useState, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
-import { useCart } from '../../context/CartContext';
-import { useAuth } from '../../context/AuthContext';
-import { createPedido, formatPrice, getDirecciones, createDireccion } from '../../services/dataService';
+import { Link } from 'react-router-dom';
+import { formatPrice } from '../../services/dataService';
+import { useCheckoutForm } from './hooks/useCheckoutForm';
+import NuevaDireccionForm from './components/NuevaDireccionForm';
+import ResumenPedido from './components/ResumenPedido';
 
 const Checkout = () => {
-  const navigate = useNavigate();
-  const { cartItemsWithDetails, clearCart } = useCart();
-  const { user } = useAuth();
-  
-  const [direcciones, setDirecciones] = useState([]);
-  const [selectedDireccionId, setSelectedDireccionId] = useState('');
-  const [showNewAddress, setShowNewAddress] = useState(false);
-  const [newAddress, setNewAddress] = useState({ direccion: '', barrio: '', telefono: '', tipo: 'casa' });
-  
-  const [formData, setFormData] = useState({
-    direccion: '',
-    direccion2: '',
-    barrio: '',
-    telefono: '',
-    countryCode: '57',
-    notasDomicilio: '',
-    delivery: false,
-    metodoPago: 'Abono',
-    cardNumber: '',
-    cardExpiry: '',
-    cardCvv: '',
-    cardName: ''
-  });
-  const [errors, setErrors] = useState({});
-
-  // Cargar direcciones del usuario
-  useEffect(() => {
-    const loadDirecciones = async () => {
-      if (user && user.documento) {
-        try {
-          const dirs = await getDirecciones();
-          setDirecciones(dirs || []);
-          // Seleccionar la opción "Mis datos registrados" por defecto
-          if (!selectedDireccionId) {
-            setSelectedDireccionId('registered');
-            // Inicializar con datos del usuario registrado
-            setFormData(prev => ({
-              ...prev,
-              direccion: user.direccion || '',
-              barrio: user.barrio || '',
-              telefono: user.telefono || user.celular || ''
-            }));
-          }
-        } catch (err) {
-          console.error('Error cargando direcciones:', err);
-        }
-      }
-    };
-    loadDirecciones();
-  }, [user]);
-
-  // Inicializar teléfono con datos del usuario
-  useEffect(() => {
-    if (user && !formData.telefono) {
-      setFormData(prev => ({
-        ...prev,
-        telefono: user.telefono || user.celular || ''
-      }));
-    }
-  }, [user]);
-
-  const subtotal = cartItemsWithDetails.reduce(
-    (sum, item) => sum + (item.producto.precio || 0) * item.cantidad,
-    0
-  );
-  
-  const shipping = 0; // se asigna después por admin
-  const total = subtotal;
-
-  // Verificar si hay items en el carrito
-  useEffect(() => {
-    if (cartItemsWithDetails.length === 0) {
-      navigate('/carrito');
-    }
-  }, [cartItemsWithDetails, navigate]);
-
-  // Redirigir a login si no está logueado
-  useEffect(() => {
-    if (!user && !loading) {
-      navigate('/login?redirect=/checkout');
-    }
-  }, [user, navigate]);
-
-  const loading = false;
-
-  const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
-    setFormData(prev => {
-      let newData = {
-        ...prev,
-        [name]: type === 'checkbox' ? checked : value
-      };
-      
-      // Limpiar errores de tarjeta cuando se cambia el método de pago (ya no aplica, pero mantenemos por si acaso)
-      if (name === 'metodoPago') {
-        setErrors(prev => ({
-          ...prev,
-          cardNumber: '',
-          cardExpiry: '',
-          cardCvv: '',
-          cardName: ''
-        }));
-      }
-      return newData;
-    });
-    if (errors[name]) {
-      setErrors(prev => ({ ...prev, [name]: '' }));
-    }
-  };
-
-const handleDireccionSelect = (e) => {
-    const id = e.target.value;
-    if (id === 'new') {
-      setShowNewAddress(true);
-      setSelectedDireccionId(id);
-      setFormData(prev => ({ ...prev, direccion: '', barrio: '', telefono: '' }));
-    } else if (id === 'registered') {
-      setShowNewAddress(false);
-      setSelectedDireccionId(id);
-      setFormData(prev => ({
-        ...prev,
-        direccion: user.direccion || '',
-        barrio: user.barrio || '',
-        telefono: user.telefono || user.celular || ''
-      }));
-    } else {
-      setShowNewAddress(false);
-      setSelectedDireccionId(id);
-      const dir = direcciones.find(d => String(d.id) === String(id));
-      if (dir) {
-        setFormData(prev => ({
-          ...prev,
-          direccion: dir.direccion,
-          barrio: dir.barrio,
-          telefono: dir.telefono || prev.telefono,
-          direccion2: dir.tipo || ''
-        }));
-      }
-    }
-  };
-
-  const handleAddAddress = async () => {
-    if (!newAddress.direccion?.trim()) {
-      alert('La dirección es obligatoria');
-      return;
-    }
-    
-    if (!user) {
-      alert('Debe iniciar sesión para guardar una dirección');
-      return;
-    }
-    
-    if (direcciones.length >= 3) {
-      alert('Máximo 3 direcciones guardadas. Por favor elimina una para agregar una nueva.');
-      return;
-    }
-    
-    const dirData = {
-      nombre: `${newAddress.direccion} ${newAddress.barrio || ''}`.trim(),
-      direccion: newAddress.direccion,
-      barrio: newAddress.barrio || '',
-      telefono: newAddress.telefono || user.telefono || user.celular || '',
-      tipo: newAddress.tipo || 'casa',
-      es_predeterminada: direcciones.length === 0
-    };
-    
-    console.log('Guardando dirección:', dirData);
-    try {
-      const respuesta = await createDireccion(dirData);
-      let nuevaDir = respuesta;
-      let guardadaExitosamente = false;
-      
-      if (Array.isArray(respuesta) && respuesta.length > 0) {
-        const dirText = (newAddress.direccion || '').toLowerCase().trim();
-        const found = respuesta.find(d => (d.direccion || '').toLowerCase().trim() === dirText);
-        if (found) {
-          nuevaDir = found;
-          guardadaExitosamente = true;
-          console.log('Dirección encontrada en el array devuelto por la API');
-        } else {
-          nuevaDir = respuesta[respuesta.length - 1];
-          guardadaExitosamente = Boolean(nuevaDir?.id || nuevaDir?._id);
-        }
-      } else if (respuesta && (respuesta.id || respuesta._id)) {
-        guardadaExitosamente = true;
-      }
-      
-      console.log('Resultado - dirección extraida:', nuevaDir, 'guardada:', guardadaExitosamente);
-      
-      if (guardadaExitosamente && nuevaDir) {
-        setDirecciones(prev => [...prev, nuevaDir]);
-        setSelectedDireccionId(nuevaDir.id || nuevaDir._id);
-        setFormData(prev => ({
-          ...prev,
-          direccion: nuevaDir.direccion || newAddress.direccion,
-          barrio: nuevaDir.barrio || newAddress.barrio,
-          telefono: nuevaDir.telefono || newAddress.telefono || user.telefono || user.celular || ''
-        }));
-        setShowNewAddress(false);
-      } else {
-        setFormData(prev => ({
-          ...prev,
-          direccion: newAddress.direccion,
-          barrio: newAddress.barrio,
-          telefono: newAddress.telefono || user.telefono || user.celular || ''
-        }));
-        setShowNewAddress(false);
-      }
-    } catch (e) {
-      console.error('Error agregando dirección:', e);
-      setFormData(prev => ({
-        ...prev,
-        direccion: newAddress.direccion,
-        barrio: newAddress.barrio,
-        telefono: newAddress.telefono || user.telefono || user.celular || ''
-      }));
-      setShowNewAddress(false);
-    }
-    setShowNewAddress(false);
-    setNewAddress({ direccion: '', barrio: '', telefono: '', tipo: 'casa' });
-  };
-  
-  const validate = () => {
-    const newErrors = {};
-    const metodo = formData.metodoPago;
-    const isDelivery = formData.delivery;
-    
-    if (isDelivery) {
-      if (!formData.direccion?.trim()) newErrors.direccion = 'La dirección es obligatoria';
-      if (!formData.telefono?.trim()) newErrors.telefono = 'El teléfono es obligatorio';
-    }
-    return newErrors;
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    
-    try {
-      const validationErrors = validate();
-      if (Object.keys(validationErrors).length > 0) {
-        setErrors(validationErrors);
-        return;
-      }
-
-      const productos = cartItemsWithDetails
-        .filter(item => item.producto && (item.producto.id || item.producto._id))
-        .map(item => {
-          const productoId = item.producto.id || item.producto._id;
-          return {
-            producto: productoId,
-            cantidad: item.cantidad,
-            precio_unitario: item.producto.precio
-          };
-        });
-
-      let estado = formData.delivery ? 'Pendiente' : 'Pendiente';
-
-      const cleanedPhone = (formData.telefono || '').toString().replace(/\D/g, '');
-      const prefix = (formData.countryCode || '').toString().replace(/\D/g, '');
-      const telefonoCompleto = `${prefix}${cleanedPhone}`;
-
-      const payload = {
-        telefono_contacto: telefonoCompleto,
-        subtotal,
-        shipping,
-        total,
-        metodo_pago: formData.metodoPago,
-        estado,
-        productos,
-        notasDomicilio: formData.notasDomicilio || '',
-        notasAutor: formData.delivery ? 'usuario' : undefined,
-        delivery: formData.delivery,
-        direccion: formData.delivery ? {
-          direccion: formData.direccion,
-          direccion2: formData.direccion2 || '',
-          barrio: formData.barrio,
-          telefono: telefonoCompleto,
-          tipo: formData.direccion2 || 'casa'
-        } : null,
-        tipo_venta: formData.delivery ? 'domicilio' : 'mostrador'
-      };
-
-      const pedidoCreado = await createPedido(payload);
-      if (!pedidoCreado || !pedidoCreado.id) {
-        throw new Error('No se pudo crear el pedido correctamente');
-      }
-      clearCart();
-      navigate(`/pedidos/${pedidoCreado.id}`);
-    } catch (error) {
-      console.error('Error al crear la venta:', error);
-      alert('Error al procesar el pedido: ' + error.message);
-    }
-  };
+  const {
+    user,
+    cartItemsWithDetails,
+    direcciones,
+    selectedDireccionId,
+    showNewAddress,
+    setShowNewAddress,
+    newAddress,
+    setNewAddress,
+    formData,
+    errors,
+    subtotal,
+    total,
+    handleChange,
+    handleDireccionSelect,
+    handleAddAddress,
+    handleSubmit,
+  } = useCheckoutForm();
 
   if (cartItemsWithDetails.length === 0) {
     return <div className="container mt-4">Redirigiendo...</div>;
@@ -375,59 +100,12 @@ const handleDireccionSelect = (e) => {
                     </div>
 
                     {showNewAddress && (
-                      <div className="card bg-light mb-3 p-3">
-                        <h6 className="mb-3">Nueva Dirección</h6>
-                        <div className="mb-2">
-                          <label className="form-label">Tipo de residencia *</label>
-                          <select
-                            className="form-select"
-                            value={newAddress.tipo}
-                            onChange={e => setNewAddress({...newAddress, tipo: e.target.value})}
-                          >
-                            <option value="casa">Casa</option>
-                            <option value="apartamento">Apartamento</option>
-                            <option value="oficina">Oficina</option>
-                          </select>
-                        </div>
-                        <div className="mb-2">
-                          <label className="form-label">Dirección *</label>
-                          <input
-                            type="text"
-                            className="form-control"
-                            value={newAddress.direccion}
-                            onChange={e => setNewAddress({...newAddress, direccion: e.target.value})}
-                            placeholder="Carrera 1 # 2-3"
-                          />
-                        </div>
-                        <div className="mb-2">
-                          <label className="form-label">Barrio</label>
-                          <input
-                            type="text"
-                            className="form-control"
-                            value={newAddress.barrio}
-                            onChange={e => setNewAddress({...newAddress, barrio: e.target.value})}
-                            placeholder="Barrio"
-                          />
-                        </div>
-                        <div className="mb-2">
-                          <label className="form-label">Teléfono</label>
-                          <input
-                            type="text"
-                            className="form-control"
-                            value={newAddress.telefono}
-                            onChange={e => setNewAddress({...newAddress, telefono: e.target.value})}
-                            placeholder="Teléfono"
-                          />
-                        </div>
-                        <div className="d-flex gap-2 mt-2">
-                          <button type="button" className="btn btn-outline-primary btn-sm" onClick={handleAddAddress}>
-                            <i className="fas fa-check me-1"></i>Guardar Dirección
-                          </button>
-                          <button type="button" className="btn btn-secondary btn-sm" onClick={() => setShowNewAddress(false)}>
-                            Cancelar
-                          </button>
-                        </div>
-                      </div>
+                      <NuevaDireccionForm
+                        newAddress={newAddress}
+                        setNewAddress={setNewAddress}
+                        onSave={handleAddAddress}
+                        onCancel={() => setShowNewAddress(false)}
+                      />
                     )}
 
                     <div className="mb-3">
@@ -563,40 +241,7 @@ const handleDireccionSelect = (e) => {
         </div>
 
         <div className="col-md-4">
-          <div className="card">
-            <div className="card-header">Resumen del pedido</div>
-            <div className="card-body">
-              {cartItemsWithDetails
-                .filter(item => item.producto && (item.producto.id || item.producto._id))
-                .map(item => {
-                  const producto = item.producto;
-                  const productId = producto.id || producto._id;
-
-                  return (
-                    <div key={productId} className="d-flex align-items-center mb-2">
-                      <img src={producto.imagen || 'https://via.placeholder.com/60'} className="img-thumbnail me-2" style={{ width: '60px', height: '60px', objectFit: 'cover' }} alt={producto.nombre} />
-                      <div>
-                        <div className="fw-bold">{producto.nombre}</div>
-                        <small className="text-muted">{item.cantidad} x {formatPrice(producto.precio)}</small>
-                      </div>
-                    </div>
-                  );
-                })}
-              <hr />
-              <p>Subtotal: <strong>{formatPrice(subtotal)}</strong></p>
-              {formData.delivery ? (
-                <>
-                  <p>Envío: <strong className="text-info">Será asignado por la administración</strong></p>
-                  <h5 className="text-success">Total (envío pendiente): <strong>{formatPrice(total)}</strong></h5>
-                </>
-              ) : (
-                <>
-                  <p>Envío: <strong>Recoger en tienda</strong></p>
-                  <h5 className="text-success">Total: <strong>{formatPrice(total)}</strong></h5>
-                </>
-              )}
-            </div>
-          </div>
+          <ResumenPedido items={cartItemsWithDetails} subtotal={subtotal} total={total} delivery={formData.delivery} />
         </div>
       </div>
     </div>

@@ -1,102 +1,38 @@
 // src/pages/usuarios/UsersList.jsx
-import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { useAuth } from '../../context/AuthContext';
-import {
-  getUsuarios,
-  getRoles,
-  toggleUsuarioEstado,
-  updateUsuario,
-  exportUsuarios,
-  importUsuarios
-} from '../../services/dataService';
+import { useUsersList } from './hooks/useUsersList';
+import RoleChangeModal from './components/RoleChangeModal';
+import UsuarioDetalleModal from './components/UsuarioDetalleModal';
 
 const UsersList = ({ source = 'usuarios' }) => {
-  const { user: currentUser } = useAuth();
-  const [usuarios, setUsuarios] = useState([]);
-  const [roles, setRoles] = useState([]);
-  const [search, setSearch] = useState('');
-  const [filterRol, setFilterRol] = useState('');
-  const [showRoleModal, setShowRoleModal] = useState(null);
-  const [showDetalleModal, setShowDetalleModal] = useState(null);
-  const [importStatus, setImportStatus] = useState({ message: '', type: '' });
-  const fileRef = useRef(null);
+  const {
+    currentUser,
+    isAdmin,
+    usuarios,
+    roles,
+    search,
+    setSearch,
+    filterRol,
+    setFilterRol,
+    clearFilters,
+    showRoleModal,
+    setShowRoleModal,
+    showDetalleModal,
+    setShowDetalleModal,
+    importStatus,
+    fileRef,
+    loadData,
+    handleToggle,
+    handleRoleChange,
+    handleExport,
+    handleImport,
+    filtered,
+    getRoleName,
+  } = useUsersList(source);
 
-  const isAdmin = currentUser && (currentUser.rol_id === 5 || currentUser.rol === 'ADMIN');
-
-  // Cargar datos
-  const loadData = async () => {
-    if (source === 'usuarios') {
-      const [users, rolesData] = await Promise.all([getUsuarios(), getRoles()]);
-      setUsuarios(users);
-      setRoles(rolesData);
-    } else {
-      // Para clientes, usar getClientes (si se necesita)
-      // const clientesData = await getClientes();
-      // setUsuarios(clientesData);
-    }
-  };
-
-  useEffect(() => {
-    loadData();
-  }, [source]);
-
-  const handleToggle = async (id, nombre, estadoActual) => {
-    const accion = estadoActual ? 'Desactivar' : 'Activar';
-    if (!window.confirm(`¿${accion} el usuario "${nombre}"?`)) return;
-    try {
-      await toggleUsuarioEstado(id, !estadoActual);
-      await loadData(); // Recargar
-    } catch (err) {
-      alert('Error al cambiar estado: ' + (err.message || 'Error desconocido'));
-    }
-  };
-
-  const handleRoleChange = async (userId, newRoleId) => {
-    try {
-      await updateUsuario(userId, { rolId: newRoleId });
-      await loadData();
-      setShowRoleModal(null);
-    } catch (err) {
-      alert('Error al cambiar rol: ' + (err.message || 'Intente nuevamente'));
-    }
-  };
-
-  const handleExport = async () => {
-    await exportUsuarios();
-  };
-
-  const handleImport = async (e) => {
+  const onImportChange = (e) => {
     const file = e.target.files[0];
-    if (!file) return;
-    importUsuarios(
-      file,
-      (count) => {
-        setImportStatus({ message: `Importados ${count} usuarios`, type: 'success' });
-        loadData();
-        if (fileRef.current) fileRef.current.value = '';
-        setTimeout(() => setImportStatus({ message: '', type: '' }), 3000);
-      },
-      (err) => {
-        setImportStatus({ message: 'Error importando: ' + (err?.message || err), type: 'danger' });
-        setTimeout(() => setImportStatus({ message: '', type: '' }), 5000);
-      }
-    );
-  };
-
-  const filtered = usuarios.filter(u => {
-    const matchSearch = !search ||
-      (u.nombre || '').toLowerCase().includes(search.toLowerCase()) ||
-      (u.email || '').toLowerCase().includes(search.toLowerCase());
-    const matchRol = source === 'usuarios' ? (!filterRol || String(u.rol_id) === String(filterRol)) : true;
-    return matchSearch && matchRol;
-  });
-
-  const getRoleName = (rolId, fallbackName) => {
-    if (!rolId && fallbackName) return fallbackName;
-    if (!rolId) return 'Sin rol';
-    const rol = roles.find(r => String(r.id) === String(rolId));
-    return rol ? rol.nombre : (fallbackName || 'Sin rol');
+    handleImport(file);
   };
 
   return (
@@ -113,7 +49,7 @@ const UsersList = ({ source = 'usuarios' }) => {
           <button className="btn btn-outline-secondary" onClick={handleExport} title="Exportar">
             <i className="fas fa-file-export me-1"></i>Exportar
           </button>
-          <input type="file" ref={fileRef} accept=".xlsx,.xls" style={{ display: 'none' }} onChange={handleImport} />
+          <input type="file" ref={fileRef} accept=".xlsx,.xls" style={{ display: 'none' }} onChange={onImportChange} />
           <button className="btn btn-outline-secondary" onClick={() => fileRef.current && fileRef.current.click()} title="Importar">
             <i className="fas fa-file-import me-1"></i>Importar
           </button>
@@ -149,7 +85,7 @@ const UsersList = ({ source = 'usuarios' }) => {
               </div>
             )}
             <div className={`col-md-${source === 'usuarios' ? '2' : '6'}`}>
-              <button className="btn btn-secondary w-100" onClick={() => { setSearch(''); setFilterRol(''); }}>
+              <button className="btn btn-secondary w-100" onClick={clearFilters}>
                 <i className="fas fa-eraser me-1"></i>Limpiar
               </button>
             </div>
@@ -204,7 +140,7 @@ const UsersList = ({ source = 'usuarios' }) => {
                       <button className="btn btn-sm btn-outline-info" onClick={() => setShowDetalleModal(u)} title="Ver detalles">
                         <i className="fas fa-eye"></i>
                       </button>
-{currentUser && currentUser.documento !== u.documento && (
+                      {currentUser && currentUser.documento !== u.documento && (
                         <Link to={`/admin/usuarios/editar/${u.id}`} className="btn btn-sm btn-outline-primary" title="Editar">
                           <i className="fas fa-edit"></i>
                         </Link>
@@ -230,102 +166,21 @@ const UsersList = ({ source = 'usuarios' }) => {
         <div className="alert alert-info text-center mt-3">No hay usuarios registrados.</div>
       )}
 
-      {/* Modal Cambio de Rol */}
       {showRoleModal && (
-        <div className="modal fade show" style={{ display: 'block', backgroundColor: 'rgba(0,0,0,0.5)' }}>
-          <div className="modal-dialog modal-dialog-centered">
-            <div className="modal-content">
-              <div className="modal-header">
-                <h5 className="modal-title">Cambiar Rol</h5>
-                <button type="button" className="btn-close" onClick={() => setShowRoleModal(null)}></button>
-              </div>
-              <div className="modal-body">
-                <p>Selecciona el nuevo rol para el usuario:</p>
-                <div className="d-flex flex-column gap-2">
-                  {roles.map(r => (
-                    <button
-                      key={r.id}
-                      className={`btn ${String(usuarios.find(u => u.id === showRoleModal)?.rol_id) === String(r.id) ? 'btn-primary' : 'btn-outline-secondary'}`}
-                      onClick={() => handleRoleChange(showRoleModal, r.id)}
-                    >
-                      {r.nombre}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+        <RoleChangeModal
+          roles={roles}
+          usuario={usuarios.find(u => u.id === showRoleModal)}
+          onSelectRole={(roleId) => handleRoleChange(showRoleModal, roleId)}
+          onClose={() => setShowRoleModal(null)}
+        />
       )}
 
-      {/* Modal Detalles Usuario */}
       {showDetalleModal && (
-        <div className="modal fade show" style={{ display: 'block', backgroundColor: 'rgba(0,0,0,0.5)' }}>
-          <div className="modal-dialog modal-dialog-centered">
-            <div className="modal-content">
-              <div className="modal-header">
-                <h5 className="modal-title">Detalles del Usuario</h5>
-                <button type="button" className="btn-close" onClick={() => setShowDetalleModal(null)}></button>
-              </div>
-              <div className="modal-body">
-                <div className="row">
-                  <div className="col-md-6 mb-3">
-                    <label className="form-label small text-muted">Documento</label>
-                    <p className="mb-0 fw-bold">{showDetalleModal.documento || '—'}</p>
-                  </div>
-                  <div className="col-md-6 mb-3">
-                    <label className="form-label small text-muted">Nombre</label>
-                    <p className="mb-0">{showDetalleModal.nombre} {showDetalleModal.apellido}</p>
-                  </div>
-                  <div className="col-md-6 mb-3">
-                    <label className="form-label small text-muted">Email</label>
-                    <p className="mb-0">{showDetalleModal.email || '—'}</p>
-                  </div>
-                  <div className="col-md-6 mb-3">
-                    <label className="form-label small text-muted">Teléfono</label>
-                    <p className="mb-0">{showDetalleModal.telefono || '—'}</p>
-                  </div>
-                  <div className="col-md-6 mb-3">
-                    <label className="form-label small text-muted">Rol</label>
-                    <p className="mb-0">{getRoleName(showDetalleModal.rol_id, showDetalleModal.rol_nombre) || 'Sin rol'}</p>
-                  </div>
-                  <div className="col-md-6 mb-3">
-                    <label className="form-label small text-muted">Estado</label>
-                    <p className="mb-0">
-                      <span className={`badge ${showDetalleModal.estado ? 'bg-success' : 'bg-secondary'}`}>
-                        {showDetalleModal.estado ? 'Activo' : 'Inactivo'}
-                      </span>
-                    </p>
-                  </div>
-                  {showDetalleModal.direccion && (
-                    <div className="col-12 mb-3">
-                      <label className="form-label small text-muted">Dirección</label>
-                      <p className="mb-0">{showDetalleModal.direccion}</p>
-                    </div>
-                  )}
-                  {showDetalleModal.barrio && (
-                    <div className="col-12 mb-3">
-                      <label className="form-label small text-muted">Barrio</label>
-                      <p className="mb-0">{showDetalleModal.barrio}</p>
-                    </div>
-                  )}
-                  <div className="col-12 mb-3">
-                    <label className="form-label small text-muted">Fecha de Creación</label>
-                    <p className="mb-0">{showDetalleModal.fecha_creacion ? new Date(showDetalleModal.fecha_creacion).toLocaleString() : '—'}</p>
-                  </div>
-                </div>
-              </div>
-              <div className="modal-footer">
-                <button type="button" className="btn btn-secondary" onClick={() => setShowDetalleModal(null)}>
-                  Cerrar
-                </button>
-                <Link to={`/admin/usuarios/editar/${showDetalleModal.id}`} className="btn btn-primary">
-                  Editar
-                </Link>
-              </div>
-            </div>
-          </div>
-        </div>
+        <UsuarioDetalleModal
+          usuario={showDetalleModal}
+          getRoleName={getRoleName}
+          onClose={() => setShowDetalleModal(null)}
+        />
       )}
     </div>
   );

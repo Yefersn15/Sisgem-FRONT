@@ -1346,6 +1346,11 @@ export const createBanner = async (banner) => {
   return data;
 };
 
+export const updateBanner = async (id, banner) => {
+  const data = await request(`/api/banners/${id}`, { method: 'PUT', body: banner });
+  return data;
+};
+
 export const deleteBanner = async (id) => {
   await request(`/api/banners/${id}`, { method: 'DELETE' });
 };
@@ -2059,26 +2064,6 @@ export const importUsuarios = async (file, onSuccess, onError) => {
   } catch (err) {
     onError && onError(err);
   }
-};
-
-// ----------------------------------------------------------------//
-// HOME - Banner
-// ----------------------------------------------------------------//
-export const getBanner = async () => {
-  const data = await request('/api/banners');
-  return data && data.length > 0 ? data[0] : { imagen: '', activo: true };
-};
-
-export const updateBanner = async (bannerData) => {
-  const existentes = await request('/api/banners');
-  if (existentes && existentes.length > 0) {
-    return await request(`/api/banners/${existentes[0]._id}`, {
-      method: 'PUT',
-      body: bannerData
-    });
-  }
-  // Si no existe, crear uno nuevo
-  return await request('/api/banners', { method: 'POST', body: bannerData });
 };
 
 // ----------------------------------------------------------------//

@@ -1,30 +1,24 @@
 // src/pages/roles/RoleCreate.jsx
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getPermisosDisponibles, createRol } from '../../services/dataService';
+import { getPermisosDisponibles, createRol } from './services/rolesService';
+import { usePermisosPorCategoria } from './hooks/usePermisosPorCategoria';
+import { usePermisosSelector } from './hooks/usePermisosSelector';
+import PermisosGrid from './components/PermisosGrid';
 
 const RoleCreate = () => {
   const navigate = useNavigate();
   const [nombre, setNombre] = useState('');
   const [descripcion, setDescripcion] = useState('');
   const [esDefault, setEsDefault] = useState(false);
-  const [permisos, setPermisos] = useState([]);
   const [permisosDisponibles, setPermisosDisponibles] = useState([]);
   const [loading, setLoading] = useState(false);
+  const { permisos, togglePermiso, toggleCategoria } = usePermisosSelector([]);
+  const categoriasPermisos = usePermisosPorCategoria(permisosDisponibles);
 
   useEffect(() => {
     getPermisosDisponibles().then(setPermisosDisponibles);
   }, []);
-
-  const getPermisosPorCategoria = () => {
-    const categorias = {};
-    permisosDisponibles.forEach(p => {
-      const [categoria] = p.split('.');
-      if (!categorias[categoria]) categorias[categoria] = [];
-      categorias[categoria].push(p);
-    });
-    return categorias;
-  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -43,25 +37,6 @@ const RoleCreate = () => {
       setLoading(false);
     }
   };
-
-  const togglePermiso = (permiso) => {
-    setPermisos(prev =>
-      prev.includes(permiso)
-        ? prev.filter(p => p !== permiso)
-        : [...prev, permiso]
-    );
-  };
-
-  const toggleCategoria = (categoriaPermisos) => {
-    const allSelected = categoriaPermisos.every(p => permisos.includes(p));
-    if (allSelected) {
-      setPermisos(prev => prev.filter(p => !categoriaPermisos.includes(p)));
-    } else {
-      setPermisos(prev => [...new Set([...prev, ...categoriaPermisos])]);
-    }
-  };
-
-  const categoriasPermisos = getPermisosPorCategoria();
 
   return (
     <div className="container mt-4">
@@ -111,42 +86,13 @@ const RoleCreate = () => {
 
             <div className="mb-4">
               <label className="form-label">Permisos del Rol</label>
-              <div className="row">
-                {Object.entries(categoriasPermisos).map(([categoria, perms]) => {
-                  const allSelected = perms.every(p => permisos.includes(p));
-                  return (
-                    <div key={categoria} className="col-md-4 mb-3">
-                      <div className="card border-secondary">
-                        <div className="card-header bg-light border-secondary py-2 d-flex justify-content-between align-items-center fw-bold text-dark">
-                          <span>{categoria.toUpperCase()}</span>
-                          <input
-                            type="checkbox"
-                            checked={allSelected}
-                            onChange={() => toggleCategoria(perms)}
-                            title="Seleccionar todos"
-                          />
-                        </div>
-                        <div className="card-body py-2">
-                          {perms.map(p => (
-                            <div key={p} className="form-check">
-                              <input
-                                type="checkbox"
-                                className="form-check-input"
-                                id={`new-${p}`}
-                                checked={permisos.includes(p)}
-                                onChange={() => togglePermiso(p)}
-                              />
-                              <label className={`form-check-label fw-bold ${permisos.includes(p) ? 'text-white bg-primary px-2 rounded' : ''}`} htmlFor={`new-${p}`} style={{ fontSize: '0.85rem' }}>
-                                {p.split('.')[1].replace('read', 'LEER').replace('write', 'ESCRIBIR').replace('delete', 'ELIMINAR')}
-                              </label>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
+              <PermisosGrid
+                categoriasPermisos={categoriasPermisos}
+                permisosSeleccionados={permisos}
+                onTogglePermiso={togglePermiso}
+                onToggleCategoria={toggleCategoria}
+                idPrefix="new"
+              />
               <small className="text-muted">
                 Permisos seleccionados: {permisos.length}
               </small>

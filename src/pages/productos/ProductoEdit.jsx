@@ -1,20 +1,21 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { getProductoById, updateProducto, getMarcas, getCategorias, getProveedores, formatPrice } from '../../services/dataService';
+import { getProductoById, updateProducto } from './services/productosService';
+import { formatPrice } from '../../services/dataService';
+import { useProductoForm } from './hooks/useProductoForm';
+import { useProductoReferenceData } from './hooks/useProductoReferenceData';
+import ProductoFormFields from './components/ProductoFormFields';
 
 const ProductoEdit = ({ esDetalle = false }) => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const [marcas, setMarcas] = useState([]);
-  const [categorias, setCategorias] = useState([]);
-  const [proveedores, setProveedores] = useState([]);
-  const [formData, setFormData] = useState(null);
-  const [errors, setErrors] = useState({});
+  const { marcas, categorias, proveedores } = useProductoReferenceData();
+  const { formData, setFormData, errors, setErrors, handleChange, validate } = useProductoForm(null);
   const [loading, setLoading] = useState(false);
   const [fetchError, setFetchError] = useState('');
 
   useEffect(() => {
-    const init = async () => {
+    (async () => {
       try {
         const producto = await getProductoById(id);
         if (!producto) {
@@ -22,61 +23,17 @@ const ProductoEdit = ({ esDetalle = false }) => {
           return;
         }
         setFormData(producto);
-        
-        const [marcasData, categoriasData, proveedoresData] = await Promise.all([
-          getMarcas(),
-          getCategorias(),
-          getProveedores()
-        ]);
-        
-        console.log('Marcas cargadas:', marcasData);
-        console.log('Categorías cargadas:', categoriasData);
-        console.log('Proveedores cargados:', proveedoresData);
-        
-        setMarcas(Array.isArray(marcasData) ? marcasData : []);
-        setCategorias(Array.isArray(categoriasData) ? categoriasData : []);
-        setProveedores(Array.isArray(proveedoresData) ? proveedoresData : []);
       } catch (err) {
-        console.error('Error cargando datos:', err);
+        console.error('Error cargando producto:', err);
         setFetchError('Error al cargar datos');
       }
-    };
-    init();
+    })();
   }, [id]);
-
-  const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: type === 'checkbox' ? checked : value
-    }));
-    if (errors[name]) {
-      setErrors(prev => ({ ...prev, [name]: '' }));
-    }
-  };
-
-  const validate = () => {
-    const newErrors = {};
-    if (!formData.nombre.trim()) newErrors.nombre = 'El nombre es obligatorio';
-    else if (formData.nombre.length > 200) newErrors.nombre = 'Máximo 200 caracteres';
-    if (!formData.descripcion.trim()) newErrors.descripcion = 'La descripción es obligatoria';
-    else if (formData.descripcion.length > 1000) newErrors.descripcion = 'Máximo 1000 caracteres';
-    if (!formData.precioUnitario) newErrors.precioUnitario = 'El precio es obligatorio';
-    else if (parseFloat(formData.precioUnitario) <= 0) newErrors.precioUnitario = 'Debe ser mayor a 0';
-    if (!formData.stockDisponible && formData.stockDisponible !== 0) newErrors.stockDisponible = 'El stock es obligatorio';
-    else if (parseInt(formData.stockDisponible) < 0) newErrors.stockDisponible = 'No puede ser negativo';
-    if (!formData.categoriaId) newErrors.categoriaId = 'Selecciona una categoría';
-    if (!formData.marcaId) newErrors.marcaId = 'Selecciona una marca';
-    return newErrors;
-  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
     const validationErrors = validate();
-    if (Object.keys(validationErrors).length > 0) {
-      setErrors(validationErrors);
-      return;
-    }
+    if (Object.keys(validationErrors).length > 0) return;
 
     setLoading(true);
     (async () => {
@@ -84,7 +41,7 @@ const ProductoEdit = ({ esDetalle = false }) => {
         await updateProducto(id, {
           ...formData,
           precioUnitario: parseFloat(formData.precioUnitario),
-          stockDisponible: parseInt(formData.stockDisponible)
+          stockDisponible: parseInt(formData.stockDisponible),
         });
         navigate('/productos');
       } catch (err) {
@@ -150,7 +107,7 @@ const ProductoEdit = ({ esDetalle = false }) => {
                       <td className="text-muted fw-bold">Descripción:</td>
                       <td>{formData.descripcion}</td>
                     </tr>
-<tr>
+                    <tr>
                       <td className="text-muted fw-bold">Categoría:</td>
                       <td>
                         {formData.categoria?.nombre || formData.categoriaNombre || categorias.find(c => c.id == formData.categoriaId)?.nombre || 'Sin categoría'}
@@ -165,7 +122,7 @@ const ProductoEdit = ({ esDetalle = false }) => {
                     <tr>
                       <td className="text-muted fw-bold">Proveedor:</td>
                       <td>
-                        {formData.proveedor?.nombre || formData.proveedorNombre || 
+                        {formData.proveedor?.nombre || formData.proveedorNombre ||
                          (formData.proveedorId ? (proveedores.find(p => p.id == formData.proveedorId)?.nombre || 'Sin proveedor') : 'Sin proveedor')}
                       </td>
                     </tr>
@@ -212,145 +169,14 @@ const ProductoEdit = ({ esDetalle = false }) => {
         </div>
         <div className="card-body">
           <form onSubmit={handleSubmit}>
-            <div className="row mb-3">
-              <div className="col-md-6">
-                <label className="form-label">Nombre del Producto *</label>
-                <input
-                  type="text"
-                  className={`form-control ${errors.nombre ? 'is-invalid' : ''}`}
-                  name="nombre"
-                  value={formData.nombre}
-                  onChange={handleChange}
-                />
-                {errors.nombre && <div className="invalid-feedback">{errors.nombre}</div>}
-              </div>
-              <div className="col-md-6">
-                <label className="form-label">Código de Barras</label>
-                <input
-                  type="text"
-                  className={`form-control ${errors.barcode ? 'is-invalid' : ''}`}
-                  name="barcode"
-                  value={formData.barcode || ''}
-                  onChange={handleChange}
-                  onInput={(e) => e.target.value = e.target.value.toUpperCase()}
-                />
-                {errors.barcode && <div className="invalid-feedback">{errors.barcode}</div>}
-              </div>
-            </div>
-
-            <div className="mb-3">
-              <label className="form-label">Descripción *</label>
-              <textarea
-                className={`form-control ${errors.descripcion ? 'is-invalid' : ''}`}
-                name="descripcion"
-                rows="3"
-                value={formData.descripcion}
-                onChange={handleChange}
-              ></textarea>
-              {errors.descripcion && <div className="invalid-feedback">{errors.descripcion}</div>}
-            </div>
-
-            <div className="row mb-3">
-              <div className="col-md-6">
-                <label className="form-label">Categoría *</label>
-                <select
-                  className={`form-select ${errors.categoriaId ? 'is-invalid' : ''}`}
-                  name="categoriaId"
-                  value={formData.categoriaId}
-                  onChange={handleChange}
-                >
-                  <option value="">-- Seleccione Categoría --</option>
-                  {categorias.map(cat => (
-                    <option key={cat.id} value={cat.id}>{cat.nombre}</option>
-                  ))}
-                </select>
-                {errors.categoriaId && <div className="invalid-feedback">{errors.categoriaId}</div>}
-              </div>
-              <div className="col-md-6">
-                <label className="form-label">Marca *</label>
-                <select
-                  className={`form-select ${errors.marcaId ? 'is-invalid' : ''}`}
-                  name="marcaId"
-                  value={formData.marcaId}
-                  onChange={handleChange}
-                >
-                  <option value="">-- Seleccione Marca --</option>
-                  {marcas.map(m => (
-                    <option key={m.id} value={m.id}>{m.nombre}</option>
-                  ))}
-                </select>
-                {errors.marcaId && <div className="invalid-feedback">{errors.marcaId}</div>}
-              </div>
-              <div className="col-md-6">
-                <label className="form-label">Proveedor</label>
-                <select
-                  className="form-select"
-                  name="proveedorId"
-                  value={formData.proveedorId || ''}
-                  onChange={handleChange}
-                >
-                  <option value="">-- Seleccione Proveedor (opcional) --</option>
-                  {proveedores.filter(p => p.estado !== false).map(p => (
-                    <option key={p.id} value={p.id}>{p.nombre} ({p.tipo_documento} {p.documento})</option>
-                  ))}
-                </select>
-              </div>
-            </div>
-
-            <div className="row mb-3">
-              <div className="col-md-6">
-                <label className="form-label">Precio Unitario *</label>
-                <div className="input-group">
-                  <span className="input-group-text">$</span>
-                  <input
-                    type="number"
-                    step="0.01"
-                    min="0.01"
-                    className={`form-control ${errors.precioUnitario ? 'is-invalid' : ''}`}
-                    name="precioUnitario"
-                    value={formData.precioUnitario}
-                    onChange={handleChange}
-                  />
-                </div>
-                {errors.precioUnitario && <div className="invalid-feedback">{errors.precioUnitario}</div>}
-              </div>
-              <div className="col-md-6">
-                <label className="form-label">Stock Disponible *</label>
-                <input
-                  type="number"
-                  min="0"
-                  className={`form-control ${errors.stockDisponible ? 'is-invalid' : ''}`}
-                  name="stockDisponible"
-                  value={formData.stockDisponible}
-                  onChange={handleChange}
-                />
-                {errors.stockDisponible && <div className="invalid-feedback">{errors.stockDisponible}</div>}
-              </div>
-            </div>
-
-            <div className="mb-3">
-              <label className="form-label">URL de la Imagen</label>
-              <input
-                type="url"
-                className="form-control"
-                name="fotoUrl"
-                value={formData.fotoUrl || ''}
-                onChange={handleChange}
-              />
-            </div>
-
-            <div className="mb-3">
-              <div className="form-check">
-                <input
-                  className="form-check-input"
-                  type="checkbox"
-                  name="activo"
-                  checked={formData.activo}
-                  onChange={handleChange}
-                />
-                <label className="form-check-label">Producto activo</label>
-              </div>
-            </div>
+            <ProductoFormFields
+              formData={formData}
+              errors={errors}
+              onChange={handleChange}
+              categorias={categorias}
+              marcas={marcas}
+              proveedores={proveedores}
+            />
 
             <div className="d-grid gap-2 d-md-flex justify-content-md-end">
               <button type="submit" className="btn btn-primary me-md-2" disabled={loading}>

@@ -1,141 +1,34 @@
-import { useState, useEffect, useRef } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { getCategorias, deleteCategoria, updateCategoria, getProductos, getMarcas, exportCategorias, importCategorias } from '../../services/dataService';
-import useDebounce from '../../hooks/useDebounce';
+import { useRef } from 'react';
+import { Link } from 'react-router-dom';
+import { useCategoriasAdmin } from './hooks/useCategoriasAdmin';
 
 const AdminCategorias = () => {
-  const navigate = useNavigate();
-  const [categorias, setCategorias] = useState([]);
-  const [filterEstado, setFilterEstado] = useState('');
-  const [sortBy, setSortBy] = useState('nombre-asc');
-  const [query, setQuery] = useState('');
-  const debounced = useDebounce(query, 300);
-  const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 20;
+  const {
+    paginatedItems,
+    currentPage,
+    setCurrentPage,
+    totalPages,
+    query,
+    setQuery,
+    filterEstado,
+    setFilterEstado,
+    sortBy,
+    setSortBy,
+    clearFilters,
+    importStatus,
+    setImportStatus,
+    handleDelete,
+    toggleActiva,
+    handleExport,
+    handleImport,
+  } = useCategoriasAdmin();
   const fileInputRef = useRef(null);
-  const [importStatus, setImportStatus] = useState({ message: '', type: '' });
 
-  const handleExport = () => {
-    exportCategorias();
-  };
-
-  const handleImport = (e) => {
+  const onImportChange = (e) => {
     const file = e.target.files?.[0];
-    if (!file) return;
-    
-    importCategorias(file, 
-      (count) => {
-        setImportStatus({ message: `${count} categorías importadas exitosamente`, type: 'success' });
-        cargarCategorias();
-        setTimeout(() => setImportStatus({ message: '', type: '' }), 3000);
-      },
-      (error) => {
-        setImportStatus({ message: error.message || 'Error al importar', type: 'danger' });
-        setTimeout(() => setImportStatus({ message: '', type: '' }), 5000);
-      }
-    );
+    handleImport(file);
     e.target.value = '';
   };
-
-  // Modal state - eliminated, using redirect to pages
-
-  useEffect(() => {
-    cargarCategorias();
-  }, []);
-
-  useEffect(() => {
-    cargarCategorias();
-  }, [debounced, filterEstado, sortBy]);
-
-  const cargarCategorias = () => {
-    const cargar = async () => {
-      let lista = await getCategorias() || [];
-      // Extraer datos de la respuesta API { success, data }
-      if (!Array.isArray(lista)) {
-        lista = lista.data ? lista.data : (lista || []);
-      }
-
-      const productos = await getProductos() || [];
-
-      // Enriquecer con conteo de productos y marcas
-      lista = lista.map(c => {
-        const productosCategoria = productos.filter(p => String(p.categoriaId) === String(c.id));
-        return {
-          ...c,
-          productoCount: productosCategoria.length,
-          activa: c.activa !== false
-        };
-      });
-
-    if (filterEstado) {
-      if (filterEstado === 'activa') {
-        lista = lista.filter(c => c.activa === true);
-      } else if (filterEstado === 'inactiva') {
-        lista = lista.filter(c => c.activa === false);
-      }
-    }
-
-    if (debounced) {
-      const q = debounced.toLowerCase();
-      lista = lista.filter(c => 
-        c.nombre.toLowerCase().includes(q) ||
-        c.descripcion?.toLowerCase().includes(q) ||
-        String(c.id).includes(q)
-      );
-    }
-
-    // Ordenar según sortBy
-    lista = [...lista].sort((a, b) => {
-      switch (sortBy) {
-        case 'nombre-asc':
-          return a.nombre.localeCompare(b.nombre);
-        case 'nombre-desc':
-          return b.nombre.localeCompare(a.nombre);
-        case 'id-asc':
-          return (a.id || 0) - (b.id || 0);
-        case 'id-desc':
-          return (b.id || 0) - (a.id || 0);
-        case 'productos-asc':
-          return (a.productoCount || 0) - (b.productoCount || 0);
-        case 'productos-desc':
-          return (b.productoCount || 0) - (a.productoCount || 0);
-        default:
-          return a.nombre.localeCompare(b.nombre);
-      }
-    });
-
-      setCategorias(lista);
-      setCurrentPage(1);
-    };
-    cargar();
-  };
-
-  const handleDelete = (id) => {
-    if (window.confirm('¿Estás seguro de eliminar esta categoría?')) {
-      (async () => {
-        await deleteCategoria(id);
-        await cargarCategorias();
-      })();
-    }
-  };
-
-  const toggleActiva = (categoria) => {
-    (async () => {
-      await updateCategoria(categoria.id, { ...categoria, activa: !categoria.activa });
-      await cargarCategorias();
-    })();
-  };
-
-  // Stats
-  const totalCategorias = categorias.length;
-  const categoriasActivas = categorias.filter(c => c.activa).length;
-  const categoriasInactivas = categorias.filter(c => !c.activa).length;
-  const totalProductos = categorias.reduce((sum, c) => sum + c.productoCount, 0);
-  const totalMarcas = categorias.reduce((sum, c) => sum + 0, 0);
-
-  // Paginación
-  const totalPages = Math.ceil(categorias.length / itemsPerPage);
-  const paginatedItems = categorias.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
   return (
     <div className="container-fluid py-4">
@@ -154,7 +47,7 @@ const AdminCategorias = () => {
           <input
             type="file"
             ref={fileInputRef}
-            onChange={handleImport}
+            onChange={onImportChange}
             accept=".xlsx,.xls,.csv"
             style={{ display: 'none' }}
           />
@@ -164,7 +57,6 @@ const AdminCategorias = () => {
         </div>
       </div>
 
-      {/* Import status alert */}
       {importStatus.message && (
         <div className={`alert alert-${importStatus.type} alert-dismissible fade show`} role="alert">
           {importStatus.message}
@@ -172,13 +64,10 @@ const AdminCategorias = () => {
         </div>
       )}
 
-      
-
-      {/* Filtros */}
       <div className="card mb-4">
         <div className="card-body">
           <div className="row g-3">
-                        <div className="col-md-4">
+            <div className="col-md-4">
               <input
                 type="text"
                 className="form-control"
@@ -188,9 +77,9 @@ const AdminCategorias = () => {
               />
             </div>
             <div className="col-md-3">
-              <select 
-                className="form-select" 
-                value={filterEstado} 
+              <select
+                className="form-select"
+                value={filterEstado}
                 onChange={(e) => setFilterEstado(e.target.value)}
               >
                 <option value="">Todos los estados</option>
@@ -199,9 +88,9 @@ const AdminCategorias = () => {
               </select>
             </div>
             <div className="col-md-3">
-              <select 
-                className="form-select" 
-                value={sortBy} 
+              <select
+                className="form-select"
+                value={sortBy}
                 onChange={(e) => setSortBy(e.target.value)}
               >
                 <option value="nombre-asc">Nombre (A-Z)</option>
@@ -213,10 +102,7 @@ const AdminCategorias = () => {
               </select>
             </div>
             <div className="col-md-2">
-              <button
-                className="btn btn-outline-secondary w-100"
-                onClick={() => { setQuery(''); setFilterEstado(''); setSortBy('nombre-asc'); }}
-              >
+              <button className="btn btn-outline-secondary w-100" onClick={clearFilters}>
                 <i className="fas fa-eraser me-1"></i>Limpiar
               </button>
             </div>
@@ -224,7 +110,6 @@ const AdminCategorias = () => {
         </div>
       </div>
 
-      {/* Tabla */}
       <div className="card">
         <div className="card-body">
           <div className="table-responsive">
@@ -254,7 +139,7 @@ const AdminCategorias = () => {
                         <span className="badge bg-secondary">{categoria.productoCount}</span>
                       </td>
                       <td>
-                        <button 
+                        <button
                           className={`btn btn-sm ${categoria.activa ? 'btn-outline-warning' : 'btn-outline-success'}`}
                           onClick={() => toggleActiva(categoria)}
                           title={categoria.activa ? 'Desactivar' : 'Activar'}
@@ -267,7 +152,7 @@ const AdminCategorias = () => {
                           <Link to={`/categorias/editar/${categoria.id}`} className="btn btn-outline-primary btn-sm" title="Editar">
                             <i className="fas fa-edit"></i>
                           </Link>
-                          <button 
+                          <button
                             className="btn btn-outline-danger btn-sm"
                             onClick={() => handleDelete(categoria.id)}
                             title="Eliminar"
@@ -283,7 +168,6 @@ const AdminCategorias = () => {
             </table>
           </div>
 
-          {/* Paginación */}
           {totalPages > 1 && (
             <nav className="mt-3">
               <ul className="pagination justify-content-center">

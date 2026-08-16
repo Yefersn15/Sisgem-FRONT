@@ -1,7 +1,10 @@
 // src/pages/roles/RoleEdit.jsx
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { getPermisosDisponibles, getRoleById, updateRol } from '../../services/dataService';
+import { getPermisosDisponibles, getRoleById, updateRol } from './services/rolesService';
+import { usePermisosPorCategoria } from './hooks/usePermisosPorCategoria';
+import { usePermisosSelector } from './hooks/usePermisosSelector';
+import PermisosGrid from './components/PermisosGrid';
 
 const RoleEdit = () => {
   const { id } = useParams();
@@ -10,10 +13,11 @@ const RoleEdit = () => {
   const [descripcion, setDescripcion] = useState('');
   const [estado, setEstado] = useState(true);
   const [esDefault, setEsDefault] = useState(false);
-  const [permisos, setPermisos] = useState([]);
   const [permisosDisponibles, setPermisosDisponibles] = useState([]);
   const [loading, setLoading] = useState(false);
   const [loadingData, setLoadingData] = useState(true);
+  const { permisos, setPermisos, togglePermiso, toggleCategoria } = usePermisosSelector([]);
+  const categoriasPermisos = usePermisosPorCategoria(permisosDisponibles);
 
   useEffect(() => {
     Promise.all([getPermisosDisponibles(), getRoleById(id)]).then(([perms, rol]) => {
@@ -24,7 +28,7 @@ const RoleEdit = () => {
         setEstado(rol.estado !== false);
         setEsDefault(rol.esDefault === true);
         setPermisos(rol.permisos || []);
-        
+
         // Verificar si es el rol de administrador
         if (rol.nombre?.toUpperCase() === 'ADMIN' || rol.nombre?.toUpperCase() === 'ADMINISTRADOR') {
           alert('El rol de Administrador no puede ser editado.');
@@ -34,16 +38,6 @@ const RoleEdit = () => {
       setLoadingData(false);
     });
   }, [id]);
-
-  const getPermisosPorCategoria = () => {
-    const categorias = {};
-    permisosDisponibles.forEach(p => {
-      const [categoria] = p.split('.');
-      if (!categorias[categoria]) categorias[categoria] = [];
-      categorias[categoria].push(p);
-    });
-    return categorias;
-  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -62,25 +56,6 @@ const RoleEdit = () => {
       setLoading(false);
     }
   };
-
-  const togglePermiso = (permiso) => {
-    setPermisos(prev =>
-      prev.includes(permiso)
-        ? prev.filter(p => p !== permiso)
-        : [...prev, permiso]
-    );
-  };
-
-  const toggleCategoria = (categoriaPermisos) => {
-    const allSelected = categoriaPermisos.every(p => permisos.includes(p));
-    if (allSelected) {
-      setPermisos(prev => prev.filter(p => !categoriaPermisos.includes(p)));
-    } else {
-      setPermisos(prev => [...new Set([...prev, ...categoriaPermisos])]);
-    }
-  };
-
-  const categoriasPermisos = getPermisosPorCategoria();
 
   if (loadingData) {
     return <div className="container mt-4">Cargando...</div>;
@@ -146,42 +121,13 @@ const RoleEdit = () => {
 
             <div className="mb-4">
               <label className="form-label">Permisos del Rol</label>
-              <div className="row">
-                {Object.entries(categoriasPermisos).map(([categoria, perms]) => {
-                  const allSelected = perms.every(p => permisos.includes(p));
-                  return (
-                    <div key={categoria} className="col-md-4 mb-3">
-                      <div className="card border-secondary">
-                        <div className="card-header bg-light border-secondary py-2 d-flex justify-content-between align-items-center fw-bold text-dark">
-                          <span>{categoria.toUpperCase()}</span>
-                          <input
-                            type="checkbox"
-                            checked={allSelected}
-                            onChange={() => toggleCategoria(perms)}
-                            title="Seleccionar todos"
-                          />
-                        </div>
-                        <div className="card-body py-2">
-                          {perms.map(p => (
-                            <div key={p} className="form-check">
-                              <input
-                                type="checkbox"
-                                className="form-check-input"
-                                id={`edit-${p}`}
-                                checked={permisos.includes(p)}
-                                onChange={() => togglePermiso(p)}
-                              />
-                              <label className={`form-check-label fw-bold ${permisos.includes(p) ? 'text-white bg-primary px-2 rounded' : ''}`} htmlFor={`edit-${p}`} style={{ fontSize: '0.85rem' }}>
-                                {p.split('.')[1].replace('read', 'LEER').replace('write', 'ESCRIBIR').replace('delete', 'ELIMINAR')}
-                              </label>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
+              <PermisosGrid
+                categoriasPermisos={categoriasPermisos}
+                permisosSeleccionados={permisos}
+                onTogglePermiso={togglePermiso}
+                onToggleCategoria={toggleCategoria}
+                idPrefix="edit"
+              />
               <small className="text-muted">
                 Permisos seleccionados: {permisos.length}
               </small>
