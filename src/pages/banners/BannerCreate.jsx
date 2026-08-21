@@ -3,9 +3,11 @@ import { useNavigate } from 'react-router-dom';
 import { createBanner } from './services/bannersService';
 import { useBannerForm } from './hooks/useBannerForm';
 import BannerFormFields from './components/BannerFormFields';
+import { useToast } from '../../context/ToastContext';
 
 const BannerCreate = () => {
   const navigate = useNavigate();
+  const toast = useToast();
   const { form, errors, setLayout, setImageUrl, setField, validate } = useBannerForm();
   const [loading, setLoading] = useState(false);
 
@@ -19,7 +21,7 @@ const BannerCreate = () => {
       await createBanner(form);
       navigate('/admin/banners');
     } catch (err) {
-      alert('Error al crear banner: ' + (err.message || err));
+      toast.error('Error al crear banner: ' + (err.message || err));
     } finally {
       setLoading(false);
     }

@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { formatPrice } from '../../services/dataService';
+import { formatPrice } from '../../services/api/utils';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend, CartesianGrid } from 'recharts';
 import { useDashboardStats } from './hooks/useDashboardStats';
 import StatCard from './components/StatCard';

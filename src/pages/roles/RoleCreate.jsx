@@ -5,9 +5,11 @@ import { getPermisosDisponibles, createRol } from './services/rolesService';
 import { usePermisosPorCategoria } from './hooks/usePermisosPorCategoria';
 import { usePermisosSelector } from './hooks/usePermisosSelector';
 import PermisosGrid from './components/PermisosGrid';
+import { useToast } from '../../context/ToastContext';
 
 const RoleCreate = () => {
   const navigate = useNavigate();
+  const toast = useToast();
   const [nombre, setNombre] = useState('');
   const [descripcion, setDescripcion] = useState('');
   const [esDefault, setEsDefault] = useState(false);
@@ -23,7 +25,7 @@ const RoleCreate = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!nombre.trim()) {
-      alert('El nombre del rol es requerido');
+      toast.error('El nombre del rol es requerido');
       return;
     }
 
@@ -32,7 +34,7 @@ const RoleCreate = () => {
       await createRol({ nombre, descripcion, permisos, esDefault });
       navigate('/admin/roles');
     } catch (err) {
-      alert('Error al crear rol: ' + (err.message || err));
+      toast.error('Error al crear rol: ' + (err.message || err));
     } finally {
       setLoading(false);
     }

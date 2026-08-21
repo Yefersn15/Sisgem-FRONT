@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { formatPrice } from '../../services/dataService';
+import { formatPrice } from '../../services/api/utils';
 import { usePedidosAdmin } from './hooks/usePedidosAdmin';
 import { usePedidoBuilder } from './hooks/usePedidoBuilder';
 import CrearPedidoModal from './components/CrearPedidoModal';

@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import { getMarcaById } from './services/marcasService';
-import { getProductos, formatPrice } from '../../services/dataService';
+import { getProductos } from '../../services/api/productos.api';
+import { formatPrice } from '../../services/api/utils';
 
 const MarcaDetail = () => {
   const { id } = useParams();

@@ -8,4 +8,4 @@ export {
   toggleProductoEstado,
   exportProductos,
   importProductos,
-} from '../../../services/dataService';
+} from '../../../services/api/productos.api';

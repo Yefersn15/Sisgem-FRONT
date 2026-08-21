@@ -1,6 +1,6 @@
 // src/pages/marcas/components/MarcaFormFields.jsx
 import React from 'react';
-import ImageUploadField from '../../../components/ImageUploadField';
+import ImageUploadField from '../../../components/upload/ImageUploadField';
 
 const MarcaFormFields = ({ formData, errors, onChange }) => (
   <>

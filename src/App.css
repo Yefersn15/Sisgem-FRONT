@@ -856,6 +856,11 @@ footer.bg-dark .text-white {
   color: var(--text-secondary) !important;
 }
 
+.app-admin-sidebar .nav-link:hover {
+  background: var(--surface2) !important;
+  color: var(--text-primary) !important;
+}
+
 .app-admin-sidebar .nav-link.active {
   background: var(--accent) !important;
   color: white !important;
@@ -866,6 +871,89 @@ footer.bg-dark .text-white {
 }
 
 .admin-main-content {
+  background: var(--bg) !important;
+  min-height: calc(100vh - var(--topbar-height) - 50px);
+}
+
+/* Menú de la tienda (no-admin): mismo lenguaje visual que el del admin,
+   personalizable como barra lateral/superior, normal o comprimida. */
+.app-store-sidebar {
+  --bs-offcanvas-width: 250px;
+  background: var(--surface) !important;
+  color: var(--text-primary) !important;
+  border-right: 1px solid var(--border) !important;
+}
+
+.app-store-sidebar .nav-link {
+  color: var(--text-secondary) !important;
+}
+
+.app-store-sidebar .nav-link:hover {
+  background: var(--surface2) !important;
+  color: var(--text-primary) !important;
+}
+
+.app-store-sidebar .nav-link.active {
+  background: var(--accent) !important;
+  color: white !important;
+}
+
+.app-store-sidebar .text-muted {
+  color: var(--text-muted) !important;
+}
+
+/* Botón que abre el StoreSidebarNav (off-canvas): pestaña pegada al borde
+   izquierdo, centrada verticalmente, no empuja ni se mezcla con el contenido. */
+.app-store-sidebar-trigger {
+  position: fixed;
+  top: 50%;
+  left: 0;
+  transform: translateY(-50%);
+  width: 24px;
+  height: 88px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--surface);
+  color: var(--text-secondary);
+  border: 1px solid var(--border);
+  border-left: none;
+  border-radius: 0 10px 10px 0;
+  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.15);
+  z-index: 1030;
+  cursor: pointer;
+  padding: 0;
+  transition: width 0.15s ease, background 0.15s ease, color 0.15s ease;
+}
+
+.app-store-sidebar-trigger:hover {
+  width: 30px;
+  background: var(--surface2);
+  color: var(--text-primary);
+}
+
+.app-store-topnav {
+  background: var(--surface) !important;
+  border-bottom: 1px solid var(--border) !important;
+}
+
+.app-store-topnav .store-topnav-link {
+  color: var(--text-secondary) !important;
+  background: transparent;
+  border: 1px solid transparent;
+}
+
+.app-store-topnav .store-topnav-link:hover {
+  color: var(--text-primary) !important;
+  background: var(--surface2);
+}
+
+.app-store-topnav .store-topnav-link.active {
+  background: var(--accent) !important;
+  color: white !important;
+}
+
+.app-store-main-content {
   background: var(--bg) !important;
   min-height: calc(100vh - var(--topbar-height) - 50px);
 }
@@ -1176,6 +1264,22 @@ label {
 }
 .theme-dark .alert-info i {
   color: #93c5fd;
+}
+
+/* ================================
+   HOME - BUSCADOR
+   ================================ */
+.home-search-bar {
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.home-search-bar:focus-within {
+  border-color: var(--accent) !important;
+  box-shadow: 0 0 0 3px var(--accent-dim) !important;
+}
+
+.home-search-input:focus {
+  box-shadow: none !important;
 }
 
 /* ================================

@@ -20,12 +20,13 @@ import BannerCreate from '../pages/banners/BannerCreate';
 import BannerEdit from '../pages/banners/BannerEdit';
 import PrivateRoute from './PrivateRoute';
 import { useAuth } from '../context/AuthContext';
-import { useAdminLayoutMode } from '../hooks/useAdminLayoutMode';
-import AdminSidebarNav from './admin/AdminSidebarNav';
-import AdminTopNav from './admin/AdminTopNav';
-import LayoutModeSwitcher from './admin/LayoutModeSwitcher';
+import { useAdminLayoutMode } from '../shared/components/admin/useAdminLayoutMode';
+import { useMeasuredHeight } from '../hooks/useMeasuredHeight';
+import AdminSidebarNav from '../shared/components/admin/AdminSidebarNav';
+import AdminTopNav from '../shared/components/admin/AdminTopNav';
+import AppearanceMenu from '../shared/components/common/AppearanceMenu';
 
-const AdminHeader = ({ layoutMode, onLayoutModeChange }) => {
+const AdminHeader = ({ isTopbar, onOrientationChange, navRef }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const auth = useAuth();
@@ -42,10 +43,9 @@ const AdminHeader = ({ layoutMode, onLayoutModeChange }) => {
     else document.documentElement.classList.remove('theme-dark');
   }, []);
 
-  const toggleTheme = () => {
-    const newIsDark = !isDark;
-    setIsDark(newIsDark);
-    if (newIsDark) {
+  const setThemeMode = (dark) => {
+    setIsDark(dark);
+    if (dark) {
       document.documentElement.classList.add('theme-dark');
       localStorage.setItem('theme', 'dark');
     } else {
@@ -77,7 +77,7 @@ const AdminHeader = ({ layoutMode, onLayoutModeChange }) => {
   };
 
   return (
-    <nav className="navbar navbar-expand-lg app-navbar sticky-top">
+    <nav ref={navRef} className="navbar navbar-expand-lg app-navbar fixed-top">
       <div className="container-fluid">
         <Link to="/admin" className="navbar-brand d-flex align-items-center">
           <i className="fas fa-cube me-2"></i>
@@ -90,16 +90,7 @@ const AdminHeader = ({ layoutMode, onLayoutModeChange }) => {
             <i className="fas fa-user-circle me-1"></i>
             {user?.nombre || user?.email || 'Administrador'}
           </span>
-          <button
-            className="theme-toggle btn btn-link me-2"
-            onClick={toggleTheme}
-            aria-label="Cambiar tema"
-            style={{ fontSize: 18 }}
-          >
-            <i className={`fas ${isDark ? 'fa-sun' : 'fa-moon'}`}></i>
-          </button>
-
-          <LayoutModeSwitcher layoutMode={layoutMode} onChange={onLayoutModeChange} />
+          <AppearanceMenu isDark={isDark} onSetTheme={setThemeMode} isTopbar={isTopbar} onOrientationChange={onOrientationChange} />
 
           <div className="dropdown">
             <button className="btn btn-outline-theme dropdown-toggle btn-sm" data-bs-toggle="dropdown">
@@ -138,7 +129,8 @@ const AdminFooter = () => {
 // Layout principal del admin
 const AdminLayout = () => {
   const location = useLocation();
-  const { layoutMode, setLayoutMode, isTopbar, isCompact } = useAdminLayoutMode();
+  const { isTopbar, isCompact, setOrientation, toggleCompact } = useAdminLayoutMode();
+  const [headerRef, headerHeight] = useMeasuredHeight();
 
   const getPageTitle = () => {
     if (location.pathname === '/admin') return 'Dashboard';
@@ -186,18 +178,20 @@ const AdminLayout = () => {
 
   return (
     <div>
-      <AdminHeader layoutMode={layoutMode} onLayoutModeChange={setLayoutMode} />
-      {isTopbar ? (
-        <>
-          <AdminTopNav compact={isCompact} />
-          <div className="admin-main-content p-4">{routes}</div>
-        </>
-      ) : (
-        <div className="d-flex">
-          <AdminSidebarNav compact={isCompact} />
-          <div className="flex-grow-1 p-4 admin-main-content">{routes}</div>
-        </div>
-      )}
+      <AdminHeader navRef={headerRef} isTopbar={isTopbar} onOrientationChange={setOrientation} />
+      <div style={{ paddingTop: headerHeight }}>
+        {isTopbar ? (
+          <>
+            <AdminTopNav compact={isCompact} onToggleCompact={toggleCompact} />
+            <div className="admin-main-content p-4">{routes}</div>
+          </>
+        ) : (
+          <div className="d-flex">
+            <AdminSidebarNav compact={isCompact} onToggleCompact={toggleCompact} />
+            <div className="flex-grow-1 p-4 admin-main-content">{routes}</div>
+          </div>
+        )}
+      </div>
       <AdminFooter />
     </div>
   );

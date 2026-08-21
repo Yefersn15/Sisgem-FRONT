@@ -528,15 +528,15 @@ El proyecto ya no usa LocalStorage como fallback de datos de negocio: productos,
 src/
 ├── assets/            # Imágenes estáticas
 ├── components/        # Componentes reutilizables y layouts
-│   ├── admin/           # Navegación del admin (AdminSidebarNav, AdminTopNav, LayoutModeSwitcher, navConfig)
+│   ├── admin/           # Navegación del admin (AdminSidebarNav, AdminTopNav, LayoutModeSwitcher, navConfig, useAdminLayoutMode)
+│   ├── upload/           # Subida y selección de imágenes (ImageUploadField, ImageGalleryModal, useImageUpload)
 │   ├── AdminLayout.jsx  # Layout y rutas internas de /admin/*
 │   ├── Layout.jsx       # Layout público (Header + Footer)
 │   ├── Header.jsx / Footer.jsx
 │   ├── Rutas.jsx        # Rutas públicas / tienda (montadas en /*)
-│   ├── PrivateRoute.jsx # Guard de autenticación y permisos
-│   └── ImageUploadField.jsx / ImageGalleryModal.jsx  # Subida y selección de imágenes (Cloudinary)
-├── context/           # Contextos (AuthContext, CartContext)
-├── hooks/             # Hooks compartidos (useDebounce, useAdminLayoutMode, useImageUpload)
+│   └── PrivateRoute.jsx # Guard de autenticación y permisos
+├── context/           # Contextos usados por múltiples módulos (AuthContext, CartContext)
+├── hooks/             # Hooks genéricos reutilizados por varios módulos (useDebounce)
 ├── pages/             # Páginas del sistema, organizadas por módulo
 │   ├── auth/            # Login, ForgotPassword, ResetPassword
 │   ├── banners/         # CRUD de banners del Home (services/, hooks/, components/)

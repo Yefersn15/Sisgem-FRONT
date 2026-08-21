@@ -1,5 +1,3 @@
 // src/pages/home/services/homeService.js
-export {
-  getBanners,
-  getTopProductos,
-} from '../../../services/dataService';
+export { getBanners } from '../../../services/api/banners.api';
+export { getTopProductos } from '../../../services/api/dashboard.api';

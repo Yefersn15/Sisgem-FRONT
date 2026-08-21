@@ -9,4 +9,4 @@ export {
   getDomicilioByVentaId,
   importDomicilios,
   exportDomicilios,
-} from '../../../services/dataService';
+} from '../../../services/api/domicilios.api';

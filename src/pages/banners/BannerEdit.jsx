@@ -3,10 +3,12 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { getBannerById, updateBanner } from './services/bannersService';
 import { useBannerForm } from './hooks/useBannerForm';
 import BannerFormFields from './components/BannerFormFields';
+import { useToast } from '../../context/ToastContext';
 
 const BannerEdit = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const toast = useToast();
   const { form, setForm, errors, setLayout, setImageUrl, setField, validate } = useBannerForm(null);
   const [loading, setLoading] = useState(false);
   const [fetchError, setFetchError] = useState('');
@@ -40,7 +42,7 @@ const BannerEdit = () => {
       await updateBanner(id, form);
       navigate('/admin/banners');
     } catch (err) {
-      alert('Error al actualizar banner: ' + (err.message || err));
+      toast.error('Error al actualizar banner: ' + (err.message || err));
     } finally {
       setLoading(false);
     }

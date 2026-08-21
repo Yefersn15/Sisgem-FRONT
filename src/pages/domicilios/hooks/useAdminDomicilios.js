@@ -7,11 +7,19 @@ import {
   asignarRepartidor,
   editarRepartidor,
 } from '../services/domiciliosService';
-import { getVentas, getVentaById, getUsuarios, exportToExcel, importDomicilios, formatPrice } from '../../../services/dataService';
+import { getVentas, getVentaById } from '../../../services/api/pedidos.api';
+import { getUsuarios } from '../../../services/api/usuarios.api';
+import { exportToExcel, formatPrice } from '../../../services/api/utils';
+import { importDomicilios } from '../../../services/api/domicilios.api';
 import { openPrintVoucher } from '../../../services/printService';
 import { getSiguientesEstadosDomicilio, isEstadoFinalDomicilio, normalizeNumber } from './domicilioEstados';
+import { useToast } from '../../../context/ToastContext';
+import { useConfirm, usePrompt } from '../../../context/ConfirmContext';
 
 export const useAdminDomicilios = () => {
+  const toast = useToast();
+  const confirm = useConfirm();
+  const prompt = usePrompt();
   const [domicilios, setDomicilios] = useState([]);
   const [repartidoresList, setRepartidoresList] = useState([]);
   const [selectedRepartidorId, setSelectedRepartidorId] = useState('');
@@ -79,11 +87,11 @@ export const useAdminDomicilios = () => {
     if (!currentVentaId) return;
     const token = localStorage.getItem('auth_token');
     if (!token) {
-      alert('No hay sesión activa. Por favor, inicia sesión nuevamente.');
+      toast.error('No hay sesión activa. Por favor, inicia sesión nuevamente.');
       return;
     }
     const { nombre, telefono, tipoVehiculo, placa, tarifa } = repartidorForm;
-    if (!nombre || !telefono) return alert('Nombre y teléfono son obligatorios');
+    if (!nombre || !telefono) return toast.error('Nombre y teléfono son obligatorios');
 
     const dom = domicilios.find(d => String(d.ventaId) === String(currentVentaId));
     let res = null;
@@ -106,16 +114,16 @@ export const useAdminDomicilios = () => {
       }
     } catch (err) {
       console.error('Error asignando repartidor:', err);
-      alert('No se puede asignar/editar repartidor: ' + (err?.message || err));
+      toast.error('No se puede asignar/editar repartidor: ' + (err?.message || err));
       return;
     }
     if (!res) {
-      alert('No se puede asignar/editar repartidor: el pedido puede requerir aprobación previa o no existe un domicilio creado.');
+      toast.error('No se puede asignar/editar repartidor: el pedido puede requerir aprobación previa o no existe un domicilio creado.');
       return;
     }
     try {
       const venta = ventas.find(v => String(v.id) === String(currentVentaId));
-      if (venta && res) openPrintVoucher(venta, res, { forBag: true });
+      if (venta && res) openPrintVoucher(venta, res, { forBag: true, onError: toast.error });
     } catch (e) {}
     setShowRepartidorModal(false);
     setCurrentVentaId(null);
@@ -127,58 +135,58 @@ export const useAdminDomicilios = () => {
     const estadoActual = dom?.estado;
 
     if (estadoActual && isEstadoFinalDomicilio(estadoActual)) {
-      alert(`No se puede cambiar el estado: El domicilio ya está en estado "${estadoActual}" que es un estado final.`);
+      toast.error(`No se puede cambiar el estado: El domicilio ya está en estado "${estadoActual}" que es un estado final.`);
       return;
     }
     const siguientes = getSiguientesEstadosDomicilio(estadoActual);
     if (estadoActual && !siguientes.includes(nextState)) {
-      alert(`No se puede cambiar de "${estadoActual}" a "${nextState}".\n\nEstados válidos siguientes: ${siguientes.join(', ') || 'Ninguno'}`);
+      toast.error(`No se puede cambiar de "${estadoActual}" a "${nextState}". Estados válidos siguientes: ${siguientes.join(', ') || 'Ninguno'}`);
       return;
     }
     if ((nextState === 'en_preparacion' || nextState === 'asignado') && (!dom?.repartidor || !dom.repartidor.nombre)) {
-      alert('Debe asignar un repartidor antes de cambiar el estado a En Preparación o Asignado.');
+      toast.error('Debe asignar un repartidor antes de cambiar el estado a En Preparación o Asignado.');
       return;
     }
     try {
       await updateDomicilioEstado(ventaId, nextState);
       await cargarDatos();
     } catch (error) {
-      alert('Error al cambiar estado: ' + error.message);
+      toast.error('Error al cambiar estado: ' + error.message);
     }
   };
 
   const handleConvertirAVenta = async (ventaId) => {
-    if (!confirm('¿Convertir pedido a venta?')) return;
+    if (!(await confirm('¿Convertir pedido a venta?'))) return;
     await updateDomicilioEstado(ventaId, 'entregado', true);
     cargarDatos();
   };
 
   const handleEditarTarifa = async (ventaId, tarifaActual) => {
-    const nuevaTarifa = prompt('Ingrese la tarifa de envío:', tarifaActual || '0');
+    const nuevaTarifa = await prompt('Ingrese la tarifa de envío:', { title: 'Tarifa de envío', defaultValue: tarifaActual || '0' });
     if (nuevaTarifa === null) return;
     const tarifaNum = parseFloat(String(nuevaTarifa).replace(/[^0-9.\-]/g, ''));
     if (isNaN(tarifaNum) || tarifaNum < 0) {
-      alert('Tarifa inválida. Ingrese un número válido.');
+      toast.error('Tarifa inválida. Ingrese un número válido.');
       return;
     }
     const dom = domicilios.find(d => String(d.ventaId) === String(ventaId));
     if (!dom) {
-      alert('No se encontró el domicilio para la venta');
+      toast.error('No se encontró el domicilio para la venta');
       return;
     }
     try {
       dom.tarifa = tarifaNum;
       const res = await saveDomicilio(dom);
-      alert('Tarifa guardada correctamente');
+      toast.success('Tarifa guardada correctamente');
       await cargarDatos();
       return res;
     } catch (err) {
-      alert('Error guardando tarifa: ' + (err?.message || err));
+      toast.error('Error guardando tarifa: ' + (err?.message || err));
     }
   };
 
-  const handleNotas = (ventaId, notasActuales) => {
-    const nuevasNotas = prompt('Notas para el domicilio (se guardará como nota de admin):', notasActuales || '');
+  const handleNotas = async (ventaId, notasActuales) => {
+    const nuevasNotas = await prompt('Notas para el domicilio (se guardará como nota de admin):', { title: 'Notas del domicilio', defaultValue: notasActuales || '' });
     if (nuevasNotas !== null) {
       const dom = domicilios.find(d => String(d.ventaId) === String(ventaId));
       if (dom) {
@@ -199,18 +207,18 @@ export const useAdminDomicilios = () => {
       if (ventaData && ventaData.id) {
         await openPrintVoucher(ventaData, dom, { forBag: true });
       } else {
-        alert('No se pudo obtener la información de la venta para imprimir');
+        toast.error('No se pudo obtener la información de la venta para imprimir');
       }
     } catch (err) {
       console.error('Error al imprimir:', err);
-      alert('Error al generar el voucher: ' + (err.message || err));
+      toast.error('Error al generar el voucher: ' + (err.message || err));
     }
   };
 
   const handleWhatsapp = (dom) => {
     const target = dom.repartidor?.telefono ? normalizeNumber(dom.repartidor.telefono) : normalizeNumber(dom.telefono);
     if (target) window.open(`https://wa.me/${target}`, '_blank');
-    else alert('Teléfono inválido para WhatsApp');
+    else toast.error('Teléfono inválido para WhatsApp');
   };
 
   const handleExportar = () => {
@@ -234,10 +242,10 @@ export const useAdminDomicilios = () => {
   const handleImport = (file) => {
     if (!file) return;
     importDomicilios(file, () => {
-      alert('Importación de domicilios completada');
+      toast.success('Importación de domicilios completada');
       cargarDatos();
     }, (err) => {
-      alert('Error al importar domicilios: ' + (err?.message || err));
+      toast.error('Error al importar domicilios: ' + (err?.message || err));
     });
   };
 

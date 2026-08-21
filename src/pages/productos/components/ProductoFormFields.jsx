@@ -1,6 +1,6 @@
 // src/pages/productos/components/ProductoFormFields.jsx
 import React from 'react';
-import ImageUploadField from '../../../components/ImageUploadField';
+import ImageUploadField from '../../../components/upload/ImageUploadField';
 
 const ProductoFormFields = ({ formData, errors, onChange, categorias, marcas }) => (
   <>

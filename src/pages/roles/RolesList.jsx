@@ -4,8 +4,12 @@ import { Link } from 'react-router-dom';
 import { getRoles, deleteRol, getPermisosDisponibles } from './services/rolesService';
 import { usePermisosPorCategoria } from './hooks/usePermisosPorCategoria';
 import PermisosViewer from './components/PermisosViewer';
+import { useToast } from '../../context/ToastContext';
+import { useConfirm } from '../../context/ConfirmContext';
 
 const RolesList = () => {
+  const toast = useToast();
+  const confirm = useConfirm();
   const [roles, setRoles] = useState([]);
   const [permisosDisponibles, setPermisosDisponibles] = useState([]);
   const [showPermisos, setShowPermisos] = useState(null);
@@ -23,15 +27,15 @@ const RolesList = () => {
 
   const handleDelete = async (id, nombre) => {
     if (nombre?.toUpperCase() === 'ADMIN' || nombre?.toUpperCase() === 'ADMINISTRADOR') {
-      alert('El rol de Administrador no puede ser eliminado.');
+      toast.error('El rol de Administrador no puede ser eliminado.');
       return;
     }
-    if (window.confirm('¿Eliminar este rol? Los usuarios con este rol perderán acceso.')) {
+    if (await confirm('¿Eliminar este rol? Los usuarios con este rol perderán acceso.')) {
       try {
         await deleteRol(id);
         await loadData();
       } catch (err) {
-        alert('Error al eliminar: ' + err.message);
+        toast.error('Error al eliminar: ' + err.message);
       }
     }
   };

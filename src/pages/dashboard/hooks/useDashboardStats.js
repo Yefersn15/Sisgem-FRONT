@@ -1,7 +1,10 @@
 // src/pages/dashboard/hooks/useDashboardStats.js
 import { useState, useEffect } from 'react';
 import { getTopProductos, getTopByBrand, getTopByCategory } from '../services/dashboardService';
-import { getVentas, getProductos, getUsuarios, getDomicilios } from '../../../services/dataService';
+import { getVentas } from '../../../services/api/pedidos.api';
+import { getProductos } from '../../../services/api/productos.api';
+import { getUsuarios } from '../../../services/api/usuarios.api';
+import { getDomicilios } from '../../../services/api/domicilios.api';
 
 const DIAS_POR_FILTRO = { dia: 1, semana: 7, mes: 30, trimestre: 90, semestre: 180, año: 365 };
 

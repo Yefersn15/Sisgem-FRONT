@@ -1,17 +1,25 @@
-import React from 'react';
-import { formatPrice } from '../../../services/dataService';
+import React, { useState } from 'react';
+import { formatPrice } from '../../../services/api/utils';
 import { usePagoForm } from '../hooks/usePagoForm';
 
 const PagoForm = ({ initial = {}, onSubmit, onCancel }) => {
   const { isAbono, form, errors, deuda, handleChange, validate, buildPayload } = usePagoForm(initial);
+  const [submitting, setSubmitting] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    if (submitting) return;
     const validationErrors = validate();
     if (Object.keys(validationErrors).length > 0) {
       return;
     }
-    onSubmit && onSubmit(buildPayload());
+    if (!onSubmit) return;
+    setSubmitting(true);
+    try {
+      await onSubmit(buildPayload());
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -80,8 +88,10 @@ const PagoForm = ({ initial = {}, onSubmit, onCancel }) => {
         </div>
       </div>
       <div className="d-flex justify-content-end gap-2 mt-4">
-        <button type="button" className="btn btn-secondary" onClick={onCancel}>Cancelar</button>
-        <button type="submit" className="btn btn-primary">Guardar</button>
+        <button type="button" className="btn btn-secondary" onClick={onCancel} disabled={submitting}>Cancelar</button>
+        <button type="submit" className="btn btn-primary" disabled={submitting}>
+          {submitting ? (<><span className="spinner-border spinner-border-sm me-2" role="status"></span>Guardando...</>) : 'Guardar'}
+        </button>
       </div>
     </form>
   );

@@ -1,7 +1,8 @@
 // src/pages/home/components/HomeProductoModal.jsx
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { formatPrice } from '../../../services/dataService';
+import { formatPrice } from '../../../services/api/utils';
+import Modal from '../../../shared/components/common/Modal';
 
 const HomeProductoModal = ({ producto, onClose, onAdd }) => {
   const [cantidad, setCantidad] = useState(1);
@@ -14,15 +15,8 @@ const HomeProductoModal = ({ producto, onClose, onAdd }) => {
   const stock = producto.stockDisponible || producto.stock || 0;
 
   return (
-    <div className="modal fade show" style={{ display: 'block', backgroundColor: 'rgba(0,0,0,0.5)' }}>
-      <div className="modal-dialog modal-lg modal-dialog-centered">
-        <div className="modal-content">
-          <div className="modal-header">
-            <h3 className="modal-title">{producto.nombre}</h3>
-            <button type="button" className="btn-close" onClick={onClose}></button>
-          </div>
-          <div className="modal-body">
-            <div className="row">
+    <Modal title={producto.nombre} onClose={onClose} maxWidth={860}>
+      <div className="row">
               <div className="col-md-7">
                 <div className="mb-4">
                   <h5 className="text-muted">
@@ -95,10 +89,7 @@ const HomeProductoModal = ({ producto, onClose, onAdd }) => {
                 )}
               </div>
             </div>
-          </div>
-        </div>
-      </div>
-    </div>
+    </Modal>
   );
 };
 

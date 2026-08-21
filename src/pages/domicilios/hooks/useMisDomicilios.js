@@ -2,7 +2,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useAuth } from '../../../context/AuthContext';
 import { getDomicilios } from '../services/domiciliosService';
-import { getVentas } from '../../../services/dataService';
+import { getVentas } from '../../../services/api/pedidos.api';
 
 const BADGE_CLASSES = {
   entregado: 'bg-success',

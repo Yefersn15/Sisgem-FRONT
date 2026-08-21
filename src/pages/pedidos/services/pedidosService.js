@@ -9,4 +9,4 @@ export {
   aprobarSolicitudAbono,
   rechazarAbono,
   aprobarPedido,
-} from '../../../services/dataService';
+} from '../../../services/api/pedidos.api';

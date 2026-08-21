@@ -3,4 +3,4 @@ export {
   getTopProductos,
   getTopByBrand,
   getTopByCategory,
-} from '../../../services/dataService';
+} from '../../../services/api/dashboard.api';

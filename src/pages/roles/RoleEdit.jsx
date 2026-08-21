@@ -5,10 +5,13 @@ import { getPermisosDisponibles, getRoleById, updateRol } from './services/roles
 import { usePermisosPorCategoria } from './hooks/usePermisosPorCategoria';
 import { usePermisosSelector } from './hooks/usePermisosSelector';
 import PermisosGrid from './components/PermisosGrid';
+import { useToast } from '../../context/ToastContext';
+import LoadingState from '../../shared/components/common/LoadingState';
 
 const RoleEdit = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const toast = useToast();
   const [nombre, setNombre] = useState('');
   const [descripcion, setDescripcion] = useState('');
   const [estado, setEstado] = useState(true);
@@ -31,7 +34,7 @@ const RoleEdit = () => {
 
         // Verificar si es el rol de administrador
         if (rol.nombre?.toUpperCase() === 'ADMIN' || rol.nombre?.toUpperCase() === 'ADMINISTRADOR') {
-          alert('El rol de Administrador no puede ser editado.');
+          toast.error('El rol de Administrador no puede ser editado.');
           navigate('/admin/roles');
         }
       }
@@ -42,7 +45,7 @@ const RoleEdit = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!nombre.trim()) {
-      alert('El nombre del rol es requerido');
+      toast.error('El nombre del rol es requerido');
       return;
     }
 
@@ -51,14 +54,14 @@ const RoleEdit = () => {
       await updateRol(id, { nombre, descripcion, estado, permisos, esDefault });
       navigate('/admin/roles');
     } catch (err) {
-      alert('Error al actualizar rol: ' + (err.message || err));
+      toast.error('Error al actualizar rol: ' + (err.message || err));
     } finally {
       setLoading(false);
     }
   };
 
   if (loadingData) {
-    return <div className="container mt-4">Cargando...</div>;
+    return <div className="container mt-4"><LoadingState /></div>;
   }
 
   return (

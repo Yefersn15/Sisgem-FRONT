@@ -4,6 +4,7 @@ import useDebounce from '../../../hooks/useDebounce';
 import { getProductos, deleteProducto, updateProducto } from '../services/productosService';
 import { getCategoriaById } from '../../categorias/services/categoriasService';
 import { getMarcas } from '../../marcas/services/marcasService';
+import { useConfirm } from '../../../context/ConfirmContext';
 
 const ordenarProductos = (lista, sortBy) => {
   if (!sortBy) return lista;
@@ -21,6 +22,7 @@ const ordenarProductos = (lista, sortBy) => {
 };
 
 export const useProductosPorCategoria = (id) => {
+  const confirm = useConfirm();
   const [categoria, setCategoria] = useState(null);
   const [productos, setProductos] = useState([]);
   const [allProductos, setAllProductos] = useState([]);
@@ -57,16 +59,16 @@ export const useProductosPorCategoria = (id) => {
     setProductos(ordenarProductos(lista, sortBy));
   }, [allProductos, brandFilter, debouncedSearch, sortBy]);
 
-  const handleDelete = (productoId, nombre) => {
-    if (window.confirm(`¿Estás seguro de eliminar el producto "${nombre}"?`)) {
+  const handleDelete = async (productoId, nombre) => {
+    if (await confirm(`¿Estás seguro de eliminar el producto "${nombre}"?`)) {
       deleteProducto(productoId);
       setProductos((prev) => prev.filter((p) => p.id !== productoId));
       setAllProductos((prev) => prev.filter((p) => p.id !== productoId));
     }
   };
 
-  const handleToggleActivo = (productoId, currentActivo, nombre) => {
-    if (!window.confirm(`¿Deseas ${currentActivo ? 'desactivar' : 'activar'} el producto "${nombre}"?`)) return;
+  const handleToggleActivo = async (productoId, currentActivo, nombre) => {
+    if (!(await confirm(`¿Deseas ${currentActivo ? 'desactivar' : 'activar'} el producto "${nombre}"?`))) return;
     updateProducto(productoId, { activo: !currentActivo });
     setAllProductos((prev) => prev.map((p) => (String(p.id) === String(productoId) ? { ...p, activo: !currentActivo } : p)));
   };

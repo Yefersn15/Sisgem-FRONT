@@ -12,7 +12,9 @@ import {
   rechazarAbono,
   getDomicilioByVentaId,
 } from '../services/ventasService';
-import { getProductos } from '../../../services/dataService';
+import { getProductos } from '../../../services/api/productos.api';
+import { useToast } from '../../../context/ToastContext';
+import { usePrompt } from '../../../context/ConfirmContext';
 
 const PASOS_ENTREGA = [
   { estado: 'pendiente', label: 'Recibido', icon: 'fa-clipboard-list' },
@@ -48,6 +50,8 @@ export const getEstadoBadge = (estado) => ESTADO_BADGES[estado] || 'bg-secondary
 
 export const useVentaDetalle = (id) => {
   const navigate = useNavigate();
+  const toast = useToast();
+  const prompt = usePrompt();
   const { user, role, hasPermission } = useAuth();
   const [pedido, setPedido] = useState(null);
   const [domicilio, setDomicilio] = useState(null);
@@ -62,14 +66,14 @@ export const useVentaDetalle = (id) => {
   useEffect(() => {
     (async () => {
       if (!id || id === 'undefined') {
-        alert('ID de pedido inválido');
+        toast.error('ID de pedido inválido');
         navigate('/admin/ventas');
         return;
       }
       try {
         const p = await getVentaById(id);
         if (!p) {
-          alert('Pedido no encontrado');
+          toast.error('Pedido no encontrado');
           navigate('/admin/ventas');
           return;
         }
@@ -89,7 +93,7 @@ export const useVentaDetalle = (id) => {
         setTotalPagado(total || 0);
       } catch (error) {
         console.error('Error al cargar pedido:', error);
-        alert('Error al cargar los detalles del pedido: ' + (error.message || 'Error desconocido'));
+        toast.error('Error al cargar los detalles del pedido: ' + (error.message || 'Error desconocido'));
         navigate('/admin/ventas');
         return;
       }
@@ -129,7 +133,7 @@ export const useVentaDetalle = (id) => {
   }));
 
   const handleCambiarEstadoPago = async (pagoId, estado) => {
-    if (!canConfirmPayment) { alert('No tiene permisos'); return; }
+    if (!canConfirmPayment) { toast.error('No tiene permisos'); return; }
     try {
       await cambiarEstadoPago(pagoId, estado);
       const pagosVenta = (await getPagosByVenta(id)) || [];
@@ -140,37 +144,37 @@ export const useVentaDetalle = (id) => {
       setPedido(p);
     } catch (e) {
       console.error('Error cambiando estado de pago:', e);
-      alert('Error cambiando estado de pago: ' + (e.message || e));
+      toast.error('Error cambiando estado de pago: ' + (e.message || e));
     }
   };
 
   const handleAvanzarEstado = async (nuevoEstado) => {
-    if (!isAdmin) { alert('No tiene permisos'); return; }
+    if (!isAdmin) { toast.error('No tiene permisos'); return; }
     try {
       await cambiarEstado(id, nuevoEstado);
       const p = await getVentaById(id);
       setPedido(p);
     } catch (e) {
-      alert('Error advancing state: ' + (e.message || e));
+      toast.error('Error advancing state: ' + (e.message || e));
     }
   };
 
   const handleAceptarAbono = async (aceptar) => {
-    if (!canConfirmPayment) { alert('No tiene permisos'); return; }
+    if (!canConfirmPayment) { toast.error('No tiene permisos'); return; }
     try {
       if (aceptar) {
         await aprobarSolicitudAbono(id);
-        alert('Solicitud de abono aprobada. Stock reducido.');
+        toast.success('Solicitud de abono aprobada. Stock reducido.');
       } else {
-        const motivo = prompt('Ingrese el motivo del rechazo (opcional):');
+        const motivo = await prompt('Ingrese el motivo del rechazo (opcional):', { title: 'Motivo del rechazo' });
         await rechazarAbono(id, motivo);
-        alert('Abono rechazado.');
+        toast.success('Abono rechazado.');
       }
       const p = await getVentaById(id);
       setPedido(p);
     } catch (e) {
       console.error('Error actualizando estado del pedido:', e);
-      alert('Error actualizando estado del pedido: ' + (e.message || e));
+      toast.error('Error actualizando estado del pedido: ' + (e.message || e));
     }
   };
 

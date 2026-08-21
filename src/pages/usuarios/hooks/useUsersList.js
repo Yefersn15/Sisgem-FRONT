@@ -3,9 +3,13 @@ import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../../../context/AuthContext';
 import { getUsuarios, toggleUsuarioEstado, updateUsuario, exportUsuarios, importUsuarios } from '../services/usuariosService';
 import { getRoles } from '../../roles/services/rolesService';
+import { useToast } from '../../../context/ToastContext';
+import { useConfirm } from '../../../context/ConfirmContext';
 
 export const useUsersList = (source = 'usuarios') => {
   const { user: currentUser } = useAuth();
+  const toast = useToast();
+  const confirm = useConfirm();
   const [usuarios, setUsuarios] = useState([]);
   const [roles, setRoles] = useState([]);
   const [search, setSearch] = useState('');
@@ -31,12 +35,12 @@ export const useUsersList = (source = 'usuarios') => {
 
   const handleToggle = async (id, nombre, estadoActual) => {
     const accion = estadoActual ? 'Desactivar' : 'Activar';
-    if (!window.confirm(`¿${accion} el usuario "${nombre}"?`)) return;
+    if (!(await confirm(`¿${accion} el usuario "${nombre}"?`))) return;
     try {
       await toggleUsuarioEstado(id, !estadoActual);
       await loadData();
     } catch (err) {
-      alert('Error al cambiar estado: ' + (err.message || 'Error desconocido'));
+      toast.error('Error al cambiar estado: ' + (err.message || 'Error desconocido'));
     }
   };
 
@@ -46,7 +50,7 @@ export const useUsersList = (source = 'usuarios') => {
       await loadData();
       setShowRoleModal(null);
     } catch (err) {
-      alert('Error al cambiar rol: ' + (err.message || 'Intente nuevamente'));
+      toast.error('Error al cambiar rol: ' + (err.message || 'Intente nuevamente'));
     }
   };
 

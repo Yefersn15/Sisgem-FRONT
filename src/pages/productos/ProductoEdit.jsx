@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { getProductoById, updateProducto } from './services/productosService';
-import { formatPrice } from '../../services/dataService';
+import { formatPrice } from '../../services/api/utils';
 import { useProductoForm } from './hooks/useProductoForm';
 import { useProductoReferenceData } from './hooks/useProductoReferenceData';
 import ProductoFormFields from './components/ProductoFormFields';

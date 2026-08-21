@@ -1,5 +1,5 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
-import { getCart, addToCart as add, removeFromCart as remove, updateCartItem as update, clearCart as clear } from '../services/dataService';
+import { getCart, addToCart as add, removeFromCart as remove, updateCartItem as update, clearCart as clear } from '../services/api/carrito.api';
 import { useAuth } from './AuthContext';
 
 const CartContext = createContext();

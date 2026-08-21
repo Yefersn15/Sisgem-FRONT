@@ -1,12 +1,15 @@
 // src/pages/productos/components/ProductoDetalleModal.jsx
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { formatPrice } from '../../../services/dataService';
+import { formatPrice } from '../../../services/api/utils';
 import { useCart } from '../../../context/CartContext';
+import { useToast } from '../../../context/ToastContext';
+import Modal from '../../../shared/components/common/Modal';
 
 const ProductoDetalleModal = ({ producto, onClose, linkableTags = false, showAdminActions = false, onToggleActivo, onDelete }) => {
   const [cantidad, setCantidad] = useState(1);
   const { addToCart } = useCart();
+  const toast = useToast();
 
   useEffect(() => {
     setCantidad(1);
@@ -16,20 +19,13 @@ const ProductoDetalleModal = ({ producto, onClose, linkableTags = false, showAdm
 
   const handleAddToCart = () => {
     addToCart(producto.id, cantidad);
-    alert('Producto agregado al carrito');
+    toast.success('Producto agregado al carrito');
     onClose();
   };
 
   return (
-    <div className="modal fade show" style={{ display: 'block', backgroundColor: 'rgba(0,0,0,0.5)' }}>
-      <div className="modal-dialog modal-lg modal-dialog-centered">
-        <div className="modal-content">
-          <div className="modal-header">
-            <h3 className="modal-title">{producto.nombre}</h3>
-            <button type="button" className="btn-close" onClick={onClose}></button>
-          </div>
-          <div className="modal-body">
-            <div className="row">
+    <Modal title={producto.nombre} onClose={onClose} maxWidth={860}>
+      <div className="row">
               <div className="col-md-7">
                 <div className="mb-4">
                   {linkableTags ? (
@@ -138,10 +134,7 @@ const ProductoDetalleModal = ({ producto, onClose, linkableTags = false, showAdm
                 )}
               </div>
             </div>
-          </div>
-        </div>
-      </div>
-    </div>
+    </Modal>
   );
 };
 

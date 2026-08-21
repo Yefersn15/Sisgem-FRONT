@@ -1,5 +1,5 @@
 import { useParams, Link, useLocation } from 'react-router-dom';
-import { formatPrice } from '../../services/dataService';
+import { formatPrice } from '../../services/api/utils';
 import { useVentaDetalle } from './hooks/useVentaDetalle';
 import { formatFecha, getMetodoBadge } from './hooks/ventaFormatters';
 import DeliveryTimeline from './components/DeliveryTimeline';

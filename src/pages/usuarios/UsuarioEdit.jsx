@@ -2,6 +2,7 @@
 import { useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useUsuarioForm } from './hooks/useUsuarioForm';
+import LoadingState from '../../shared/components/common/LoadingState';
 
 const UsuarioEdit = () => {
   const { id } = useParams();
@@ -24,7 +25,7 @@ const UsuarioEdit = () => {
   } = useUsuarioForm(id);
 
   if (loadingData) {
-    return <div className="container mt-4">Cargando...</div>;
+    return <div className="container mt-4"><LoadingState /></div>;
   }
 
   if (loadError) {

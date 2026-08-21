@@ -12,6 +12,6 @@ export {
   getPagosByVenta,
   getTotalPagadoByVenta,
   getTotalRecibidoByVenta,
-  getVentaById,
-  getDomicilioByVentaId,
-} from '../../../services/dataService';
+} from '../../../services/api/pagos.api';
+export { getVentaById } from '../../../services/api/pedidos.api';
+export { getDomicilioByVentaId } from '../../../services/api/domicilios.api';

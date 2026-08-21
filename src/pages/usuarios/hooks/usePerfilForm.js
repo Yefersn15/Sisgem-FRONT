@@ -17,6 +17,7 @@ export const usePerfilForm = () => {
   });
   const [success, setSuccess] = useState('');
   const [error, setError] = useState('');
+  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     const fetchPerfil = async () => {
@@ -44,6 +45,7 @@ export const usePerfilForm = () => {
     setError('');
     setSuccess('');
 
+    setSubmitting(true);
     try {
       await updateUsuario(user.documento, {
         nombre: form.nombre,
@@ -58,6 +60,8 @@ export const usePerfilForm = () => {
       setEditMode(false);
     } catch (err) {
       setError('Error al actualizar la información: ' + err.message);
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -72,5 +76,5 @@ export const usePerfilForm = () => {
     });
   };
 
-  return { perfil, loading, editMode, setEditMode, form, success, error, handleChange, handleSubmit, cancelEdit };
+  return { perfil, loading, editMode, setEditMode, form, success, error, submitting, handleChange, handleSubmit, cancelEdit };
 };

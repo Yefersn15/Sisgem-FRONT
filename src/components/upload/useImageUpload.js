@@ -1,6 +1,6 @@
-// src/hooks/useImageUpload.js
+// src/components/upload/useImageUpload.js
 import { useState } from 'react';
-import { uploadImagen } from '../services/dataService';
+import { uploadImagen } from '../../services/api/upload.api';
 
 const MAX_SIZE_MB = 8;
 

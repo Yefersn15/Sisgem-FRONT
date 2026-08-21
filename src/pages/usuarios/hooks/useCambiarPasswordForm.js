@@ -3,9 +3,10 @@ import { useState } from 'react';
 import { changePassword } from '../services/usuariosService';
 
 export const useCambiarPasswordForm = () => {
-  const [form, setForm] = useState({ newPassword: '', confirmPassword: '' });
+  const [form, setForm] = useState({ currentPassword: '', newPassword: '', confirmPassword: '' });
   const [success, setSuccess] = useState('');
   const [error, setError] = useState('');
+  const [submitting, setSubmitting] = useState(false);
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -15,6 +16,11 @@ export const useCambiarPasswordForm = () => {
     e.preventDefault();
     setError('');
     setSuccess('');
+
+    if (!form.currentPassword) {
+      setError('Debe ingresar la contraseña actual');
+      return;
+    }
 
     if (form.newPassword !== form.confirmPassword) {
       setError('Las contraseñas nuevas no coinciden');
@@ -27,14 +33,22 @@ export const useCambiarPasswordForm = () => {
       return;
     }
 
+    if (form.currentPassword === pw) {
+      setError('La nueva contraseña debe ser diferente a la actual');
+      return;
+    }
+
+    setSubmitting(true);
     try {
-      await changePassword(pw);
+      await changePassword(form.currentPassword, pw);
       setSuccess('Contraseña actualizada correctamente');
-      setForm({ newPassword: '', confirmPassword: '' });
+      setForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
     } catch (err) {
       setError('Error al actualizar la contraseña: ' + err.message);
+    } finally {
+      setSubmitting(false);
     }
   };
 
-  return { form, success, error, handleChange, handleSubmit };
+  return { form, success, error, submitting, handleChange, handleSubmit };
 };

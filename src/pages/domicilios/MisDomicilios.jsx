@@ -1,7 +1,7 @@
 // src/pages/domicilios/MisDomicilios.jsx
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { formatPrice } from '../../services/dataService';
+import { formatPrice } from '../../services/api/utils';
 import { useMisDomicilios, getBadgeClass } from './hooks/useMisDomicilios';
 
 const MisDomicilios = () => {

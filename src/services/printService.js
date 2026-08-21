@@ -1,16 +1,19 @@
 import html2pdf from 'html2pdf.js';
-import { formatPrice } from './dataService';
+import { formatPrice } from './api/utils';
 
-// options: { forBag: boolean }
+// options: { forBag: boolean, onError: (message: string) => void }
+// onError es opcional para no acoplar este servicio a React; si no se
+// pasa, el error solo queda en consola en vez de interrumpir con alert().
 export const openPrintVoucher = async (venta, domicilio, options = {}) => {
   const forBag = !!options.forBag;
+  const onError = typeof options.onError === 'function' ? options.onError : (msg) => console.error(msg);
   // Generar HTML del voucher (igual que antes)
   try {
     // Validaciones: no imprimir si la venta o el domicilio están anulados/rechazados/cancelados
-    if (!venta || !venta.id) { alert('Venta no encontrada'); return; }
+    if (!venta || !venta.id) { onError('Venta no encontrada'); return; }
     const blockedVentaStates = ['Anulada', 'Rechazada', 'Cancelado'];
-    if (blockedVentaStates.includes(venta.estado)) { alert('No se puede imprimir voucher de una venta anulada o cancelada'); return; }
-    if (domicilio && ['Anulada', 'Rechazada', 'Cancelado'].includes(domicilio.estado)) { alert('No se puede imprimir voucher de un domicilio anulado/cancelado'); return; }
+    if (blockedVentaStates.includes(venta.estado)) { onError('No se puede imprimir voucher de una venta anulada o cancelada'); return; }
+    if (domicilio && ['Anulada', 'Rechazada', 'Cancelado'].includes(domicilio.estado)) { onError('No se puede imprimir voucher de un domicilio anulado/cancelado'); return; }
     const fecha = venta?.fecha ? new Date(venta.fecha).toLocaleString() : new Date().toLocaleString();
     const getNombreProducto = (d) => {
       if (d.productoSnapshot?.nombre) return d.productoSnapshot.nombre;
@@ -130,12 +133,12 @@ export const openPrintVoucher = async (venta, domicilio, options = {}) => {
       return;
     } catch (pdfErr) {
       console.error('Error generando PDF con html2pdf:', pdfErr);
-      alert('No se pudo generar el voucher. Revise su navegador.');
+      onError('No se pudo generar el voucher. Revise su navegador.');
       return;
     }
   } catch (e) {
     console.error('Error imprimiendo voucher', e);
-    alert('Error generando voucher de impresión');
+    onError('Error generando voucher de impresión');
   }
 };
 

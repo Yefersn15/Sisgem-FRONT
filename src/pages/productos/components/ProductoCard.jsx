@@ -1,6 +1,6 @@
 // src/pages/productos/components/ProductoCard.jsx
 import React from 'react';
-import { formatPrice } from '../../../services/dataService';
+import { formatPrice } from '../../../services/api/utils';
 
 const ProductoCard = ({ producto, onClick, metaLabel, metaIcon }) => (
   <div className="col">

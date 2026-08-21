@@ -1,6 +1,6 @@
 // src/pages/ventas/components/PagosAbono.jsx
 import React from 'react';
-import { formatPrice } from '../../../services/dataService';
+import { formatPrice } from '../../../services/api/utils';
 import { formatFecha } from '../hooks/ventaFormatters';
 import { getEstadoBadge } from '../hooks/useVentaDetalle';
 

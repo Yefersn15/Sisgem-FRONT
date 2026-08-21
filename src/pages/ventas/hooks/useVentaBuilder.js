@@ -1,6 +1,7 @@
 // src/pages/ventas/hooks/useVentaBuilder.js
 import { useState } from 'react';
 import { createVenta, updateVenta } from '../services/ventasService';
+import { useToast } from '../../../context/ToastContext';
 
 const FORM_INICIAL = {
   metodoPago: 'Efectivo',
@@ -17,6 +18,7 @@ const FORM_INICIAL = {
 const ITEM_INICIAL = { productoId: '', nombre: '', cantidad: 1, precio: 0 };
 
 export const useVentaBuilder = (productos, onGuardado) => {
+  const toast = useToast();
   const [modal, setModal] = useState(null);
   const [ventaSeleccionada, setVentaSeleccionada] = useState(null);
   const [form, setForm] = useState(FORM_INICIAL);
@@ -82,11 +84,11 @@ export const useVentaBuilder = (productos, onGuardado) => {
   const totalForm = form.items.reduce((s, i) => s + (i.cantidad * i.precio), 0);
 
   const guardarVenta = async () => {
-    if (form.items.length === 0) return alert('Agregue al menos un producto');
-    if (!seleccionarUsuario && !form.nombreComprador.trim()) return alert('Ingrese nombre del comprador');
-    if (seleccionarUsuario && !form.usuarioId) return alert('Seleccione un usuario');
-    if (form.delivery && !form.direccion.trim()) return alert('Ingrese dirección de entrega');
-    if (form.delivery && !form.telefono.trim()) return alert('Ingrese teléfono de contacto');
+    if (form.items.length === 0) return toast.error('Agregue al menos un producto');
+    if (!seleccionarUsuario && !form.nombreComprador.trim()) return toast.error('Ingrese nombre del comprador');
+    if (seleccionarUsuario && !form.usuarioId) return toast.error('Seleccione un usuario');
+    if (form.delivery && !form.direccion.trim()) return toast.error('Ingrese dirección de entrega');
+    if (form.delivery && !form.telefono.trim()) return toast.error('Ingrese teléfono de contacto');
 
     try {
       await createVenta({
@@ -111,7 +113,7 @@ export const useVentaBuilder = (productos, onGuardado) => {
       setModal(null);
       onGuardado();
     } catch (err) {
-      alert(err.message || 'Error al guardar venta');
+      toast.error(err.message || 'Error al guardar venta');
     }
   };
 
@@ -137,7 +139,7 @@ export const useVentaBuilder = (productos, onGuardado) => {
       setModal(null);
       onGuardado();
     } catch (err) {
-      alert(err.message || 'Error al actualizar');
+      toast.error(err.message || 'Error al actualizar');
     }
   };
 

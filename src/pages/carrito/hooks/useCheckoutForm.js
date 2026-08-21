@@ -3,10 +3,13 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '../../../context/CartContext';
 import { useAuth } from '../../../context/AuthContext';
-import { createPedido, getDirecciones, createDireccion } from '../../../services/dataService';
+import { createPedido } from '../../../services/api/pedidos.api';
+import { getDirecciones, createDireccion } from '../../../services/api/usuarios.api';
+import { useToast } from '../../../context/ToastContext';
 
 export const useCheckoutForm = () => {
   const navigate = useNavigate();
+  const toast = useToast();
   const { cartItemsWithDetails, clearCart } = useCart();
   const { user } = useAuth();
 
@@ -30,6 +33,7 @@ export const useCheckoutForm = () => {
     cardName: '',
   });
   const [errors, setErrors] = useState({});
+  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     const loadDirecciones = async () => {
@@ -140,17 +144,17 @@ export const useCheckoutForm = () => {
 
   const handleAddAddress = async () => {
     if (!newAddress.direccion?.trim()) {
-      alert('La dirección es obligatoria');
+      toast.error('La dirección es obligatoria');
       return;
     }
 
     if (!user) {
-      alert('Debe iniciar sesión para guardar una dirección');
+      toast.error('Debe iniciar sesión para guardar una dirección');
       return;
     }
 
     if (direcciones.length >= 3) {
-      alert('Máximo 3 direcciones guardadas. Por favor elimina una para agregar una nueva.');
+      toast.error('Máximo 3 direcciones guardadas. Por favor elimina una para agregar una nueva.');
       return;
     }
 
@@ -223,6 +227,7 @@ export const useCheckoutForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (submitting) return;
 
     try {
       const validationErrors = validate();
@@ -230,6 +235,8 @@ export const useCheckoutForm = () => {
         setErrors(validationErrors);
         return;
       }
+
+      setSubmitting(true);
 
       const productos = cartItemsWithDetails
         .filter(item => item.producto && (item.producto.id || item.producto._id))
@@ -277,7 +284,9 @@ export const useCheckoutForm = () => {
       navigate(`/pedidos/${pedidoCreado.id}`);
     } catch (error) {
       console.error('Error al crear la venta:', error);
-      alert('Error al procesar el pedido: ' + error.message);
+      toast.error('Error al procesar el pedido: ' + error.message);
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -294,6 +303,7 @@ export const useCheckoutForm = () => {
     errors,
     subtotal,
     total,
+    submitting,
     handleChange,
     handleDireccionSelect,
     handleAddAddress,

@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { formatPrice } from '../../services/dataService';
+import { formatPrice } from '../../services/api/utils';
 import { useCheckoutForm } from './hooks/useCheckoutForm';
 import NuevaDireccionForm from './components/NuevaDireccionForm';
 import ResumenPedido from './components/ResumenPedido';
@@ -18,6 +18,7 @@ const Checkout = () => {
     errors,
     subtotal,
     total,
+    submitting,
     handleChange,
     handleDireccionSelect,
     handleAddAddress,
@@ -232,8 +233,12 @@ const Checkout = () => {
                   </div>
                 )}
 
-                <button type="submit" className="btn btn-primary btn-lg w-100">
-                  <i className="fas fa-check-circle me-2"></i>Confirmar Pedido{!formData.delivery && ` - ${formatPrice(total)}`}
+                <button type="submit" className="btn btn-primary btn-lg w-100" disabled={submitting}>
+                  {submitting ? (
+                    <><span className="spinner-border spinner-border-sm me-2" role="status"></span>Procesando...</>
+                  ) : (
+                    <><i className="fas fa-check-circle me-2"></i>Confirmar Pedido{!formData.delivery && ` - ${formatPrice(total)}`}</>
+                  )}
                 </button>
               </form>
             </div>

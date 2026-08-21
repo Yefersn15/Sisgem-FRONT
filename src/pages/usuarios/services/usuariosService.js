@@ -8,6 +8,5 @@ export {
   toggleUsuarioEstado,
   exportUsuarios,
   importUsuarios,
-  registerUser,
-  changePassword,
-} from '../../../services/dataService';
+} from '../../../services/api/usuarios.api';
+export { registerUser, changePassword } from '../../../services/api/auth.api';

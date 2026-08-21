@@ -2,7 +2,8 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getPagos, exportPagos, importPagos } from '../services/pagosService';
-import { getPedidos, getVentas, getDomicilios } from '../../../services/dataService';
+import { getPedidos, getVentas } from '../../../services/api/pedidos.api';
+import { getDomicilios } from '../../../services/api/domicilios.api';
 
 const calcularVentaConPagos = (venta, pagos) => {
   const shipping = parseFloat(venta.shipping) || 0;

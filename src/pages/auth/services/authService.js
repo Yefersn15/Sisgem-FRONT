@@ -6,4 +6,4 @@ export {
   changePassword,
   forgotPassword,
   resetPassword,
-} from '../../../services/dataService';
+} from '../../../services/api/auth.api';

@@ -6,10 +6,8 @@ export {
   updateVenta,
   deleteVenta,
   cambiarEstado,
-  cambiarEstadoPago,
   aprobarSolicitudAbono,
   rechazarAbono,
-  getPagosByVenta,
-  getTotalPagadoByVenta,
-  getDomicilioByVentaId,
-} from '../../../services/dataService';
+} from '../../../services/api/pedidos.api';
+export { cambiarEstadoPago, getPagosByVenta, getTotalPagadoByVenta } from '../../../services/api/pagos.api';
+export { getDomicilioByVentaId } from '../../../services/api/domicilios.api';

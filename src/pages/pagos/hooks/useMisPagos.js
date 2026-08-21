@@ -2,7 +2,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useAuth } from '../../../context/AuthContext';
 import { getPagos } from '../services/pagosService';
-import { getMisPedidos } from '../../../services/dataService';
+import { getMisPedidos } from '../../../services/api/pedidos.api';
 
 export const getMetodoBadge = (metodo) => {
   switch (metodo) {

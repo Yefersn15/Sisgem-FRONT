@@ -1,12 +1,12 @@
 // src/pages/banners/services/bannersService.js
-import * as dataService from '../../../services/dataService';
+import * as bannersApi from '../../../services/api/banners.api';
 
-export const getBanners = dataService.getBanners;
-export const createBanner = dataService.createBanner;
-export const updateBanner = dataService.updateBanner;
-export const deleteBanner = dataService.deleteBanner;
+export const getBanners = bannersApi.getBanners;
+export const createBanner = bannersApi.createBanner;
+export const updateBanner = bannersApi.updateBanner;
+export const deleteBanner = bannersApi.deleteBanner;
 
 export const getBannerById = async (id) => {
-  const banners = await dataService.getBanners();
+  const banners = await bannersApi.getBanners();
   return banners.find(b => String(b.id) === String(id)) || null;
 };

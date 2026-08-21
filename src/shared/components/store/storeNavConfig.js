@@ -1,0 +1,53 @@
+// src/shared/components/store/storeNavConfig.js
+// Secciones del menú de la tienda (no-admin), agrupadas igual que el navConfig del admin
+// para poder alimentar tanto una barra lateral como una barra superior.
+export const getStoreMenuSections = ({ isAdmin, hasPermission }) => [
+  {
+    key: 'tienda',
+    title: 'Tienda',
+    icon: 'fa-store',
+    items: [
+      { to: '/productos', icon: 'fa-box', label: 'Productos' },
+      { to: '/carrito', icon: 'fa-shopping-cart', label: 'Carrito' },
+    ],
+  },
+  {
+    key: 'administracion',
+    title: 'Administración',
+    icon: 'fa-cube',
+    condition: () => isAdmin
+      || hasPermission('Ventas') || hasPermission('Usuarios') || hasPermission('Configuración')
+      || hasPermission('Reportes') || hasPermission('Inventario') || hasPermission('Productos'),
+    items: isAdmin ? [
+      { to: '/admin', icon: 'fa-home', label: 'Dashboard' },
+      { to: '/admin/productos', icon: 'fa-boxes', label: 'Productos', module: 'Inventario' },
+      { to: '/admin/marcas', icon: 'fa-tag', label: 'Marcas', module: 'Inventario' },
+      { to: '/admin/categorias', icon: 'fa-folder', label: 'Categorías', module: 'Inventario' },
+      { to: '/admin/ventas', icon: 'fa-shopping-cart', label: 'Ventas', module: 'Ventas' },
+      { to: '/admin/pedidos', icon: 'fa-box', label: 'Pedidos', module: 'Ventas' },
+      { to: '/admin/domicilios', icon: 'fa-truck', label: 'Domicilios', module: 'Ventas' },
+      { to: '/admin/pagos', icon: 'fa-money-bill-wave', label: 'Pagos', module: 'Ventas' },
+      { to: '/admin/usuarios', icon: 'fa-users', label: 'Usuarios', module: 'Usuarios' },
+      { to: '/admin/roles', icon: 'fa-user-shield', label: 'Roles', module: 'Configuración' },
+    ] : [
+      { to: '/admin', icon: 'fa-cube', label: 'Panel Admin' },
+      ...(hasPermission('Inventario') || hasPermission('Productos') ? [
+        { to: '/admin/productos', icon: 'fa-boxes', label: 'Productos', module: 'Inventario' },
+        { to: '/admin/marcas', icon: 'fa-tag', label: 'Marcas', module: 'Inventario' },
+        { to: '/admin/categorias', icon: 'fa-folder', label: 'Categorías', module: 'Inventario' },
+      ] : []),
+      ...(hasPermission('Ventas') ? [
+        { to: '/admin/ventas', icon: 'fa-shopping-cart', label: 'Ventas', module: 'Ventas' },
+        { to: '/admin/pedidos', icon: 'fa-box', label: 'Pedidos', module: 'Ventas' },
+        { to: '/admin/domicilios', icon: 'fa-truck', label: 'Domicilios', module: 'Ventas' },
+        { to: '/admin/pagos', icon: 'fa-money-bill-wave', label: 'Pagos', module: 'Ventas' },
+      ] : []),
+      ...(hasPermission('Usuarios') ? [
+        { to: '/admin/usuarios', icon: 'fa-users', label: 'Usuarios', module: 'Usuarios' },
+      ] : []),
+      ...(hasPermission('Configuración') ? [
+        { to: '/admin/roles', icon: 'fa-user-shield', label: 'Roles', module: 'Configuración' },
+      ] : []),
+    ],
+  },
+];

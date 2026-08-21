@@ -8,4 +8,4 @@ export {
   toggleMarcaEstado,
   exportMarcas,
   importMarcas,
-} from '../../../services/dataService';
+} from '../../../services/api/marcas.api';

@@ -6,10 +6,14 @@ import { useHomeData } from './hooks/useHomeData';
 import { useInfiniteCarousel } from './hooks/useInfiniteCarousel';
 import BannerCarousel from './components/BannerCarousel';
 import HomeProductoModal from './components/HomeProductoModal';
+import HomeSearchBar from './components/HomeSearchBar';
+import CategoriaCarousel from './components/CategoriaCarousel';
+import { useToast } from '../../context/ToastContext';
 
 const Home = () => {
-  const { banners, marcas, destacados, categorias } = useHomeData();
+  const { banners, marcas, destacados, categorias, productos } = useHomeData();
   const [modalProducto, setModalProducto] = useState(null);
+  const toast = useToast();
   const { addToCart } = useContext(CartContext);
   const { hasPermission } = useAuth();
   const canManageBanners = hasPermission('Banners');
@@ -31,7 +35,7 @@ const Home = () => {
 
   const handleAdd = (producto, cantidad = 1) => {
     addToCart(producto.id, Number(cantidad));
-    alert('Producto agregado al carrito');
+    toast.success('Producto agregado al carrito');
     closeModal();
   };
 
@@ -41,6 +45,8 @@ const Home = () => {
         banners={banners}
         canManageBanners={canManageBanners}
       />
+
+      <HomeSearchBar />
 
       <h3 className="mb-3"><Link to="/productos" className="text-decoration-none">Nuestras Marcas</Link></h3>
       {marcas.length > 0 ? (
@@ -79,6 +85,20 @@ const Home = () => {
         </div>
       ) : (
         <div className="text-muted mb-5">No hay productos destacados.</div>
+      )}
+
+      {categorias.length > 0 && (
+        <>
+          <h2 className="mb-3">Explora por Categoría</h2>
+          {categorias.map((cat) => (
+            <CategoriaCarousel
+              key={cat.id}
+              categoria={cat}
+              productos={productos.filter((p) => String(p.categoriaId) === String(cat.id))}
+              onOpenProducto={openProducto}
+            />
+          ))}
+        </>
       )}
 
       <HomeProductoModal producto={modalProducto} onClose={closeModal} onAdd={handleAdd} />

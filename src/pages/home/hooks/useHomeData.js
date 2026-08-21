@@ -10,6 +10,7 @@ export const useHomeData = () => {
   const [marcas, setMarcas] = useState([]);
   const [destacados, setDestacados] = useState([]);
   const [categorias, setCategorias] = useState([]);
+  const [productos, setProductos] = useState([]);
 
   const reloadAll = async () => {
     const b = (await getBanners()) || [];
@@ -22,6 +23,7 @@ export const useHomeData = () => {
     const topVendidos = await getTopProductos(10);
     const p = (await getProductos()) || [];
     const activos = p.filter(x => x.activo !== false);
+    setProductos(activos);
 
     if (topVendidos.length > 0) {
       const topIds = topVendidos.map(t => t.productoId);
@@ -46,5 +48,5 @@ export const useHomeData = () => {
     reloadAll();
   }, []);
 
-  return { banners, marcas, destacados, categorias };
+  return { banners, marcas, destacados, categorias, productos };
 };

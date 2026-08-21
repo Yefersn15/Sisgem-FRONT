@@ -1,7 +1,7 @@
-// src/components/admin/AdminTopNav.jsx
+// src/shared/components/admin/AdminTopNav.jsx
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { useAuth } from '../../context/AuthContext';
+import { useAuth } from '../../../context/AuthContext';
 import { DASHBOARD_ITEM, NAV_GROUPS } from './navConfig';
 
 const isActivePath = (pathname, item) =>
@@ -9,7 +9,7 @@ const isActivePath = (pathname, item) =>
 
 const isGroupActive = (pathname, group) => group.items.some(item => isActivePath(pathname, item));
 
-const AdminTopNav = ({ compact = false }) => {
+const AdminTopNav = ({ compact = false, onToggleCompact }) => {
   const location = useLocation();
   const { hasPermission } = useAuth();
 
@@ -53,10 +53,21 @@ const AdminTopNav = ({ compact = false }) => {
         </div>
       ))}
 
-      <Link to="/" className="btn btn-sm btn-outline-theme ms-auto" title={compact ? 'Volver a la tienda' : undefined}>
-        <i className={`fas fa-store ${compact ? '' : 'me-1'}`}></i>
-        {!compact && 'Volver a la tienda'}
-      </Link>
+      <div className="ms-auto d-flex align-items-center gap-2">
+        <Link to="/" className="btn btn-sm btn-outline-theme" title={compact ? 'Volver a la tienda' : undefined}>
+          <i className={`fas fa-store ${compact ? '' : 'me-1'}`}></i>
+          {!compact && 'Volver a la tienda'}
+        </Link>
+        <button
+          type="button"
+          className="btn btn-sm btn-outline-theme"
+          onClick={onToggleCompact}
+          title={compact ? 'Expandir menú' : 'Compactar menú'}
+          aria-label={compact ? 'Expandir menú' : 'Compactar menú'}
+        >
+          <i className={`fas ${compact ? 'fa-angles-down' : 'fa-angles-up'}`}></i>
+        </button>
+      </div>
     </nav>
   );
 };

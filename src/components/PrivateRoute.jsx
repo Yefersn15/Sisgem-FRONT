@@ -1,11 +1,12 @@
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import LoadingState from '../shared/components/common/LoadingState';
 
 const PrivateRoute = ({ children, module, requireGuest }) => {
   const { user, role, hasPermission, loading } = useAuth();
   const location = useLocation();
 
-  if (loading) return <div>Cargando...</div>;
+  if (loading) return <LoadingState />;
   
   // Si requiere ser invitado (no estar logueado)
   if (requireGuest) {

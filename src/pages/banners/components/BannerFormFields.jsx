@@ -2,7 +2,7 @@
 import React from 'react';
 import BannerTemplatePicker from './BannerTemplatePicker';
 import BannerCollage from './BannerCollage';
-import ImageUploadField from '../../../components/ImageUploadField';
+import ImageUploadField from '../../../components/upload/ImageUploadField';
 import { getTemplate } from '../hooks/bannerTemplates';
 
 const TEXT_POSITIONS = [

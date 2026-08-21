@@ -1,6 +1,6 @@
-// src/components/ImageUploadField.jsx
+// src/components/upload/ImageUploadField.jsx
 import React, { useRef, useState } from 'react';
-import { useImageUpload } from '../hooks/useImageUpload';
+import { useImageUpload } from './useImageUpload';
 import ImageGalleryModal from './ImageGalleryModal';
 
 // Campo de imagen reutilizable: sube el archivo a Cloudinary (o reutiliza una ya

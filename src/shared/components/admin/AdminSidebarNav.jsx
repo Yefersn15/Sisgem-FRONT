@@ -1,13 +1,13 @@
-// src/components/admin/AdminSidebarNav.jsx
+// src/shared/components/admin/AdminSidebarNav.jsx
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { useAuth } from '../../context/AuthContext';
+import { useAuth } from '../../../context/AuthContext';
 import { DASHBOARD_ITEM, NAV_GROUPS } from './navConfig';
 
 const isActivePath = (pathname, item) =>
   item.exact ? pathname === item.to : (pathname === item.to || pathname.startsWith(item.to + '/'));
 
-const AdminSidebarNav = ({ compact = false }) => {
+const AdminSidebarNav = ({ compact = false, onToggleCompact }) => {
   const location = useLocation();
   const { hasPermission } = useAuth();
 
@@ -23,11 +23,18 @@ const AdminSidebarNav = ({ compact = false }) => {
       className="app-admin-sidebar p-3"
       style={{ width: compact ? '72px' : '250px', minHeight: 'calc(100vh - var(--topbar-height) - 50px)' }}
     >
-      {!compact && (
-        <div className="mb-3 d-none d-lg-block">
-          <small className="text-muted fw-bold">Menú principal</small>
-        </div>
-      )}
+      <div className={`mb-3 d-none d-lg-flex align-items-center ${compact ? 'justify-content-center' : 'justify-content-between'}`}>
+        {!compact && <small className="text-muted fw-bold">Menú principal</small>}
+        <button
+          type="button"
+          className="btn btn-outline-theme btn-sm"
+          onClick={onToggleCompact}
+          title={compact ? 'Expandir menú' : 'Compactar menú'}
+          aria-label={compact ? 'Expandir menú' : 'Compactar menú'}
+        >
+          <i className={`fas ${compact ? 'fa-angles-right' : 'fa-angles-left'}`}></i>
+        </button>
+      </div>
 
       <ul className="nav flex-column">
         <li className="nav-item">

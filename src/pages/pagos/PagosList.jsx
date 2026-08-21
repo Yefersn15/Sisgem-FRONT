@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { formatPrice } from '../../services/dataService';
+import { formatPrice } from '../../services/api/utils';
 import { usePagosAdmin } from './hooks/usePagosAdmin';
 
 const PagosList = () => {

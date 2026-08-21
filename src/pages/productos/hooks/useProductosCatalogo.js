@@ -1,5 +1,6 @@
 // src/pages/productos/hooks/useProductosCatalogo.js
 import { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import useDebounce from '../../../hooks/useDebounce';
 import { getProductos } from '../services/productosService';
 import { getMarcas } from '../../marcas/services/marcasService';
@@ -21,10 +22,11 @@ const ordenarProductos = (lista, sortBy) => {
 };
 
 export const useProductosCatalogo = () => {
+  const [searchParams] = useSearchParams();
   const [productos, setProductos] = useState([]);
   const [marcas, setMarcas] = useState([]);
   const [categorias, setCategorias] = useState([]);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState(searchParams.get('q') || '');
   const [sortBy, setSortBy] = useState('');
   const [filterMarca, setFilterMarca] = useState('');
   const [filterCategoria, setFilterCategoria] = useState('');
@@ -48,9 +50,12 @@ export const useProductosCatalogo = () => {
     if (filterMarca) lista = lista.filter((p) => String(p.marcaId) === String(filterMarca));
     if (filterCategoria) lista = lista.filter((p) => String(p.categoriaId) === String(filterCategoria));
     if (debouncedSearch) {
+      const term = debouncedSearch.toLowerCase();
       lista = lista.filter((p) =>
-        p.nombre.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
-        p.descripcion.toLowerCase().includes(debouncedSearch.toLowerCase())
+        p.nombre.toLowerCase().includes(term) ||
+        p.descripcion.toLowerCase().includes(term) ||
+        (p.marcaNombre || '').toLowerCase().includes(term) ||
+        (p.categoriaNombre || '').toLowerCase().includes(term)
       );
     }
 

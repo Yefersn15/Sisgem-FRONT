@@ -1,6 +1,7 @@
 // src/pages/pedidos/hooks/usePedidoBuilder.js
 import { useState } from 'react';
 import { createPedido } from '../services/pedidosService';
+import { useToast } from '../../../context/ToastContext';
 
 const FORM_INICIAL = {
   tipoVenta: 'mostrador',
@@ -17,6 +18,7 @@ const FORM_INICIAL = {
 const ITEM_INICIAL = { productoId: '', nombre: '', cantidad: 1, precio: 0 };
 
 export const usePedidoBuilder = (productos, onGuardado) => {
+  const toast = useToast();
   const [modal, setModal] = useState(null);
   const [form, setForm] = useState(FORM_INICIAL);
   const [item, setItem] = useState(ITEM_INICIAL);
@@ -55,11 +57,11 @@ export const usePedidoBuilder = (productos, onGuardado) => {
   const totalForm = form.items.reduce((s, i) => s + (i.cantidad * i.precio), 0);
 
   const guardarPedido = async () => {
-    if (form.items.length === 0) return alert('Agregue al menos un producto');
-    if (!seleccionarUsuario && !form.nombreComprador.trim()) return alert('Ingrese nombre del comprador');
-    if (seleccionarUsuario && !form.usuarioId) return alert('Seleccione un usuario');
-    if (form.delivery && !form.direccion.trim()) return alert('Ingrese dirección de entrega');
-    if (form.delivery && !form.telefono.trim()) return alert('Ingrese teléfono de contacto');
+    if (form.items.length === 0) return toast.error('Agregue al menos un producto');
+    if (!seleccionarUsuario && !form.nombreComprador.trim()) return toast.error('Ingrese nombre del comprador');
+    if (seleccionarUsuario && !form.usuarioId) return toast.error('Seleccione un usuario');
+    if (form.delivery && !form.direccion.trim()) return toast.error('Ingrese dirección de entrega');
+    if (form.delivery && !form.telefono.trim()) return toast.error('Ingrese teléfono de contacto');
 
     try {
       await createPedido({
@@ -81,7 +83,7 @@ export const usePedidoBuilder = (productos, onGuardado) => {
       setModal(null);
       onGuardado();
     } catch (err) {
-      alert(err.message || 'Error al crear pedido');
+      toast.error(err.message || 'Error al crear pedido');
     }
   };
 

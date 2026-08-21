@@ -4,6 +4,7 @@ import useDebounce from '../../../hooks/useDebounce';
 import { getProductos, deleteProducto, updateProducto, exportProductos, importProductos } from '../services/productosService';
 import { getMarcas } from '../../marcas/services/marcasService';
 import { getCategorias } from '../../categorias/services/categoriasService';
+import { useConfirm } from '../../../context/ConfirmContext';
 
 const ITEMS_PER_PAGE = 20;
 
@@ -24,6 +25,7 @@ const ordenarProductos = (lista, sortBy) => {
 };
 
 export const useProductosAdmin = () => {
+  const confirm = useConfirm();
   const [productos, setProductos] = useState([]);
   const [marcas, setMarcas] = useState([]);
   const [categorias, setCategorias] = useState([]);
@@ -82,7 +84,7 @@ export const useProductosAdmin = () => {
   }, [debounced, filterMarca, filterCategoria, filterEstado, sortBy]);
 
   const handleDelete = async (id) => {
-    if (window.confirm('¿Estás seguro de eliminar este producto?')) {
+    if (await confirm('¿Estás seguro de eliminar este producto?')) {
       await deleteProducto(id);
       await cargarProductos();
     }

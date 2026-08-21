@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { formatPrice } from '../../services/dataService';
+import { formatPrice } from '../../services/api/utils';
 import { useVentasAdmin } from './hooks/useVentasAdmin';
 import { useVentaBuilder } from './hooks/useVentaBuilder';
 import { formatFecha, getMetodoBadge } from './hooks/ventaFormatters';

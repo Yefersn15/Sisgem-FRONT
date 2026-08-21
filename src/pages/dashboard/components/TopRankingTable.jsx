@@ -1,6 +1,6 @@
 // src/pages/dashboard/components/TopRankingTable.jsx
 import React from 'react';
-import { formatPrice } from '../../../services/dataService';
+import { formatPrice } from '../../../services/api/utils';
 
 const TopRankingTable = ({ title, columnLabel, items }) => (
   <div className="card h-100">

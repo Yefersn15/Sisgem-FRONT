@@ -1,7 +1,7 @@
 // src/pages/pagos/MisPagos.jsx
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { formatPrice } from '../../services/dataService';
+import { formatPrice } from '../../services/api/utils';
 import { useMisPagos, getMetodoBadge, getEstadoBadge } from './hooks/useMisPagos';
 
 const MisPagos = () => {

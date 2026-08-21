@@ -1,11 +1,17 @@
 // src/pages/pedidos/hooks/usePedidosAdmin.js
 import { useState, useEffect, useMemo } from 'react';
 import { getPedidos, cambiarEstadoPedido, aprobarSolicitudAbono, rechazarAbono } from '../services/pedidosService';
-import { getUsuarios, getProductos } from '../../../services/dataService';
+import { getUsuarios } from '../../../services/api/usuarios.api';
+import { getProductos } from '../../../services/api/productos.api';
+import { useToast } from '../../../context/ToastContext';
+import { useConfirm, usePrompt } from '../../../context/ConfirmContext';
 
 const ITEMS_PER_PAGE = 20;
 
 export const usePedidosAdmin = () => {
+  const toast = useToast();
+  const confirm = useConfirm();
+  const prompt = usePrompt();
   const [pedidos, setPedidos] = useState([]);
   const [usuarios, setUsuarios] = useState([]);
   const [productos, setProductos] = useState([]);
@@ -52,23 +58,23 @@ export const usePedidosAdmin = () => {
     const mensaje = esAbono
       ? '¿Aprobar este pedido por Abono?\n\nEl cliente podrá hacer pagos parciales.\nEl stock se reducirá al entregar.'
       : '¿Aprobar este pedido para envío?\n\nEl stock se reducirá al entregar.';
-    if (!window.confirm(mensaje)) return;
+    if (!(await confirm(mensaje))) return;
     try {
       await aprobarSolicitudAbono(pedidoId);
       cargarPedidos();
     } catch (e) {
-      alert('Error aprobando: ' + (e?.message || e));
+      toast.error('Error aprobando: ' + (e?.message || e));
     }
   };
 
   const handleRechazarAbono = async (pedidoId) => {
-    const motivo = prompt('Ingrese el motivo del rechazo (opcional):');
+    const motivo = await prompt('Ingrese el motivo del rechazo (opcional):', { title: 'Motivo del rechazo' });
     if (motivo === null) return;
     try {
       await rechazarAbono(pedidoId, motivo);
       cargarPedidos();
     } catch (e) {
-      alert('Error rechazando solicitud: ' + (e?.message || e));
+      toast.error('Error rechazando solicitud: ' + (e?.message || e));
     }
   };
 

@@ -2,16 +2,18 @@ import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import PagoForm from './components/PagoForm';
 import { createPago } from './services/pagosService';
+import { useToast } from '../../context/ToastContext';
 
 const PagoCreate = () => {
   const navigate = useNavigate();
+  const toast = useToast();
 
   const handleSubmit = async (data) => {
     const result = await createPago(data);
     if (result) {
       navigate('/admin/pagos');
     } else {
-      alert('Error al crear el pago');
+      toast.error('Error al crear el pago');
     }
   };
 

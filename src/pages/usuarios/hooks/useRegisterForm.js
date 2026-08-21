@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { registerUser } from '../services/usuariosService';
 import { normalizeText } from './textUtils';
+import { useToast } from '../../../context/ToastContext';
 
 const FORM_INICIAL = {
   nombre: '',
@@ -20,6 +21,7 @@ const FORM_INICIAL = {
 
 export const useRegisterForm = () => {
   const navigate = useNavigate();
+  const toast = useToast();
   const [form, setForm] = useState(FORM_INICIAL);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -71,7 +73,7 @@ export const useRegisterForm = () => {
 
       // La API retorna null en data si fue exitoso
       if (result === null || result) {
-        alert('Registro exitoso. Por favor inicia sesión.');
+        toast.success('Registro exitoso. Por favor inicia sesión.');
         navigate('/login');
       } else {
         setError('Error al registrar. Intenta nuevamente.');

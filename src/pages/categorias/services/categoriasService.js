@@ -8,4 +8,4 @@ export {
   toggleCategoriaEstado,
   exportCategorias,
   importCategorias,
-} from '../../../services/dataService';
+} from '../../../services/api/categorias.api';

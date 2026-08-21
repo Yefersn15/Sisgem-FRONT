@@ -1,6 +1,7 @@
 // src/pages/pedidos/components/CrearPedidoModal.jsx
 import React from 'react';
-import { formatPrice } from '../../../services/dataService';
+import { formatPrice } from '../../../services/api/utils';
+import Modal from '../../../shared/components/common/Modal';
 
 const TIPOS_PEDIDO = [
   { value: 'mostrador', label: 'Mostrador' },
@@ -25,11 +26,22 @@ const CrearPedidoModal = ({
   onGuardar,
   onClose,
 }) => (
-  <div className="modal fade show" style={{ display: 'block', backgroundColor: 'rgba(0,0,0,0.5)' }}>
-    <div className="modal-dialog modal-dialog-centered modal-lg m-auto">
-      <div className="modal-content">
-        <div className="modal-body p-3" style={{ maxHeight: '90vh', overflowY: 'auto' }}>
-          <button type="button" className="btn-close position-absolute top-0 end-0 m-3" onClick={onClose}></button>
+  <Modal
+    title="Crear Pedido"
+    onClose={onClose}
+    maxWidth={920}
+    footer={
+      <>
+        <button type="button" className="btn btn-secondary" onClick={onClose}>
+          <i className="fas fa-times me-1"></i>Cancelar
+        </button>
+        <button type="button" className="btn btn-primary" onClick={onGuardar}>
+          <i className="fas fa-save me-1"></i>Crear Pedido
+        </button>
+      </>
+    }
+  >
+    <div style={{ maxHeight: '65vh', overflowY: 'auto' }}>
           <div className="row g-3">
             <div className="col-12 mb-3">
               <label className="form-label fw-bold">¿Quién hace el pedido?</label>
@@ -171,18 +183,8 @@ const CrearPedidoModal = ({
               <textarea className="form-control" value={form.notas} onChange={(e) => setForm({ ...form, notas: e.target.value })} />
             </div>
           </div>
-        </div>
-        <div className="modal-footer">
-          <button type="button" className="btn btn-secondary" onClick={onClose}>
-            <i className="fas fa-times me-1"></i>Cancelar
-          </button>
-          <button type="button" className="btn btn-primary" onClick={onGuardar}>
-            <i className="fas fa-save me-1"></i>Crear Pedido
-          </button>
-        </div>
-      </div>
     </div>
-  </div>
+  </Modal>
 );
 
 export default CrearPedidoModal;

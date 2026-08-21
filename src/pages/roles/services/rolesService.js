@@ -10,4 +10,4 @@ export {
   seedRoles,
   getRoleModules,
   assignRoleModules,
-} from '../../../services/dataService';
+} from '../../../services/api/roles.api';

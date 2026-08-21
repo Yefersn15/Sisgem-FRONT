@@ -6,4 +6,4 @@ export {
   updateCartItem,
   clearCart,
   getCartItemsWithDetails,
-} from '../../../services/dataService';
+} from '../../../services/api/carrito.api';

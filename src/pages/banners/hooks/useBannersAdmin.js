@@ -1,8 +1,10 @@
 // src/pages/banners/hooks/useBannersAdmin.js
 import { useState, useEffect } from 'react';
 import { getBanners, deleteBanner, updateBanner } from '../services/bannersService';
+import { useConfirm } from '../../../context/ConfirmContext';
 
 export const useBannersAdmin = () => {
+  const confirm = useConfirm();
   const [banners, setBanners] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -17,7 +19,7 @@ export const useBannersAdmin = () => {
   }, []);
 
   const handleDelete = async (id) => {
-    if (!window.confirm('¿Eliminar este banner?')) return;
+    if (!(await confirm('¿Eliminar este banner?'))) return;
     await deleteBanner(id);
     await cargarBanners();
   };

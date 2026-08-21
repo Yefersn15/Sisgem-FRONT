@@ -1,6 +1,6 @@
 // src/pages/domicilios/components/DomicilioCard.jsx
 import React from 'react';
-import { formatPrice } from '../../../services/dataService';
+import { formatPrice } from '../../../services/api/utils';
 import { isEstadoFinalDomicilio } from '../hooks/domicilioEstados';
 
 const DomicilioCard = ({ dom, onCambiarEstado, onEditarTarifa, onAsignarRepartidor, onImprimir, onWhatsapp, onNotas, onConvertirAVenta }) => {

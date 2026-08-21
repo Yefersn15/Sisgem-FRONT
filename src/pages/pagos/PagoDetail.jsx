@@ -1,14 +1,15 @@
 import React from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
-import { formatPrice } from '../../services/dataService';
+import { formatPrice } from '../../services/api/utils';
 import { usePagoDetalle } from './hooks/usePagoDetalle';
+import LoadingState from '../../shared/components/common/LoadingState';
 
 const PagoDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { pago, venta, domicilio, pagosVenta, loading, shipping, totalVenta, totalPagado, saldoPendiente } = usePagoDetalle(id);
 
-  if (loading) return <div className="container mt-4">Cargando...</div>;
+  if (loading) return <div className="container mt-4"><LoadingState /></div>;
 
   const ventaId = venta?.id || id;
 

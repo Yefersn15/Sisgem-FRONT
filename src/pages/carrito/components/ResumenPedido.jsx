@@ -1,6 +1,6 @@
 // src/pages/carrito/components/ResumenPedido.jsx
 import React from 'react';
-import { formatPrice } from '../../../services/dataService';
+import { formatPrice } from '../../../services/api/utils';
 
 const ResumenPedido = ({ items, subtotal, total, delivery }) => (
   <div className="card">

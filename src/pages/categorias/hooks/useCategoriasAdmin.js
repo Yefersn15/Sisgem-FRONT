@@ -2,7 +2,8 @@
 import { useState, useEffect } from 'react';
 import useDebounce from '../../../hooks/useDebounce';
 import { getCategorias, deleteCategoria, updateCategoria, exportCategorias, importCategorias } from '../services/categoriasService';
-import { getProductos } from '../../../services/dataService';
+import { getProductos } from '../../../services/api/productos.api';
+import { useConfirm } from '../../../context/ConfirmContext';
 
 const ITEMS_PER_PAGE = 20;
 
@@ -21,6 +22,7 @@ const ordenarCategorias = (lista, sortBy) => {
 };
 
 export const useCategoriasAdmin = () => {
+  const confirm = useConfirm();
   const [categorias, setCategorias] = useState([]);
   const [filterEstado, setFilterEstado] = useState('');
   const [sortBy, setSortBy] = useState('nombre-asc');
@@ -62,7 +64,7 @@ export const useCategoriasAdmin = () => {
   }, [debounced, filterEstado, sortBy]);
 
   const handleDelete = async (id) => {
-    if (window.confirm('¿Estás seguro de eliminar esta categoría?')) {
+    if (await confirm('¿Estás seguro de eliminar esta categoría?')) {
       await deleteCategoria(id);
       await cargarCategorias();
     }

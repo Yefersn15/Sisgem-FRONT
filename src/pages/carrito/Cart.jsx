@@ -1,22 +1,26 @@
 import { useCart } from '../../context/CartContext';
-import { formatPrice } from '../../services/dataService';
+import { formatPrice } from '../../services/api/utils';
 import { useNavigate } from 'react-router-dom';
+import { useToast } from '../../context/ToastContext';
+import { useConfirm } from '../../context/ConfirmContext';
 
 const Cart = () => {
   const { cartItemsWithDetails, removeFromCart, updateCartItem, clearCart } = useCart();
   const navigate = useNavigate();
+  const toast = useToast();
+  const confirm = useConfirm();
 
   const handleQuantityChange = (productoId, newCantidad, stock) => {
     if (newCantidad < 1) newCantidad = 1;
     if (newCantidad > stock) {
-      alert(`La cantidad no puede ser mayor al stock disponible (${stock}).`);
+      toast.error(`La cantidad no puede ser mayor al stock disponible (${stock}).`);
       newCantidad = stock;
     }
     updateCartItem(productoId, newCantidad);
   };
 
-  const handleRemove = (productoId) => {
-    if (window.confirm('¿Eliminar este producto del carrito?')) {
+  const handleRemove = async (productoId) => {
+    if (await confirm('¿Eliminar este producto del carrito?')) {
       removeFromCart(productoId);
     }
   };

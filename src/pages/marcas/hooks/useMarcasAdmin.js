@@ -2,7 +2,8 @@
 import { useState, useEffect } from 'react';
 import useDebounce from '../../../hooks/useDebounce';
 import { getMarcas, deleteMarca, updateMarca, exportMarcas, importMarcas } from '../services/marcasService';
-import { getProductos } from '../../../services/dataService';
+import { getProductos } from '../../../services/api/productos.api';
+import { useConfirm } from '../../../context/ConfirmContext';
 
 const ITEMS_PER_PAGE = 20;
 
@@ -21,6 +22,7 @@ const ordenarMarcas = (lista, sortBy) => {
 };
 
 export const useMarcasAdmin = () => {
+  const confirm = useConfirm();
   const [marcas, setMarcas] = useState([]);
   const [filterEstado, setFilterEstado] = useState('');
   const [sortBy, setSortBy] = useState('nombre-asc');
@@ -62,7 +64,7 @@ export const useMarcasAdmin = () => {
   }, [debounced, filterEstado, sortBy]);
 
   const handleDelete = async (id) => {
-    if (window.confirm('¿Estás seguro de eliminar esta marca?')) {
+    if (await confirm('¿Estás seguro de eliminar esta marca?')) {
       await deleteMarca(id);
       await cargarMarcas();
     }

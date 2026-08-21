@@ -2,11 +2,17 @@
 import { useState, useEffect } from 'react';
 import useDebounce from '../../../hooks/useDebounce';
 import { getVentas, updateVenta } from '../services/ventasService';
-import { getUsuarios, getProductos, exportToExcel } from '../../../services/dataService';
+import { getUsuarios } from '../../../services/api/usuarios.api';
+import { getProductos } from '../../../services/api/productos.api';
+import { exportToExcel } from '../../../services/api/utils';
+import { useToast } from '../../../context/ToastContext';
+import { useConfirm } from '../../../context/ConfirmContext';
 
 const ITEMS_PER_PAGE = 20;
 
 export const useVentasAdmin = () => {
+  const toast = useToast();
+  const confirm = useConfirm();
   const [ventas, setVentas] = useState([]);
   const [usuarios, setUsuarios] = useState([]);
   const [productos, setProductos] = useState([]);
@@ -55,12 +61,12 @@ export const useVentasAdmin = () => {
   }, [debounced, filterEstado, filterMetodo]);
 
   const anularVenta = async (id) => {
-    if (!window.confirm('¿Anular esta venta?')) return;
+    if (!(await confirm('¿Anular esta venta?'))) return;
     try {
       await updateVenta(id, { estado_venta: 'cancelado' });
       cargarVentas();
     } catch (err) {
-      alert(err.message || 'Error al anular');
+      toast.error(err.message || 'Error al anular');
     }
   };
 
@@ -69,7 +75,7 @@ export const useVentasAdmin = () => {
       await updateVenta(id, { estado_venta: 'completada' });
       cargarVentas();
     } catch (err) {
-      alert(err.message || 'Error al aprobar');
+      toast.error(err.message || 'Error al aprobar');
     }
   };
 

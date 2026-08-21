@@ -1,6 +1,7 @@
 // src/pages/ventas/components/VentaModal.jsx
 import React from 'react';
-import { formatPrice } from '../../../services/dataService';
+import { formatPrice } from '../../../services/api/utils';
+import Modal from '../../../shared/components/common/Modal';
 
 const METODOS_PAGO = ['Efectivo', 'Transferencia', 'Abono'];
 const TIPOS_PEDIDO = [
@@ -25,11 +26,23 @@ const VentaModal = ({
   onSubmit,
   onClose,
 }) => (
-  <div className="modal fade show" style={{ display: 'block', backgroundColor: 'rgba(0,0,0,0.5)' }}>
-    <div className="modal-dialog modal-dialog-centered modal-lg m-auto">
-      <div className="modal-content">
-        <div className="modal-body p-3" style={{ maxHeight: '90vh', overflowY: 'auto' }}>
-          <button type="button" className="btn-close position-absolute top-0 end-0 m-3" onClick={onClose}></button>
+  <Modal
+    title={modal === 'crear' ? 'Crear Venta' : 'Editar Venta'}
+    onClose={onClose}
+    maxWidth={920}
+    footer={
+      <>
+        <button type="button" className="btn btn-secondary" onClick={onClose}>
+          <i className="fas fa-times me-1"></i>Cancelar
+        </button>
+        <button type="button" className="btn btn-primary" onClick={onSubmit}>
+          <i className="fas fa-save me-1"></i>
+          {modal === 'crear' ? 'Crear' : 'Actualizar'}
+        </button>
+      </>
+    }
+  >
+    <div style={{ maxHeight: '65vh', overflowY: 'auto' }}>
           <div className="row g-3">
             <div className="col-12 mb-3">
               <label className="form-label fw-bold">¿Quién compra?</label>
@@ -170,19 +183,8 @@ const VentaModal = ({
               <textarea className="form-control" value={form.notas} onChange={(e) => setForm({ ...form, notas: e.target.value })} />
             </div>
           </div>
-        </div>
-        <div className="modal-footer">
-          <button type="button" className="btn btn-secondary" onClick={onClose}>
-            <i className="fas fa-times me-1"></i>Cancelar
-          </button>
-          <button type="button" className="btn btn-primary" onClick={onSubmit}>
-            <i className="fas fa-save me-1"></i>
-            {modal === 'crear' ? 'Crear' : 'Actualizar'}
-          </button>
-        </div>
-      </div>
     </div>
-  </div>
+  </Modal>
 );
 
 export default VentaModal;
