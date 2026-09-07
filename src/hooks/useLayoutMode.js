@@ -1,10 +1,11 @@
 // src/hooks/useLayoutMode.js
 import { useState, useEffect } from 'react';
 
-// Preferencia de orientación (lateral/superior) y modo compacto del menú,
-// persistida en localStorage bajo un prefijo propio. Antes vivía duplicado
-// línea por línea en useAdminLayoutMode.js y useStoreLayoutMode.js — ambos
-// son ahora envoltorios delgados de este hook, uno por prefijo de storage.
+// Preferencia de orientación (lateral/superior) y modo compacto del menú del
+// panel admin, persistida en localStorage bajo un prefijo propio (ver
+// components/admin/useAdminLayoutMode.js, envoltorio delgado de este hook).
+// El sitio público ya no tiene menú lateral que alternar, así que este hook
+// ahora solo tiene ese único consumidor.
 export const useLayoutMode = (storagePrefix) => {
   const keyOrientation = `${storagePrefix}_layout_orientation`;
   const keyCompact = `${storagePrefix}_layout_compact`;

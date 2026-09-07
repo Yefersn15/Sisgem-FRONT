@@ -7,7 +7,7 @@ const AuthContext = createContext();
 export const useAuth = () => useContext(AuthContext);
 
 // Criterio único de "es administrador": antes repetido literalmente en
-// PrivateRoute, StoreTopNav y demás componentes de menú. `role` nunca se
+// PrivateRoute, Header y demás componentes de menú. `role` nunca se
 // setea en este contexto (no hay endpoint que lo llene), así que el chequeo
 // real recae sobre los campos que sí trae el usuario autenticado.
 // eslint-disable-next-line react-refresh/only-export-components -- función utilitaria co-ubicada a propósito

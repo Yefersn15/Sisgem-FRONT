@@ -3,8 +3,18 @@ import { Link } from 'react-router-dom';
 import { useResetPasswordForm } from './hooks/useResetPasswordForm';
 import PasswordInput from '../../components/PasswordInput';
 import PasswordRequisitos from '../../components/PasswordRequisitos';
+import { useAyudaPagina } from '../../hooks/useAyudaPagina';
 
 const ResetPassword = () => {
+  useAyudaPagina({
+    titulo: 'Restablecer contraseña',
+    contenido: (
+      <>
+        <p>Llegaste aquí desde el enlace que te enviamos por correo. Elige una nueva contraseña de mínimo 8 caracteres, con mayúscula, minúscula, número y símbolo.</p>
+        <p>Si el enlace ya expiró (dura 1 hora) o ya fue usado, verás un aviso de error con la opción de solicitar uno nuevo desde "Recuperar contraseña".</p>
+      </>
+    ),
+  });
   const { token, password, setPassword, confirmPassword, setConfirmPassword, noCoinciden, error, loading, success, handleSubmit } = useResetPasswordForm();
 
   if (success) {

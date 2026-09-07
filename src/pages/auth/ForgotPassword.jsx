@@ -1,8 +1,18 @@
 // src/pages/auth/ForgotPassword.jsx
 import { Link } from 'react-router-dom';
 import { useForgotPasswordForm } from './hooks/useForgotPasswordForm';
+import { useAyudaPagina } from '../../hooks/useAyudaPagina';
 
 const ForgotPassword = () => {
+  useAyudaPagina({
+    titulo: 'Recuperar contraseña',
+    contenido: (
+      <>
+        <p>Ingresa el email con el que te registraste. Si esa cuenta existe, te llegará un correo con un enlace para elegir una nueva contraseña; el enlace expira en 1 hora.</p>
+        <p>Por seguridad, el mensaje en pantalla es el mismo exista o no una cuenta con ese email: así nadie puede usar este formulario para averiguar qué correos están registrados.</p>
+      </>
+    ),
+  });
   const { email, setEmail, enviado, error, loading, handleSubmit } = useForgotPasswordForm();
 
   if (enviado) {

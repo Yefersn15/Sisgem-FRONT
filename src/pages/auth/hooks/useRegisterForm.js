@@ -6,7 +6,7 @@ import { normalizeText } from '../../usuarios/hooks/textUtils';
 import { useToast } from '../../../context/ToastContext';
 import { passwordEsValida } from '../../../validations/password';
 import { emailEsValido } from '../../../validations/email';
-import { documentoEsValido, mensajeDocumentoInvalido } from '../../../validations/documento';
+import { documentoEsValido } from '../../../validations/documento';
 
 const FORM_INICIAL = {
   nombre: '',
@@ -29,7 +29,12 @@ export const useRegisterForm = () => {
   const toast = useToast();
   const [form, setForm] = useState(FORM_INICIAL);
   const [paso, setPaso] = useState(1);
-  const [error, setError] = useState('');
+  // Pasos donde el usuario ya intentó avanzar/enviar con datos inválidos:
+  // recién ahí cada campo del paso empieza a mostrar su propio mensaje de
+  // error debajo (ver InformacionPersonalForm/CredencialesForm), en vez de
+  // un único mensaje genérico arriba del formulario.
+  const [pasosConIntento, setPasosConIntento] = useState({});
+  const [error, setError] = useState(''); // solo errores del envío a la API, no de validación de campos
   const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
@@ -45,53 +50,36 @@ export const useRegisterForm = () => {
     setForm({ ...form, [name]: processedValue });
   };
 
-  // Cada paso se valida antes de avanzar, así el usuario nunca llega a
-  // "Registrarse" arrastrando un error de un paso anterior que ya no ve.
-  const validarPaso = (numeroPaso) => {
+  const pasoEsValido = (numeroPaso) => {
     if (numeroPaso === 1) {
-      if (!form.nombre.trim() || !form.apellido.trim()) {
-        return 'Completa nombre y apellido';
-      }
-      if (!documentoEsValido(form.documento, form.tipoDocumento)) {
-        return mensajeDocumentoInvalido(form.tipoDocumento);
-      }
-      return '';
+      return Boolean(form.nombre.trim() && form.apellido.trim() && documentoEsValido(form.documento, form.tipoDocumento));
     }
     if (numeroPaso === 3) {
-      if (!emailEsValido(form.email)) {
-        return 'Ingresa un correo electrónico válido';
-      }
-      if (form.password !== form.confirmPassword) {
-        return 'Las contraseñas no coinciden';
-      }
-      if (!passwordEsValida(form.password)) {
-        return 'La contraseña debe tener mínimo 8 caracteres, con mayúscula, minúscula, número y símbolo';
-      }
-      return '';
+      return Boolean(
+        emailEsValido(form.email) &&
+        form.password === form.confirmPassword &&
+        passwordEsValida(form.password)
+      );
     }
-    return '';
+    return true;
   };
 
   const siguientePaso = () => {
-    const mensaje = validarPaso(paso);
-    if (mensaje) {
-      setError(mensaje);
+    if (!pasoEsValido(paso)) {
+      setPasosConIntento((prev) => ({ ...prev, [paso]: true }));
       return;
     }
-    setError('');
     setPaso((p) => Math.min(p + 1, TOTAL_PASOS));
   };
 
   const pasoAnterior = () => {
-    setError('');
     setPaso((p) => Math.max(p - 1, 1));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const mensaje = validarPaso(3);
-    if (mensaje) {
-      setError(mensaje);
+    if (!pasoEsValido(3)) {
+      setPasosConIntento((prev) => ({ ...prev, 3: true }));
       return;
     }
 
@@ -126,5 +114,15 @@ export const useRegisterForm = () => {
     }
   };
 
-  return { form, paso, error, loading, handleChange, siguientePaso, pasoAnterior, handleSubmit };
+  return {
+    form,
+    paso,
+    error,
+    loading,
+    mostrarErrores: Boolean(pasosConIntento[paso]),
+    handleChange,
+    siguientePaso,
+    pasoAnterior,
+    handleSubmit,
+  };
 };

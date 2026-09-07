@@ -4,6 +4,7 @@ import { useRegisterForm, TOTAL_PASOS } from './hooks/useRegisterForm';
 import InformacionPersonalForm from '../usuarios/components/InformacionPersonalForm';
 import InformacionContactoForm from '../usuarios/components/InformacionContactoForm';
 import CredencialesForm from '../usuarios/components/CredencialesForm';
+import { useAyudaPagina } from '../../hooks/useAyudaPagina';
 
 const PASOS = [
   { numero: 1, label: 'Datos personales' },
@@ -14,12 +15,23 @@ const PASOS = [
 // Antes mostraba los 3 bloques del formulario a la vez en columnas: en
 // pantallas angostas se apilaban y generaba un scroll largo. Ahora es un
 // wizard de 3 pasos cortos (cada uno valida antes de avanzar, ver
-// useRegisterForm) reusando los mismos bloques de campos que Perfil/UsuarioEdit.
+// useRegisterForm) reusando los mismos bloques de campos que Perfil/UsuarioEdit,
+// cada uno en 2 columnas con su propio mensaje de error debajo del campo
+// (en vez de un único mensaje genérico arriba del formulario).
 const Register = () => {
-  const { form, paso, error, loading, handleChange, siguientePaso, pasoAnterior, handleSubmit } = useRegisterForm();
+  useAyudaPagina({
+    titulo: 'Crear cuenta',
+    contenido: (
+      <>
+        <p>El registro tiene 3 pasos cortos: datos personales, contacto y credenciales. Los campos marcados con * son obligatorios; el resto puedes completarlo después desde "Mi Perfil".</p>
+        <p>La contraseña debe tener mínimo 8 caracteres, con mayúscula, minúscula, número y símbolo. Toda cuenta nueva se crea con permisos de cliente; los permisos de administración los asigna un administrador desde el panel.</p>
+      </>
+    ),
+  });
+  const { form, paso, error, loading, mostrarErrores, handleChange, siguientePaso, pasoAnterior, handleSubmit } = useRegisterForm();
 
   return (
-    <div className="container mt-4 register-container" style={{ maxWidth: 480 }}>
+    <div className="container mt-4 register-container" style={{ maxWidth: 720 }}>
       <div className="card register-card">
         <div className="card-header">
           <h4 className="mb-0">Crear Cuenta</h4>
@@ -53,13 +65,14 @@ const Register = () => {
                 onChange={handleChange}
                 telefonoField="celular"
                 telefonoLabel="Celular"
+                mostrarErrores={mostrarErrores}
               />
             )}
             {paso === 2 && (
               <InformacionContactoForm form={form} onChange={handleChange} />
             )}
             {paso === 3 && (
-              <CredencialesForm form={form} onChange={handleChange} />
+              <CredencialesForm form={form} onChange={handleChange} mostrarErrores={mostrarErrores} />
             )}
 
             <div className="d-flex justify-content-between mt-4">

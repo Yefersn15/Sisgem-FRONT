@@ -1,4 +1,3 @@
-import { useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import Layout from './components/Layout';
 import AdminLayout from './components/AdminLayout';
@@ -28,20 +27,6 @@ const AuthRouter = () => {
 };
 
 function App() {
-  useEffect(() => {
-    // Eliminamos seedInitialData - la API maneja los datos inicialess
-    
-    const savedTheme = localStorage.getItem('theme');
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    const shouldBeDark = savedTheme === 'dark' || (!savedTheme && prefersDark);
-    
-    if (shouldBeDark) {
-      document.documentElement.classList.add('theme-dark');
-    } else {
-      document.documentElement.classList.remove('theme-dark');
-    }
-  }, []);
-
   return (
     <BrowserRouter>
       <ToastProvider>

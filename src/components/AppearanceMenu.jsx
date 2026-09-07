@@ -1,12 +1,18 @@
 // src/components/AppearanceMenu.jsx
 import React from 'react';
 
-// Agrupa tema (claro/oscuro) y orientación del menú (lateral/superior) en un
-// único dropdown. Se usa tanto en el header del admin como en el de la
-// tienda; en la tienda además se le pasa `vistaLlamativa`/`setVistaLlamativa`
-// para sumar la sección "Vista de inicio" (el admin no la recibe, así que
-// esa sección no se renderiza ahí).
-const AppearanceMenu = ({ isDark, onSetTheme, isTopbar, onOrientationChange, vistaLlamativa, setVistaLlamativa }) => (
+// Agrupa tema (claro/oscuro) y, solo si se recibe `onOrientationChange`
+// (panel admin), la orientación del menú (lateral/superior) — la tienda
+// pública ya no tiene menú lateral que alternar (ver StoreNav), así que ahí
+// esta sección no se renderiza. En la tienda además se le pasa
+// `vistaLlamativa`/`setVistaLlamativa` para sumar la sección "Vista de
+// inicio" (el admin no la recibe, así que esa sección no se renderiza ahí).
+const AppearanceMenu = ({
+  isDark, onSetTheme,
+  isTopbar, onOrientationChange,
+  isCompact, onToggleCompact,
+  vistaLlamativa, setVistaLlamativa,
+}) => (
   <div className="dropdown me-2">
     <button
       className="btn btn-outline-theme dropdown-toggle btn-sm"
@@ -28,18 +34,37 @@ const AppearanceMenu = ({ isDark, onSetTheme, isTopbar, onOrientationChange, vis
           <i className="fas fa-moon"></i><span>Oscuro</span>
         </button>
       </li>
-      <li><hr className="dropdown-divider" /></li>
-      <li><h6 className="dropdown-header">Vista del menú</h6></li>
-      <li>
-        <button className={`dropdown-item d-flex align-items-center gap-2 ${!isTopbar ? 'active' : ''}`} onClick={() => onOrientationChange('sidebar')}>
-          <i className="fas fa-table-columns"></i><span>Barra lateral</span>
-        </button>
-      </li>
-      <li>
-        <button className={`dropdown-item d-flex align-items-center gap-2 ${isTopbar ? 'active' : ''}`} onClick={() => onOrientationChange('topbar')}>
-          <i className="fas fa-bars"></i><span>Barra superior</span>
-        </button>
-      </li>
+      {onOrientationChange && (
+        <>
+          <li><hr className="dropdown-divider" /></li>
+          <li><h6 className="dropdown-header">Vista del menú</h6></li>
+          <li>
+            <button className={`dropdown-item d-flex align-items-center gap-2 ${!isTopbar ? 'active' : ''}`} onClick={() => onOrientationChange('sidebar')}>
+              <i className="fas fa-table-columns"></i><span>Barra lateral</span>
+            </button>
+          </li>
+          <li>
+            <button className={`dropdown-item d-flex align-items-center gap-2 ${isTopbar ? 'active' : ''}`} onClick={() => onOrientationChange('topbar')}>
+              <i className="fas fa-bars"></i><span>Barra superior</span>
+            </button>
+          </li>
+          {onToggleCompact && (
+            <li className="px-3 py-1">
+              <div className="form-check form-switch mb-0">
+                <input
+                  className="form-check-input"
+                  type="checkbox"
+                  role="switch"
+                  id="appearanceMenuCompacto"
+                  checked={isCompact}
+                  onChange={onToggleCompact}
+                />
+                <label className="form-check-label small" htmlFor="appearanceMenuCompacto">Solo iconos</label>
+              </div>
+            </li>
+          )}
+        </>
+      )}
       {setVistaLlamativa && (
         <>
           <li><hr className="dropdown-divider" /></li>

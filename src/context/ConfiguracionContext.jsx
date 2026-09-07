@@ -24,7 +24,7 @@ const ConfiguracionContext = createContext({ ...DEFECTO, loading: true, refetch:
 export const ConfiguracionProvider = ({ children }) => {
   const [config, setConfig] = useState(DEFECTO);
   const [loading, setLoading] = useState(true);
-  const { isDark } = useModoOscuro();
+  const { isDark, setThemeMode } = useModoOscuro();
 
   const refetch = useCallback(async () => {
     try {
@@ -45,6 +45,13 @@ export const ConfiguracionProvider = ({ children }) => {
     aplicarTemaCss(temaResuelto);
   }, [temaResuelto]);
 
+  // Única llamada a useModoOscuro() de toda la app: `isDark`/`setThemeMode` se
+  // reexponen aquí para que Header y AdminLayout compartan el mismo estado en
+  // vez de tener cada uno su propia copia desincronizada.
+  useEffect(() => {
+    document.documentElement.classList.toggle('theme-dark', isDark);
+  }, [isDark]);
+
   // El <title> estático de index.html es solo el valor por defecto antes de
   // que cargue la configuración; una vez cargada, la pestaña del navegador
   // refleja el nombre real de la tienda.
@@ -53,7 +60,7 @@ export const ConfiguracionProvider = ({ children }) => {
   }, [config.nombreTienda]);
 
   return (
-    <ConfiguracionContext.Provider value={{ ...config, loading, refetch, temaResuelto }}>
+    <ConfiguracionContext.Provider value={{ ...config, loading, refetch, temaResuelto, isDark, setThemeMode }}>
       {children}
     </ConfiguracionContext.Provider>
   );

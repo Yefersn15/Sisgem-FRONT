@@ -1,22 +1,40 @@
 // Header.jsx
 import React, { useState, useEffect, useRef } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { useConfiguracion } from '../context/ConfiguracionContext';
-import { useModoOscuro } from '../hooks/useModoOscuro';
+import { getStoreMenuSections } from './store/storeNavConfig';
 import AppearanceMenu from './AppearanceMenu';
 import BrandIcon from './BrandIcon';
 
-const Header = ({ isTopbar, onOrientationChange, navRef, vistaLlamativa, setVistaLlamativa }) => {
+const isActivePath = (pathname, item) =>
+  pathname === item.to || (item.to !== '/' && pathname.startsWith(item.to + '/'));
+const isSectionActive = (pathname, section) => section.items.some((item) => isActivePath(pathname, item));
+
+// Barra de navegación pública: un único navbar de Bootstrap
+// (navbar-expand-lg) que muestra los enlaces en línea desde 992px y los
+// colapsa detrás de un botón hamburguesa por debajo de ese ancho — el mismo
+// patrón que Biblioteca_ReactVite, sin menú lateral ni preferencia de
+// orientación que configurar.
+const Header = ({ vistaLlamativa, setVistaLlamativa }) => {
   const cart = useCart();
   const itemCount = cart?.itemCount || 0;
-  const { user, logout } = useAuth();
-  const { nombreTienda, logoUrl } = useConfiguracion();
+  const { user, logout, hasPermission, isAdmin } = useAuth();
+  const { nombreTienda, logoUrl, isDark, setThemeMode, temaResuelto } = useConfiguracion();
+  const esOscuro = temaResuelto.encabezadoTexto === '#ffffff';
   const navigate = useNavigate();
-  const { isDark, setThemeMode } = useModoOscuro();
+  const location = useLocation();
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const userMenuRef = useRef(null);
+
+  const visibleSections = getStoreMenuSections({ isAdmin, hasPermission })
+    .filter((section) => !section.condition || section.condition())
+    .map((section) => ({
+      ...section,
+      items: section.items.filter((item) => !item.module || hasPermission(item.module) || isAdmin),
+    }))
+    .filter((section) => section.items.length > 0);
 
   const handleLogout = () => {
     logout();
@@ -24,7 +42,6 @@ const Header = ({ isTopbar, onOrientationChange, navRef, vistaLlamativa, setVist
     navigate('/login');
   };
 
-  // Cerrar menú de usuario al hacer click fuera
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (userMenuRef.current && !userMenuRef.current.contains(event.target)) {
@@ -41,9 +58,9 @@ const Header = ({ isTopbar, onOrientationChange, navRef, vistaLlamativa, setVist
   };
 
   return (
-    <nav ref={navRef} className="navbar app-navbar fixed-top w-100">
+    <nav className={`navbar navbar-expand-lg app-navbar ${esOscuro ? 'navbar-dark' : 'navbar-light'} sticky-top`}>
       <div className="container">
-        <Link className="navbar-brand ms-2 d-flex align-items-center gap-2" to="/">
+        <Link className="navbar-brand d-flex align-items-center gap-2" to="/">
           {logoUrl ? (
             <img src={logoUrl} alt={nombreTienda} style={{ height: 28, width: 28, objectFit: 'cover', borderRadius: 6 }} />
           ) : (
@@ -52,33 +69,68 @@ const Header = ({ isTopbar, onOrientationChange, navRef, vistaLlamativa, setVist
           {nombreTienda}
         </Link>
 
-        <div className="ms-3 d-flex align-items-center" style={{ gap: 12, flex: 1 }}>
-          <Link to="/nosotros" className="btn btn-outline-theme btn-sm ms-2 d-none d-md-inline-block">
-            Nosotros
-          </Link>
-          <div className="ms-auto d-flex align-items-center">
-            <AppearanceMenu
-              isDark={isDark}
-              onSetTheme={setThemeMode}
-              isTopbar={isTopbar}
-              onOrientationChange={onOrientationChange}
-              vistaLlamativa={vistaLlamativa}
-              setVistaLlamativa={setVistaLlamativa}
-            />
+        <button
+          className="navbar-toggler"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#storeNavMenu"
+          aria-controls="storeNavMenu"
+          aria-label="Abrir menú"
+        >
+          <span className="navbar-toggler-icon"></span>
+        </button>
 
-            <Link to="/carrito" className="btn btn-outline-theme position-relative">
-              <i className="fas fa-shopping-cart"></i>
-              {itemCount > 0 && (
-                <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                  {itemCount}
-                </span>
-              )}
-            </Link>
+        <div className="collapse navbar-collapse" id="storeNavMenu">
+          <ul className="navbar-nav me-auto">
+            {visibleSections.map((section) => (
+              <li className="nav-item dropdown" key={section.key}>
+                <button
+                  className={`nav-link dropdown-toggle btn btn-link ${isSectionActive(location.pathname, section) ? 'active' : ''}`}
+                  data-bs-toggle="dropdown"
+                >
+                  <i className={`fas ${section.icon} me-1`}></i>{section.title}
+                </button>
+                <ul className="dropdown-menu">
+                  {section.items.map((item) => (
+                    <li key={item.to}>
+                      <Link to={item.to} className={`dropdown-item ${isActivePath(location.pathname, item) ? 'active' : ''}`}>
+                        <i className={`fas ${item.icon} me-2`}></i>{item.label}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </li>
+            ))}
+            <li className="nav-item">
+              <Link className="nav-link" to="/nosotros">Nosotros</Link>
+            </li>
+          </ul>
+
+          <ul className="navbar-nav align-items-lg-center">
+            <li className="nav-item">
+              <AppearanceMenu
+                isDark={isDark}
+                onSetTheme={setThemeMode}
+                vistaLlamativa={vistaLlamativa}
+                setVistaLlamativa={setVistaLlamativa}
+              />
+            </li>
+
+            <li className="nav-item">
+              <Link to="/carrito" className="nav-link position-relative">
+                <i className="fas fa-shopping-cart"></i>
+                {itemCount > 0 && (
+                  <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                    {itemCount}
+                  </span>
+                )}
+              </Link>
+            </li>
 
             {user ? (
-              <div className="dropdown" ref={userMenuRef}>
+              <li className="nav-item dropdown" ref={userMenuRef}>
                 <button
-                  className="btn btn-outline-theme btn-sm dropdown-toggle d-flex align-items-center ms-2"
+                  className="nav-link dropdown-toggle btn btn-link d-flex align-items-center"
                   type="button"
                   onClick={() => setUserMenuOpen(!userMenuOpen)}
                   aria-expanded={userMenuOpen}
@@ -96,7 +148,6 @@ const Header = ({ isTopbar, onOrientationChange, navRef, vistaLlamativa, setVist
                   {user.nombre}
                 </button>
                 <ul className={`dropdown-menu dropdown-menu-end ${userMenuOpen ? 'show' : ''}`} style={{ minWidth: 200 }}>
-                  {/* Foto de perfil en el menú */}
                   <li className="text-center py-2">
                     {user.fotoPerfil ? (
                       <img
@@ -151,18 +202,22 @@ const Header = ({ isTopbar, onOrientationChange, navRef, vistaLlamativa, setVist
                     </button>
                   </li>
                 </ul>
-              </div>
+              </li>
             ) : (
               <>
-                <Link to="/login" className="btn btn-outline-theme btn-sm ms-2">
-                  <i className="fas fa-sign-in-alt me-1"></i>Login
-                </Link>
-                <Link to="/register" className="btn btn-primary btn-sm ms-2">
-                  Registrarse
-                </Link>
+                <li className="nav-item">
+                  <Link to="/login" className="nav-link">
+                    <i className="fas fa-sign-in-alt me-1"></i>Login
+                  </Link>
+                </li>
+                <li className="nav-item ms-lg-2">
+                  <Link to="/register" className="btn btn-primary btn-sm">
+                    Registrarse
+                  </Link>
+                </li>
               </>
             )}
-          </div>
+          </ul>
         </div>
       </div>
     </nav>

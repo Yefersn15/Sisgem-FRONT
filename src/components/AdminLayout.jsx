@@ -1,5 +1,5 @@
-import React from 'react';
-import { Outlet, Link, useLocation, useNavigate, Routes, Route } from 'react-router-dom';
+import React, { useState } from 'react';
+import { Link, useNavigate, Routes, Route } from 'react-router-dom';
 import AdminDashboard from '../pages/dashboard/AdminDashboard';
 import VentasAdmin from '../pages/ventas/VentasAdmin';
 import DomiciliosAdmin from '../pages/domicilios/DomiciliosAdmin';
@@ -22,82 +22,11 @@ import ConfiguracionAdmin from '../pages/configuracion/ConfiguracionAdmin';
 import PrivateRoute from './PrivateRoute';
 import { useAuth } from '../context/AuthContext';
 import { useConfiguracion } from '../context/ConfiguracionContext';
-import { useModoOscuro } from '../hooks/useModoOscuro';
 import { useAdminLayoutMode } from './admin/useAdminLayoutMode';
-import { useMeasuredHeight } from '../hooks/useMeasuredHeight';
-import AdminSidebarNav from './admin/AdminSidebarNav';
-import AdminTopNav from './admin/AdminTopNav';
+import AdminNavGroups from './admin/AdminNavGroups';
+import AdminTopBar from './admin/AdminTopBar';
 import AppearanceMenu from './AppearanceMenu';
-
-const AdminHeader = ({ isTopbar, onOrientationChange, navRef }) => {
-  const location = useLocation();
-  const navigate = useNavigate();
-  const auth = useAuth();
-  const user = auth?.user;
-  const logout = auth?.logout;
-  const { nombreTienda, logoUrl } = useConfiguracion();
-  const { isDark, setThemeMode } = useModoOscuro();
-
-  const handleLogout = () => {
-    logout();
-    navigate('/');
-  };
-
-  const getPageTitle = () => {
-    if (location.pathname === '/admin') return 'Dashboard';
-    if (location.pathname === '/admin/ventas') return 'Gestión de Ventas';
-    if (location.pathname === '/admin/pedidos') return 'Gestión de Pedidos';
-    if (location.pathname === '/admin/domicilios') return 'Gestión de Domicilios';
-    if (location.pathname === '/admin/pagos') return 'Gestión de Pagos';
-    if (location.pathname === '/admin/usuarios') return 'Gestión de Usuarios';
-    if (location.pathname === '/admin/usuarios/nuevo') return 'Nuevo Usuario';
-    if (location.pathname.startsWith('/admin/usuarios/editar')) return 'Editar Usuario';
-    if (location.pathname === '/admin/roles') return 'Gestión de Roles';
-    if (location.pathname === '/admin/productos') return 'Inventario';
-    if (location.pathname === '/admin/marcas') return 'Inventario';
-    if (location.pathname === '/admin/categorias') return 'Inventario';
-    // analytics removed from menu
-    return 'Gestión';
-  };
-
-  return (
-    <nav ref={navRef} className="navbar navbar-expand-lg app-navbar fixed-top">
-      <div className="container-fluid">
-        <Link to="/admin" className="navbar-brand d-flex align-items-center">
-          {logoUrl ? (
-            <img src={logoUrl} alt={nombreTienda} className="me-2" style={{ height: 24, width: 24, objectFit: 'cover', borderRadius: 6 }} />
-          ) : (
-            <i className="fas fa-cube me-2"></i>
-          )}
-          <span className="fw-bold">{nombreTienda}</span>
-          <span className="ms-2 badge bg-primary">Admin</span>
-        </Link>
-
-        <div className="d-flex align-items-center">
-          <span className="me-3 d-none d-md-block">
-            <i className="fas fa-user-circle me-1"></i>
-            {user?.nombre || user?.email || 'Administrador'}
-          </span>
-          <AppearanceMenu isDark={isDark} onSetTheme={setThemeMode} isTopbar={isTopbar} onOrientationChange={onOrientationChange} />
-
-          <div className="dropdown">
-            <button className="btn btn-outline-theme dropdown-toggle btn-sm" data-bs-toggle="dropdown">
-              <i className="fas fa-cog"></i>
-            </button>
-            <ul className="dropdown-menu dropdown-menu-end">
-              <li><Link to="/admin/usuarios" className="dropdown-item">Usuarios</Link></li>
-              <li><Link to="/admin/roles" className="dropdown-item">Roles</Link></li>
-              <li><hr className="dropdown-divider" /></li>
-              <li><button className="dropdown-item text-danger" onClick={handleLogout}>
-                <i className="fas fa-sign-out-alt me-1"></i> Cerrar Sesión
-              </button></li>
-            </ul>
-          </div>
-        </div>
-      </div>
-    </nav>
-  );
-};
+import BrandIcon from './BrandIcon';
 
 const AdminFooter = () => {
   const { nombreTienda } = useConfiguracion();
@@ -116,74 +45,168 @@ const AdminFooter = () => {
   );
 };
 
-// Layout principal del admin
+// Layout principal del admin: misma arquitectura que Biblioteca_ReactVite
+// (components/AdminLayout.jsx) — una barra superior (AdminTopBar) con un
+// único botón de menú móvil que revela el mismo AdminNavGroups sin importar
+// la preferencia de escritorio (lateral/superior), en vez de dos componentes
+// de menú hechos a mano sin manejo de móvil.
 const AdminLayout = () => {
-  const location = useLocation();
+  const { user, logout } = useAuth();
+  const { nombreTienda, logoUrl, isDark, setThemeMode } = useConfiguracion();
   const { isTopbar, isCompact, setOrientation, toggleCompact } = useAdminLayoutMode();
-  const [headerRef, headerHeight] = useMeasuredHeight();
+  const [menuMovilAbierto, setMenuMovilAbierto] = useState(false);
+  const navigate = useNavigate();
+  const esLateral = !isTopbar;
 
-  const getPageTitle = () => {
-    if (location.pathname === '/admin') return 'Dashboard';
-    if (location.pathname === '/admin/ventas') return 'Gestión de Ventas';
-    if (location.pathname === '/admin/pedidos') return 'Gestión de Pedidos';
-    if (location.pathname === '/admin/domicilios') return 'Gestión de Domicilios';
-    if (location.pathname === '/admin/pagos') return 'Gestión de Pagos';
-    if (location.pathname === '/admin/usuarios') return 'Gestión de Usuarios';
-    if (location.pathname === '/admin/usuarios/nuevo') return 'Nuevo Usuario';
-    if (location.pathname.startsWith('/admin/usuarios/editar')) return 'Editar Usuario';
-    if (location.pathname === '/admin/roles') return 'Gestión de Roles';
-    if (location.pathname === '/admin/roles/nuevo') return 'Nuevo Rol';
-    if (location.pathname.startsWith('/admin/roles/editar')) return 'Editar Rol';
-    if (location.pathname === '/admin/analytics') return 'Estadísticas y Reportes';
-    return 'Administración';
+  const handleLogout = () => {
+    logout();
+    navigate('/');
   };
+
+  const cerrarMenuMovil = () => setMenuMovilAbierto(false);
+
+  const marca = (
+    <Link to="/admin" className="app-admin-topbar-link d-flex align-items-center text-decoration-none fw-bold">
+      {logoUrl ? (
+        <img src={logoUrl} alt={nombreTienda} height={28} style={{ objectFit: 'contain', borderRadius: 6 }} />
+      ) : (
+        <BrandIcon size={24} />
+      )}
+      {!isCompact && <span className="ms-2 text-truncate">{nombreTienda}</span>}
+      <span className="ms-2 badge bg-primary">Admin</span>
+    </Link>
+  );
+
+  const controlesLayout = (
+    <AppearanceMenu
+      isDark={isDark}
+      onSetTheme={setThemeMode}
+      isTopbar={isTopbar}
+      onOrientationChange={setOrientation}
+      isCompact={isCompact}
+      onToggleCompact={toggleCompact}
+    />
+  );
+
+  const menuUsuario = (
+    <div className="dropdown">
+      <button className="btn btn-outline-theme dropdown-toggle btn-sm d-flex align-items-center" data-bs-toggle="dropdown">
+        <i className="fas fa-user-circle me-1"></i>
+        <span className="d-none d-sm-inline">{user?.nombre || user?.email || 'Administrador'}</span>
+      </button>
+      <ul className="dropdown-menu dropdown-menu-end">
+        <li><Link className="dropdown-item" to="/"><i className="fas fa-globe me-2"></i>Ver sitio público</Link></li>
+        <li><hr className="dropdown-divider" /></li>
+        <li>
+          <button className="dropdown-item text-danger" onClick={handleLogout}>
+            <i className="fas fa-sign-out-alt me-2"></i>Cerrar Sesión
+          </button>
+        </li>
+      </ul>
+    </div>
+  );
+
+  const botonMenuMovil = (
+    <button
+      type="button"
+      className="btn btn-sm app-admin-topbar-link border-0 d-md-none"
+      onClick={() => setMenuMovilAbierto((abierto) => !abierto)}
+      aria-label={menuMovilAbierto ? 'Cerrar menú' : 'Abrir menú'}
+    >
+      <i className={`fas ${menuMovilAbierto ? 'fa-xmark' : 'fa-bars'}`}></i>
+    </button>
+  );
+
+  // El menú colapsable de móvil es el mismo sin importar la preferencia de
+  // escritorio (lateral/superior): en pantallas angostas ninguna de las dos
+  // formas de escritorio cabe bien, así que ambas caen a este único patrón.
+  const menuMovil = (
+    <div className={`d-md-none border-top ${menuMovilAbierto ? '' : 'd-none'}`}>
+      <AdminNavGroups variant="mobile" onNavigate={cerrarMenuMovil} />
+    </div>
+  );
 
   const routes = (
     <Routes>
-            <Route index element={<PrivateRoute module="Ventas"><AdminDashboard /></PrivateRoute>} />
+      <Route index element={<PrivateRoute module="Ventas"><AdminDashboard /></PrivateRoute>} />
 
-            <Route path="ventas" element={<PrivateRoute module="Ventas"><VentasAdmin /></PrivateRoute>} />
-            <Route path="productos" element={<PrivateRoute module="Inventario"><ProductosAdmin /></PrivateRoute>} />
-            <Route path="marcas" element={<PrivateRoute module="Inventario"><MarcasAdmin /></PrivateRoute>} />
-            <Route path="categorias" element={<PrivateRoute module="Inventario"><CategoriasAdmin /></PrivateRoute>} />
-            <Route path="banners" element={<PrivateRoute module="Banners"><AdminBanners /></PrivateRoute>} />
-            <Route path="banners/nuevo" element={<PrivateRoute module="Banners"><BannerCreate /></PrivateRoute>} />
-            <Route path="banners/editar/:id" element={<PrivateRoute module="Banners"><BannerEdit /></PrivateRoute>} />
-            <Route path="domicilios" element={<PrivateRoute module="Ventas"><DomiciliosAdmin /></PrivateRoute>} />
-            <Route path="pagos" element={<PrivateRoute module="Ventas"><PagosAdmin /></PrivateRoute>} />
-            <Route path="pagos/nuevo" element={<PrivateRoute module="Ventas"><PagoCreate /></PrivateRoute>} />
-            <Route path="pagos/:id" element={<PrivateRoute module="Ventas"><PagoDetail /></PrivateRoute>} />
-            <Route path="pedidos" element={<PrivateRoute module="Ventas"><PedidosAdmin /></PrivateRoute>} />
+      <Route path="ventas" element={<PrivateRoute module="Ventas"><VentasAdmin /></PrivateRoute>} />
+      <Route path="productos" element={<PrivateRoute module="Inventario"><ProductosAdmin /></PrivateRoute>} />
+      <Route path="marcas" element={<PrivateRoute module="Inventario"><MarcasAdmin /></PrivateRoute>} />
+      <Route path="categorias" element={<PrivateRoute module="Inventario"><CategoriasAdmin /></PrivateRoute>} />
+      <Route path="banners" element={<PrivateRoute module="Banners"><AdminBanners /></PrivateRoute>} />
+      <Route path="banners/nuevo" element={<PrivateRoute module="Banners"><BannerCreate /></PrivateRoute>} />
+      <Route path="banners/editar/:id" element={<PrivateRoute module="Banners"><BannerEdit /></PrivateRoute>} />
+      <Route path="domicilios" element={<PrivateRoute module="Ventas"><DomiciliosAdmin /></PrivateRoute>} />
+      <Route path="pagos" element={<PrivateRoute module="Ventas"><PagosAdmin /></PrivateRoute>} />
+      <Route path="pagos/nuevo" element={<PrivateRoute module="Ventas"><PagoCreate /></PrivateRoute>} />
+      <Route path="pagos/:id" element={<PrivateRoute module="Ventas"><PagoDetail /></PrivateRoute>} />
+      <Route path="pedidos" element={<PrivateRoute module="Ventas"><PedidosAdmin /></PrivateRoute>} />
 
-            <Route path="usuarios" element={<PrivateRoute module="Usuarios"><UsuariosAdmin /></PrivateRoute>} />
-            <Route path="usuarios/nuevo" element={<PrivateRoute module="Usuarios"><UsuarioEdit /></PrivateRoute>} />
-            <Route path="usuarios/editar/:id" element={<PrivateRoute module="Usuarios"><UsuarioEdit /></PrivateRoute>} />
-            <Route path="roles" element={<PrivateRoute module="Configuración"><RolesAdmin /></PrivateRoute>} />
-            <Route path="roles/nuevo" element={<PrivateRoute module="Configuración"><RoleCreate /></PrivateRoute>} />
-            <Route path="roles/editar/:id" element={<PrivateRoute module="Configuración"><RoleEdit /></PrivateRoute>} />
-            <Route path="configuracion" element={<PrivateRoute module="Configuración"><ConfiguracionAdmin /></PrivateRoute>} />
-
-      {/* analytics route removed */}
+      <Route path="usuarios" element={<PrivateRoute module="Usuarios"><UsuariosAdmin /></PrivateRoute>} />
+      <Route path="usuarios/nuevo" element={<PrivateRoute module="Usuarios"><UsuarioEdit /></PrivateRoute>} />
+      <Route path="usuarios/editar/:id" element={<PrivateRoute module="Usuarios"><UsuarioEdit /></PrivateRoute>} />
+      <Route path="roles" element={<PrivateRoute module="Configuración"><RolesAdmin /></PrivateRoute>} />
+      <Route path="roles/nuevo" element={<PrivateRoute module="Configuración"><RoleCreate /></PrivateRoute>} />
+      <Route path="roles/editar/:id" element={<PrivateRoute module="Configuración"><RoleEdit /></PrivateRoute>} />
+      <Route path="configuracion" element={<PrivateRoute module="Configuración"><ConfiguracionAdmin /></PrivateRoute>} />
     </Routes>
   );
 
-  return (
-    <div>
-      <AdminHeader navRef={headerRef} isTopbar={isTopbar} onOrientationChange={setOrientation} />
-      <div style={{ paddingTop: headerHeight }}>
-        {isTopbar ? (
-          <>
-            <AdminTopNav compact={isCompact} onToggleCompact={toggleCompact} />
-            <div className="admin-main-content p-4">{routes}</div>
-          </>
-        ) : (
-          <div className="d-flex">
-            <AdminSidebarNav compact={isCompact} onToggleCompact={toggleCompact} />
-            <div className="flex-grow-1 p-4 admin-main-content">{routes}</div>
-          </div>
-        )}
+  if (!esLateral) {
+    return (
+      <div>
+        <AdminTopBar
+          left={(
+            <>
+              {botonMenuMovil}
+              {marca}
+              <div className="d-none d-md-block">
+                <AdminNavGroups variant="topbar" compact={isCompact} />
+              </div>
+            </>
+          )}
+          right={(
+            <>
+              {controlesLayout}
+              {menuUsuario}
+            </>
+          )}
+          menuMovil={menuMovil}
+        />
+        <div className="admin-main-content p-3 p-md-4">{routes}</div>
+        <AdminFooter />
       </div>
-      <AdminFooter />
+    );
+  }
+
+  return (
+    <div className="d-md-flex" style={{ minHeight: '100vh' }}>
+      <aside className="app-admin-sidebar border-end p-3 d-none d-md-block" style={{ width: isCompact ? 70 : 230, flexShrink: 0, transition: 'width .15s' }}>
+        <div className="mb-4">{marca}</div>
+        <AdminNavGroups variant="lateral" compact={isCompact} />
+      </aside>
+
+      <div className="flex-grow-1 d-flex flex-column" style={{ minWidth: 0 }}>
+        <AdminTopBar
+          left={(
+            <>
+              {botonMenuMovil}
+              <span className="app-admin-topbar-link d-none d-md-inline">Panel de administración</span>
+              <div className="d-md-none">{marca}</div>
+            </>
+          )}
+          right={(
+            <>
+              {controlesLayout}
+              {menuUsuario}
+            </>
+          )}
+          menuMovil={menuMovil}
+        />
+        <div className="admin-main-content p-3 p-md-4 flex-grow-1">{routes}</div>
+        <AdminFooter />
+      </div>
     </div>
   );
 };

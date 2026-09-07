@@ -6,9 +6,11 @@ export const getStoreMenuSections = ({ isAdmin, hasPermission }) => [
     key: 'tienda',
     title: 'Tienda',
     icon: 'fa-store',
+    // El carrito no va aquí: el header público ya tiene su propio ícono con
+    // contador de artículos, así que listarlo también en este menú sería
+    // redundante.
     items: [
       { to: '/productos', icon: 'fa-box', label: 'Productos' },
-      { to: '/carrito', icon: 'fa-shopping-cart', label: 'Carrito' },
     ],
   },
   {

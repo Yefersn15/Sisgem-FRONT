@@ -1,7 +1,17 @@
 import { Link } from 'react-router-dom';
 import { useLoginForm } from './hooks/useLoginForm';
+import { useAyudaPagina } from '../../hooks/useAyudaPagina';
 
 const Login = () => {
+  useAyudaPagina({
+    titulo: 'Iniciar sesión',
+    contenido: (
+      <>
+        <p>Ingresa con el email y la contraseña con los que te registraste. Si aún no tienes cuenta, usa el enlace "¿No tienes cuenta? Regístrate" debajo del formulario.</p>
+        <p>¿Olvidaste tu contraseña? Usa "¿Olvidaste tu contraseña?": te enviaremos un enlace de un solo uso por correo, válido durante 1 hora, para elegir una nueva.</p>
+      </>
+    ),
+  });
   const { email, setEmail, password, setPassword, error, loading, handleSubmit } = useLoginForm();
 
   return (
