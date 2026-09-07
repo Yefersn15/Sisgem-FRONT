@@ -2,8 +2,19 @@ import { useState } from 'react';
 import { useProductosCatalogo } from './hooks/useProductosCatalogo';
 import ProductoCard from './components/ProductoCard';
 import ProductoDetalleModal from './components/ProductoDetalleModal';
+import { usePaginacion } from '../../hooks/usePaginacion';
+import Pagination from '../../components/Pagination';
+import { useAyudaPagina } from '../../hooks/useAyudaPagina';
 
+// Paginación agregada siguiendo el patrón de CatalogoLibros.jsx de
+// Biblioteca_ReactVite (el catálogo de productos es al de libros lo que
+// ProductoCard es a LibroCard): antes se mostraban todos los productos
+// filtrados de una sola vez, sin importar cuántos fueran.
 const ProductosList = () => {
+  useAyudaPagina({
+    titulo: 'Catálogo de productos',
+    contenido: <p>Aquí aparecen todos los productos activos de la tienda. Puedes buscar por nombre o descripción, filtrar por marca o categoría, y ordenar los resultados.</p>,
+  });
   const {
     productos,
     searchQuery,
@@ -18,6 +29,7 @@ const ProductosList = () => {
     filteredCategorias,
     clearFilters,
   } = useProductosCatalogo();
+  const { pagina, setPagina, totalPaginas, itemsPagina } = usePaginacion(productos, 12, [searchQuery, sortBy, filterMarca, filterCategoria]);
   const [selectedProducto, setSelectedProducto] = useState(null);
 
   return (
@@ -89,17 +101,20 @@ const ProductosList = () => {
           <p>Comienza agregando el primer producto.</p>
         </div>
       ) : (
-        <div className="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
-          {productos.map((prod) => (
-            <ProductoCard
-              key={prod.id}
-              producto={prod}
-              onClick={() => setSelectedProducto(prod)}
-              metaLabel={prod.categoriaNombre}
-              metaIcon="fa-tag"
-            />
-          ))}
-        </div>
+        <>
+          <div className="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
+            {itemsPagina.map((prod) => (
+              <ProductoCard
+                key={prod.id}
+                producto={prod}
+                onClick={() => setSelectedProducto(prod)}
+                metaLabel={prod.categoriaNombre}
+                metaIcon="fa-tag"
+              />
+            ))}
+          </div>
+          <Pagination currentPage={pagina} totalPages={totalPaginas} onPageChange={setPagina} />
+        </>
       )}
 
       {selectedProducto && (

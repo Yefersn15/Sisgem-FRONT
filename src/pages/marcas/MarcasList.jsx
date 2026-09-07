@@ -1,17 +1,26 @@
 // src/pages/marcas/MarcasList.jsx
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
 import { getMarcas } from './services/marcasService';
+import MarcaCard from './components/MarcaCard';
+import { useBusquedaOrden, ORDEN_OPCIONES } from '../../hooks/useBusquedaOrden';
+import { usePaginacion } from '../../hooks/usePaginacion';
+import Pagination from '../../components/Pagination';
 import { useAyudaPagina } from '../../hooks/useAyudaPagina';
+
+const getTexto = (m) => m.nombre;
+const getPopularidad = (m) => m.cantidadProductos || 0;
 
 // Listado público de marcas: antes /marcas solo redirigía a /productos y no
 // había ninguna página para explorar qué marcas existen (Home solo muestra
-// un carrusel, sin un "ver todas"). Cada marca enlaza a su vitrina filtrada
-// (ver ProductosPorMarca, ruta /productos/por-marca/:id).
+// un carrusel, sin un "ver todas"). Modelada sobre AutoresPublicos.jsx de
+// Biblioteca_ReactVite (la marca es al producto lo que el autor es al
+// libro): búsqueda + orden + paginación sobre las marcas activas, cada una
+// enlazando a su vitrina filtrada (ver ProductosPorMarca, ruta
+// /productos/por-marca/:id).
 const MarcasList = () => {
   useAyudaPagina({
     titulo: 'Marcas',
-    contenido: <p>Elige una marca para ver únicamente sus productos.</p>,
+    contenido: <p>Lista de marcas activas. Busca por nombre u ordénalas por popularidad (cantidad de productos); haz clic en una para ver únicamente sus productos.</p>,
   });
   const [marcas, setMarcas] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -22,42 +31,45 @@ const MarcasList = () => {
       .finally(() => setLoading(false));
   }, []);
 
-  if (loading) {
-    return (
-      <div className="container my-4 text-center">
-        <div className="spinner-border" role="status"><span className="visually-hidden">Cargando...</span></div>
-      </div>
-    );
-  }
+  const { busqueda, setBusqueda, orden, setOrden, resultado } = useBusquedaOrden(marcas, getTexto, getPopularidad);
+  const { pagina, setPagina, totalPaginas, itemsPagina } = usePaginacion(resultado, 8, [busqueda, orden]);
 
   return (
-    <div className="container my-4">
-      <h1 className="mb-4">Marcas</h1>
-      {marcas.length === 0 ? (
-        <div className="alert alert-info">No hay marcas disponibles.</div>
-      ) : (
-        <div className="row row-cols-2 row-cols-sm-3 row-cols-md-4 row-cols-lg-6 g-3">
-          {marcas.map((m) => (
-            <div className="col" key={m.id}>
-              <Link
-                to={`/productos/por-marca/${m.id}`}
-                className="card h-100 text-decoration-none text-center p-3 d-flex flex-column align-items-center justify-content-center"
-              >
-                {(m.logoUrl || m.logo) ? (
-                  <img
-                    src={m.logoUrl || m.logo}
-                    alt={m.nombre}
-                    className="mb-2"
-                    style={{ maxHeight: 60, maxWidth: '100%', objectFit: 'contain' }}
-                  />
-                ) : (
-                  <i className="fas fa-industry fa-2x text-secondary mb-2"></i>
-                )}
-                <small className="fw-semibold">{m.nombre}</small>
-              </Link>
-            </div>
-          ))}
+    <div className="container py-4">
+      <h2 className="mb-4"><i className="fas fa-tag me-2 text-tema-acento"></i>Marcas</h2>
+
+      <div className="row g-2 mb-4">
+        <div className="col-md-8">
+          <input
+            type="text"
+            className="form-control"
+            placeholder="Buscar por nombre..."
+            value={busqueda}
+            onChange={(e) => setBusqueda(e.target.value)}
+          />
         </div>
+        <div className="col-md-4">
+          <select className="form-select" value={orden} onChange={(e) => setOrden(e.target.value)}>
+            {ORDEN_OPCIONES.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+          </select>
+        </div>
+      </div>
+
+      {loading ? (
+        <div className="text-center py-5"><div className="spinner-border text-primary" role="status"></div></div>
+      ) : resultado.length === 0 ? (
+        <div className="alert alert-info">No hay marcas que coincidan con la búsqueda.</div>
+      ) : (
+        <>
+          <div className="row g-4">
+            {itemsPagina.map((m) => (
+              <div className="col-6 col-md-4 col-lg-3" key={m.id}>
+                <MarcaCard marca={m} />
+              </div>
+            ))}
+          </div>
+          <Pagination currentPage={pagina} totalPages={totalPaginas} onPageChange={setPagina} />
+        </>
       )}
     </div>
   );
