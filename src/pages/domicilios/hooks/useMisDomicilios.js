@@ -16,12 +16,15 @@ const BADGE_CLASSES = {
 
 export const getBadgeClass = (estado) => BADGE_CLASSES[String(estado || '').toLowerCase()] || 'bg-secondary';
 
+const ITEMS_PER_PAGE = 5;
+
 export const useMisDomicilios = () => {
   const { user } = useAuth();
   const [domicilios, setDomicilios] = useState([]);
   const [ventas, setVentas] = useState([]);
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState('Todos');
+  const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
     const cargarDatos = async () => {
@@ -57,10 +60,30 @@ export const useMisDomicilios = () => {
   const getVentaInfo = (domicilio) =>
     ventas.find(v => String(v.id) === String(domicilio.ventaId) || String(v.id) === String(domicilio.id));
 
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search, filter]);
+
   const clearFilters = () => {
     setSearch('');
     setFilter('Todos');
   };
 
-  return { user, search, setSearch, filter, setFilter, clearFilters, filtered, getVentaInfo };
+  const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE);
+  const paginatedItems = filtered.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
+
+  return {
+    user,
+    search,
+    setSearch,
+    filter,
+    setFilter,
+    clearFilters,
+    filtered,
+    paginatedItems,
+    currentPage,
+    setCurrentPage,
+    totalPages,
+    getVentaInfo,
+  };
 };

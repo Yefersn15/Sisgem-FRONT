@@ -19,12 +19,15 @@ export const getEstadoBadge = (estadoPago, esVenta, esAbono) => {
   return 'bg-warning text-dark';
 };
 
+const ITEMS_PER_PAGE = 5;
+
 export const useMisPagos = () => {
   const { user } = useAuth();
   const [pagos, setPagos] = useState([]);
   const [registros, setRegistros] = useState([]);
   const [search, setSearch] = useState('');
   const [filterEstadoPago, setFilterEstadoPago] = useState('Todos');
+  const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
     if (user) {
@@ -104,10 +107,29 @@ export const useMisPagos = () => {
     return lista.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
   }, [ventasConPagos, filterEstadoPago, search]);
 
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [filterEstadoPago, search]);
+
   const clearFilters = () => {
     setSearch('');
     setFilterEstadoPago('Todos');
   };
 
-  return { user, search, setSearch, filterEstadoPago, setFilterEstadoPago, clearFilters, filtered };
+  const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE);
+  const paginatedItems = filtered.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
+
+  return {
+    user,
+    search,
+    setSearch,
+    filterEstadoPago,
+    setFilterEstadoPago,
+    clearFilters,
+    filtered,
+    paginatedItems,
+    currentPage,
+    setCurrentPage,
+    totalPages,
+  };
 };

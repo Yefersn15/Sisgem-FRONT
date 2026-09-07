@@ -2,16 +2,29 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { formatPrice } from '../../services/api/utils';
 import { useMisPedidos, getBadgeClass } from './hooks/useMisPedidos';
+import FiltrosBar from '../../components/FiltrosBar';
+import Pagination from '../../components/Pagination';
+import { useAyudaPagina } from '../../hooks/useAyudaPagina';
 
 const MisPedidos = () => {
+  useAyudaPagina({
+    titulo: 'Mis Pedidos',
+    contenido: <p>Aquí aparecen todos tus pedidos y ventas de mostrador. Usa el buscador o los filtros de estado/método de pago para encontrar uno, y el ícono de ojo para ver su detalle completo.</p>,
+  });
   const {
     user,
     search,
     setSearch,
+    estadoFilter,
+    setEstadoFilter,
     metodoFilter,
     setMetodoFilter,
+    estados,
     metodos,
-    filtered,
+    paginatedItems,
+    currentPage,
+    setCurrentPage,
+    totalPages,
     clearFilters,
     getEstadoEfectivo,
   } = useMisPedidos();
@@ -30,49 +43,56 @@ const MisPedidos = () => {
         <div className="card-body">
           <h2 className="card-title">Mis Pedidos</h2>
 
-          <div className="row mb-3">
-            <div className="col-md-5 mb-2">
+          <FiltrosBar onClear={clearFilters}>
+            <div className="col-12 col-md-4">
               <input
                 className="form-control"
-                placeholder="Buscar por ID, dirección, teléfono, estado o método"
+                placeholder="Buscar por ID, dirección, teléfono, estado o método..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
               />
             </div>
-            <div className="col-md-3 mb-2">
+            <div className="col-6 col-md">
+              <select className="form-select" value={estadoFilter} onChange={(e) => setEstadoFilter(e.target.value)}>
+                <option value="">Todos los estados</option>
+                {estados.map((e) => (
+                  <option key={e} value={e}>{e}</option>
+                ))}
+              </select>
+            </div>
+            <div className="col-6 col-md">
               <select className="form-select" value={metodoFilter} onChange={(e) => setMetodoFilter(e.target.value)}>
-                <option value="">Filtrar por método</option>
+                <option value="">Todos los métodos</option>
                 {metodos.map((m) => (
                   <option key={m} value={m}>{m}</option>
                 ))}
               </select>
             </div>
-            <div className="col-md-1 mb-2 text-end">
-              <button className="btn btn-secondary" onClick={clearFilters}>
-                Limpiar
-              </button>
-            </div>
-          </div>
+          </FiltrosBar>
 
-          {filtered.length === 0 ? (
-            <div className="alert alert-info">No se encontraron pedidos con los filtros aplicados.</div>
-          ) : (
-            <div className="table-responsive">
-              <table className="table table-hover">
-                <thead>
+          <div className="table-responsive">
+            <table className="table table-hover">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Fecha</th>
+                  <th>Total</th>
+                  <th>Tipo</th>
+                  <th>Estado</th>
+                  <th>Método de Pago</th>
+                  <th>Entrega</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                {paginatedItems.length === 0 ? (
                   <tr>
-                    <th>#</th>
-                    <th>Fecha</th>
-                    <th>Total</th>
-                    <th>Tipo</th>
-                    <th>Estado</th>
-                    <th>Método de Pago</th>
-                    <th>Entrega</th>
-                    <th>Acciones</th>
+                    <td colSpan="8" className="text-center text-muted py-4">
+                      No se encontraron pedidos con los filtros aplicados
+                    </td>
                   </tr>
-                </thead>
-                <tbody>
-                  {filtered.map((pedido) => {
+                ) : (
+                  paginatedItems.map((pedido) => {
                     const estadoEfectivo = getEstadoEfectivo(pedido);
                     const esVenta = pedido.es_venta;
                     const direccionEntrega = typeof pedido.direccion === 'object' ? pedido.direccion?.direccion : '';
@@ -102,17 +122,19 @@ const MisPedidos = () => {
                           )}
                         </td>
                         <td>
-                          <Link to={`/pedidos/${pedido._id || pedido.id}`} className="btn btn-sm btn-outline-primary" title="Ver detalle">
+                          <Link to={`/pedidos/${pedido._id || pedido.id}`} className="btn btn-sm btn-outline-info" title="Ver detalle">
                             <i className="fas fa-eye"></i>
                           </Link>
                         </td>
                       </tr>
                     );
-                  })}
-                </tbody>
-              </table>
-            </div>
-          )}
+                  })
+                )}
+              </tbody>
+            </table>
+          </div>
+
+          <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
         </div>
       </div>
     </div>

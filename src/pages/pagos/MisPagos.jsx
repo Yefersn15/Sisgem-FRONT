@@ -3,9 +3,27 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { formatPrice } from '../../services/api/utils';
 import { useMisPagos, getMetodoBadge, getEstadoBadge } from './hooks/useMisPagos';
+import FiltrosBar from '../../components/FiltrosBar';
+import Pagination from '../../components/Pagination';
+import { useAyudaPagina } from '../../hooks/useAyudaPagina';
 
 const MisPagos = () => {
-  const { user, search, setSearch, filterEstadoPago, setFilterEstadoPago, clearFilters, filtered } = useMisPagos();
+  useAyudaPagina({
+    titulo: 'Mis Pagos y Abonos',
+    contenido: <p>Aquí aparecen tus ventas pagadas por abono, con el saldo pendiente de cada una. Una venta pagada por completo deja de mostrar saldo pendiente.</p>,
+  });
+  const {
+    user,
+    search,
+    setSearch,
+    filterEstadoPago,
+    setFilterEstadoPago,
+    clearFilters,
+    paginatedItems,
+    currentPage,
+    setCurrentPage,
+    totalPages,
+  } = useMisPagos();
 
   if (!user) {
     return (
@@ -21,48 +39,47 @@ const MisPagos = () => {
         <div className="card-body">
           <h2 className="card-title">Mis Pedidos y Pagos</h2>
 
-          <div className="row mb-3 align-items-center">
-            <div className="col-md-5 mb-2">
+          <FiltrosBar onClear={clearFilters}>
+            <div className="col-12 col-md-4">
               <input
                 className="form-control"
-                placeholder="Buscar por ID o método de pago"
+                placeholder="Buscar por ID o método de pago..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
               />
             </div>
-            <div className="col-md-3 mb-2">
+            <div className="col-6 col-md">
               <select className="form-select" value={filterEstadoPago} onChange={(e) => setFilterEstadoPago(e.target.value)}>
                 <option value="Todos">Todos los estados</option>
                 <option value="Pendiente">Pendiente</option>
                 <option value="Pagado">Pagado</option>
               </select>
             </div>
-            <div className="col-md-4 mb-2 text-end">
-              <button className="btn btn-secondary" onClick={clearFilters}>
-                Limpiar
-              </button>
-            </div>
-          </div>
+          </FiltrosBar>
 
-          {filtered.length === 0 ? (
-            <div className="alert alert-info">No tienes pedidos registrados.</div>
-          ) : (
-            <div className="table-responsive">
-              <table className="table table-hover">
-                <thead>
+          <div className="table-responsive">
+            <table className="table table-hover">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Fecha</th>
+                  <th>Total</th>
+                  <th>Saldo Pendiente</th>
+                  <th>Método de Pago</th>
+                  <th>Estado</th>
+                  <th>Tipo Entrega</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                {paginatedItems.length === 0 ? (
                   <tr>
-                    <th>ID</th>
-                    <th>Fecha</th>
-                    <th>Total</th>
-                    <th>Saldo Pendiente</th>
-                    <th>Método de Pago</th>
-                    <th>Estado</th>
-                    <th>Tipo Entrega</th>
-                    <th>Acciones</th>
+                    <td colSpan="8" className="text-center text-muted py-4">
+                      No tienes pedidos registrados
+                    </td>
                   </tr>
-                </thead>
-                <tbody>
-                  {filtered.map(venta => (
+                ) : (
+                  paginatedItems.map(venta => (
                     <tr key={venta.id}>
                       <td>#{venta.id}</td>
                       <td>{venta.fecha ? new Date(venta.fecha).toLocaleDateString() : 'N/A'}</td>
@@ -93,11 +110,13 @@ const MisPagos = () => {
                         </Link>
                       </td>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+
+          <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
         </div>
       </div>
     </div>

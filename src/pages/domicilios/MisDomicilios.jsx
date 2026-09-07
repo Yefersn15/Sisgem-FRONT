@@ -3,9 +3,28 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { formatPrice } from '../../services/api/utils';
 import { useMisDomicilios, getBadgeClass } from './hooks/useMisDomicilios';
+import FiltrosBar from '../../components/FiltrosBar';
+import Pagination from '../../components/Pagination';
+import { useAyudaPagina } from '../../hooks/useAyudaPagina';
 
 const MisDomicilios = () => {
-  const { user, search, setSearch, filter, setFilter, clearFilters, filtered, getVentaInfo } = useMisDomicilios();
+  useAyudaPagina({
+    titulo: 'Mis Domicilios',
+    contenido: <p>Aquí aparecen los envíos de tus pedidos a domicilio: dirección, estado y repartidor asignado. Usa el buscador o el filtro de estado para encontrar uno.</p>,
+  });
+  const {
+    user,
+    search,
+    setSearch,
+    filter,
+    setFilter,
+    clearFilters,
+    paginatedItems,
+    currentPage,
+    setCurrentPage,
+    totalPages,
+    getVentaInfo,
+  } = useMisDomicilios();
 
   if (!user) {
     return (
@@ -21,16 +40,16 @@ const MisDomicilios = () => {
         <div className="card-body">
           <h2 className="card-title">Mis Domicilios</h2>
 
-          <div className="row mb-3">
-            <div className="col-md-5 mb-2">
+          <FiltrosBar onClear={clearFilters}>
+            <div className="col-12 col-md-4">
               <input
                 className="form-control"
-                placeholder="Buscar por ID, dirección o estado"
+                placeholder="Buscar por ID, dirección o estado..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
               />
             </div>
-            <div className="col-md-3 mb-2">
+            <div className="col-6 col-md">
               <select
                 className="form-select"
                 value={filter}
@@ -45,16 +64,13 @@ const MisDomicilios = () => {
                 <option value="cancelado">Cancelado</option>
               </select>
             </div>
-            <div className="col-md-1 mb-2 text-end">
-              <button className="btn btn-secondary" onClick={clearFilters}>Limpiar</button>
-            </div>
-          </div>
+          </FiltrosBar>
 
-          {filtered.length === 0 ? (
+          {paginatedItems.length === 0 ? (
             <div className="alert alert-info">No se encontraron domicilios.</div>
           ) : (
             <div className="row">
-              {filtered.map((domicilio) => {
+              {paginatedItems.map((domicilio) => {
                 const venta = getVentaInfo(domicilio);
                 return (
                   <div className="col-md-6 col-lg-4 mb-3" key={domicilio.id || domicilio.ventaId}>
@@ -104,6 +120,8 @@ const MisDomicilios = () => {
               })}
             </div>
           )}
+
+          <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
         </div>
       </div>
     </div>
