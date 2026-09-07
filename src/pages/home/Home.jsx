@@ -1,7 +1,6 @@
 import React, { useContext, useState } from 'react';
 import { Link } from 'react-router-dom';
 import CartContext from '../../context/CartContext';
-import { useAuth } from '../../context/AuthContext';
 import { useHomeData } from './hooks/useHomeData';
 import { useInfiniteCarousel } from './hooks/useInfiniteCarousel';
 import BannerCarousel from './components/BannerCarousel';
@@ -26,8 +25,6 @@ const Home = ({ vistaLlamativa }) => {
   const [modalProducto, setModalProducto] = useState(null);
   const toast = useToast();
   const { addToCart } = useContext(CartContext);
-  const { hasPermission } = useAuth();
-  const canManageBanners = hasPermission('Banners');
 
   const { trackRef, translatePx } = useInfiniteCarousel(marcas);
   const { trackRef: trackRefProductos, translatePx: translatePxProductos } = useInfiniteCarousel(destacados);
@@ -88,10 +85,7 @@ const Home = ({ vistaLlamativa }) => {
       )}
 
       <div className="home-banner-full-bleed">
-        <BannerCarousel
-          banners={banners}
-          canManageBanners={canManageBanners}
-        />
+        <BannerCarousel banners={banners} />
       </div>
 
       <div className={`container py-4 ${vistaLlamativa ? 'home-borde-margen' : ''}`}>

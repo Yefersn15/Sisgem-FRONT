@@ -59,7 +59,11 @@ const CategoriasList = () => {
       {loading ? (
         <div className="text-center py-5"><div className="spinner-border text-primary" role="status"></div></div>
       ) : resultado.length === 0 ? (
-        <div className="alert alert-info">No hay categorías que coincidan con la búsqueda.</div>
+        <div className="alert alert-info text-center">
+          <i className="fas fa-folder fa-3x mb-3"></i>
+          <h4>No hay categorías disponibles</h4>
+          <p>Prueba con otra búsqueda o vuelve más tarde.</p>
+        </div>
       ) : (
         <>
           <div className="row g-4">
