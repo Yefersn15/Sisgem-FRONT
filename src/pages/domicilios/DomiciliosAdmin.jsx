@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { useAdminDomicilios } from './hooks/useAdminDomicilios';
 import RepartidorModal from './components/RepartidorModal';
 import DomicilioCard from './components/DomicilioCard';
+import FiltrosBar from '../../components/FiltrosBar';
 import { useAyudaPagina } from '../../hooks/useAyudaPagina';
 
 const DomiciliosAdmin = () => {
@@ -64,31 +65,22 @@ const DomiciliosAdmin = () => {
         </div>
       </div>
 
-      <div className="card mb-4">
-        <div className="card-body">
-          <div className="row g-3">
-            <div className="col-md-5">
-              <input className="form-control" placeholder="Buscar por ID, dirección, teléfono, estado o repartidor" value={search} onChange={(e) => setSearch(e.target.value)} />
-            </div>
-            <div className="col-md-3">
-              <select className="form-select" value={filter} onChange={(e) => setFilter(e.target.value)}>
-                <option value="Todos">Todos los estados</option>
-                <option value="pendiente">Pendiente</option>
-                <option value="aprobado">Aprobado</option>
-                <option value="asignado">Asignado</option>
-                <option value="en_camino">En Camino</option>
-                <option value="entregado">Entregado</option>
-                <option value="cancelado">Cancelado</option>
-              </select>
-            </div>
-            <div className="col-md-4 d-flex align-items-end">
-              <button className="btn btn-secondary w-100" onClick={clearFilters}>
-                <i className="fas fa-eraser me-1"></i>Limpiar
-              </button>
-            </div>
-          </div>
+      <FiltrosBar onClear={clearFilters}>
+        <div className="col-12 col-md-4">
+          <input className="form-control" placeholder="Buscar por ID, dirección, teléfono, estado o repartidor..." value={search} onChange={(e) => setSearch(e.target.value)} />
         </div>
-      </div>
+        <div className="col-6 col-md">
+          <select className="form-select" value={filter} onChange={(e) => setFilter(e.target.value)}>
+            <option value="Todos">Todos los estados</option>
+            <option value="pendiente">Pendiente</option>
+            <option value="aprobado">Aprobado</option>
+            <option value="asignado">Asignado</option>
+            <option value="en_camino">En Camino</option>
+            <option value="entregado">Entregado</option>
+            <option value="cancelado">Cancelado</option>
+          </select>
+        </div>
+      </FiltrosBar>
 
       <div className="row">
         {domiciliosConVenta.map(dom => (
