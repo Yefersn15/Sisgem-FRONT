@@ -1,9 +1,18 @@
 import { Link } from 'react-router-dom';
 
+const ES_NOMBRE_ADMIN = ['ADMIN', 'ADMINISTRADOR'];
+
 const UsuarioRow = ({ usuario, source, currentUser, isAdmin, getRoleName, onVerDetalle, onCambiarRol, onToggleEstado }) => {
   const esUsuarioActual = currentUser && currentUser.documento === usuario.documento;
   const esAdminPrincipal = usuario.esAdminPrincipal;
   const tituloProtegido = 'Cuenta del administrador principal (definida en .env) — se gestiona con "npm run seed:db" en el servidor';
+  // Un admin normal no puede tocar la cuenta de OTRO admin (rol, estado, ni
+  // editarla): esa capacidad queda reservada al admin principal, igual que
+  // el backend ya la rechaza (ver usuarios.service.js) — esto solo evita
+  // mostrar un botón que de todos modos terminaría en un 403.
+  const esTargetAdmin = ES_NOMBRE_ADMIN.includes(usuario.rol_nombre);
+  const soloPrincipalPuedeTocar = esTargetAdmin && !esAdminPrincipal && !esUsuarioActual && !currentUser?.esAdminPrincipal;
+  const tituloSoloPrincipal = 'Solo el administrador principal puede modificar la cuenta de otro administrador';
 
   return (
     <tr>
@@ -41,8 +50,8 @@ const UsuarioRow = ({ usuario, source, currentUser, isAdmin, getRoleName, onVerD
             <button
               className="btn btn-sm btn-outline-secondary"
               onClick={() => onCambiarRol(usuario.id)}
-              disabled={esUsuarioActual}
-              title={esUsuarioActual ? 'No puedes cambiar tu propio rol' : 'Cambiar rol'}
+              disabled={esUsuarioActual || soloPrincipalPuedeTocar}
+              title={esUsuarioActual ? 'No puedes cambiar tu propio rol' : (soloPrincipalPuedeTocar ? tituloSoloPrincipal : 'Cambiar rol')}
             >
               {getRoleName(usuario.rol_id, usuario.rol_nombre) || 'Sin rol'} <i className="fas fa-edit ms-1"></i>
             </button>
@@ -61,7 +70,7 @@ const UsuarioRow = ({ usuario, source, currentUser, isAdmin, getRoleName, onVerD
           <button className="btn btn-sm btn-outline-info" onClick={() => onVerDetalle(usuario)} title="Ver detalles">
             <i className="fas fa-eye"></i>
           </button>
-          {!esUsuarioActual && !esAdminPrincipal && (
+          {!esUsuarioActual && !esAdminPrincipal && !soloPrincipalPuedeTocar && (
             <Link to={`/admin/usuarios/editar/${usuario.id}`} className="btn btn-sm btn-outline-primary" title="Editar">
               <i className="fas fa-edit"></i>
             </Link>
@@ -69,8 +78,8 @@ const UsuarioRow = ({ usuario, source, currentUser, isAdmin, getRoleName, onVerD
           <button
             className={`btn btn-sm ${usuario.estado ? 'btn-outline-warning' : 'btn-outline-success'}`}
             onClick={() => onToggleEstado(usuario.id, usuario.nombre, usuario.estado)}
-            disabled={esUsuarioActual || esAdminPrincipal}
-            title={esAdminPrincipal ? tituloProtegido : (esUsuarioActual ? 'No puedes cambiar tu propio estado' : (usuario.estado ? 'Desactivar' : 'Activar'))}
+            disabled={esUsuarioActual || esAdminPrincipal || soloPrincipalPuedeTocar}
+            title={esAdminPrincipal ? tituloProtegido : (esUsuarioActual ? 'No puedes cambiar tu propio estado' : (soloPrincipalPuedeTocar ? tituloSoloPrincipal : (usuario.estado ? 'Desactivar' : 'Activar')))}
           >
             <i className={`fas fa-toggle-${usuario.estado ? 'off' : 'on'}`}></i>
           </button>
