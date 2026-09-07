@@ -13,12 +13,11 @@ const HomeSearchBar = () => {
   };
 
   return (
-    <div className="d-flex justify-content-center mb-5">
+    <div className="mb-5">
       <form
         onSubmit={handleSubmit}
-        className="d-flex w-100% home-search-bar"
+        className="d-flex w-100 home-search-bar"
         style={{
-          maxWidth: 640,
           background: 'var(--surface)',
           border: '1px solid var(--border)',
           borderRadius: 999,

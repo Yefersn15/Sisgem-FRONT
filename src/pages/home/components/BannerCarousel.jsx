@@ -6,14 +6,14 @@ import BannerCollage from '../../banners/components/BannerCollage';
 const BannerCarousel = ({ banners, canManageBanners }) => (
   <>
     {canManageBanners && (
-      <div className="d-flex justify-content-end mb-2">
+      <div className="d-flex justify-content-end mb-2 px-3">
         <Link to="/admin/banners" className="btn btn-sm btn-outline-primary">
           <i className="fas fa-images me-1"></i>Administrar Banners
         </Link>
       </div>
     )}
     {banners.length > 0 ? (
-      <div id="bannerCarousel" className="carousel slide mb-5" data-bs-ride="carousel">
+      <div id="bannerCarousel" className="carousel slide mb-0" data-bs-ride="carousel">
         <div className="carousel-inner">
           {banners.map((ban, idx) => (
             <div key={ban.id} className={`carousel-item ${idx === 0 ? 'active' : ''}`}>
@@ -42,7 +42,7 @@ const BannerCarousel = ({ banners, canManageBanners }) => (
         )}
       </div>
     ) : (
-      <div className="text-muted mb-5">No hay banners disponibles.</div>
+      <div className="text-muted mb-0 px-3">No hay banners disponibles.</div>
     )}
   </>
 );

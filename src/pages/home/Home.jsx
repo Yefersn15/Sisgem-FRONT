@@ -87,12 +87,14 @@ const Home = ({ vistaLlamativa }) => {
         </div>
       )}
 
-      <div className={`container py-4 ${vistaLlamativa ? 'home-borde-margen' : ''}`}>
+      <div className="home-banner-full-bleed">
         <BannerCarousel
           banners={banners}
           canManageBanners={canManageBanners}
         />
+      </div>
 
+      <div className={`container py-4 ${vistaLlamativa ? 'home-borde-margen' : ''}`}>
         <HomeSearchBar />
 
         <div className="oculta-en-llamativa">

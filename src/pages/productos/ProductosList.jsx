@@ -34,6 +34,10 @@ const ProductosList = () => {
 
   return (
     <div className="container my-4">
+      <div className="d-flex justify-content-between align-items-center mb-4">
+        <h2 className="mb-0">Catálogo de Productos</h2>
+      </div>
+
       <form className="row mb-4" onSubmit={(e) => e.preventDefault()}>
         <div className="col-md-2">
           <select
@@ -89,10 +93,6 @@ const ProductosList = () => {
           </button>
         </div>
       </form>
-
-      <div className="d-flex justify-content-between align-items-center mb-4">
-        <h2>Catálogo de Productos</h2>
-      </div>
 
       {productos.length === 0 ? (
         <div className="alert alert-info text-center">

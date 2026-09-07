@@ -15,6 +15,23 @@
 }
 
 /* ================================
+   BANNER - ANCHO COMPLETO DE PANTALLA
+   ================================ */
+/* El banner ya no vive dentro del .container del Home (ver Home.jsx), así
+   que ocupa el ancho completo del área de contenido sin necesidad de
+   márgenes negativos: no hay ningún .container ancestro que lo limite. Sin
+   esquinas redondeadas aquí: pegado al borde de la pantalla, un radio se ve
+   como un hueco en vez de un estilo. */
+.home-banner-full-bleed {
+  width: 100%;
+  margin-bottom: 2rem;
+}
+
+.home-banner-full-bleed .banner-collage {
+  border-radius: 0;
+}
+
+/* ================================
    BANNERS - COLLAGE
    ================================ */
 .banner-collage {
