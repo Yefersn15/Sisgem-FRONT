@@ -3,31 +3,47 @@ import * as XLSX from 'xlsx';
 import { request } from './client';
 import { exportToExcel } from './utils';
 
+const mapearPago = (pago) => {
+  const ventaId = typeof pago.pedido === 'object' ? pago.pedido?.id : pago.pedido;
+  const usuarioObj = pago.pedido?.usuario;
+  const usuarioId = usuarioObj?.id || pago.pedido?.usuario;
+  const usuarioNombre = usuarioObj ? `${usuarioObj.nombre || ''} ${usuarioObj.apellido || ''}`.trim() : undefined;
+  const usuarioDocumento = usuarioObj?.documento;
+  return {
+    id: pago.id,
+    ventaId,
+    usuarioId,
+    usuarioNombre,
+    usuarioDocumento,
+    monto: pago.monto,
+    metodo: pago.metodo,
+    referencia: pago.referencia,
+    estado: pago.estado,
+    fecha: pago.fecha_pago || pago.created_at || pago.createdAt,
+    notas: pago.observaciones
+  };
+};
+
 export const getPagos = async () => {
   try {
     const data = await request('/api/pagos');
-    return Array.isArray(data) ? data.map(pago => {
-      const ventaId = typeof pago.pedido === 'object' ? pago.pedido?.id : pago.pedido;
-      const usuarioObj = pago.pedido?.usuario;
-      const usuarioId = usuarioObj?.id || pago.pedido?.usuario;
-      const usuarioNombre = usuarioObj ? `${usuarioObj.nombre || ''} ${usuarioObj.apellido || ''}`.trim() : undefined;
-      const usuarioDocumento = usuarioObj?.documento;
-      return {
-        id: pago.id,
-        ventaId,
-        usuarioId,
-        usuarioNombre,
-        usuarioDocumento,
-        monto: pago.monto,
-        metodo: pago.metodo,
-        referencia: pago.referencia,
-        estado: pago.estado,
-        fecha: pago.fecha_pago || pago.created_at || pago.createdAt,
-        notas: pago.observaciones
-      };
-    }) : [];
+    return Array.isArray(data) ? data.map(mapearPago) : [];
   } catch (e) {
     console.error('Error obteniendo pagos:', e);
+    return [];
+  }
+};
+
+// A diferencia de getPagos() (GET /api/pagos, solo ADMIN), este es el
+// endpoint que sí puede llamar cualquier cliente autenticado: el backend lo
+// filtra por su propio documento (ver pagos.service.misPagos), así que no
+// hace falta (ni se puede) filtrar por usuario del lado del cliente.
+export const getMisPagos = async () => {
+  try {
+    const data = await request('/api/pagos/mis-pagos');
+    return Array.isArray(data) ? data.map(mapearPago) : [];
+  } catch (e) {
+    console.error('Error obteniendo mis pagos:', e);
     return [];
   }
 };

@@ -1,7 +1,7 @@
 // src/pages/pagos/hooks/useMisPagos.js
 import { useState, useEffect, useMemo } from 'react';
 import { useAuth } from '../../../context/AuthContext';
-import { getPagos } from '../services/pagosService';
+import { getMisPagos } from '../services/pagosService';
 import { getMisPedidos } from '../../../services/api/pedidos.api';
 
 export const getMetodoBadge = (metodo) => {
@@ -33,10 +33,10 @@ export const useMisPagos = () => {
     if (user) {
       const loadData = async () => {
         const misPedidosData = await getMisPedidos();
-        const todosPagos = await getPagos();
+        const misPagosData = await getMisPagos();
 
         setRegistros(misPedidosData);
-        setPagos(todosPagos);
+        setPagos(misPagosData);
       };
       loadData();
     }

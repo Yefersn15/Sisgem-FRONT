@@ -15,6 +15,30 @@ export const esAdmin = (user, role) =>
   role?.nombre === 'ADMIN' || role?.nombre === 'Administrador' ||
   user?.rol_id === 5 || user?.rol === 'ADMIN' || user?.rol === 'Administrador';
 
+// hasPermission() recibe las mismas etiquetas en español que ya usan
+// Rutas.jsx/AdminLayout.jsx/navConfig.js/storeNavConfig.js (module="Ventas",
+// permission: 'Configuración', etc.) — nunca los strings reales que guarda
+// el backend en rol.permisos (p. ej. "ventas.write"). Antes hasPermission
+// comparaba la etiqueta contra esos strings tal cual, así que para CUALQUIER
+// rol que no fuera ADMIN literal nunca coincidía nada: cada ruta protegida
+// por module redirigía a "/" y cada grupo de menú desaparecía, sin importar
+// qué permisos se le marcaran al rol desde el panel. Este mapeo traduce cada
+// etiqueta a los prefijos de permiso reales que representa — algunas
+// etiquetas ya se usaban como paraguas de varias categorías del backend a la
+// vez (p. ej. "Ventas" protege también Pedidos/Pagos/Domicilios, y
+// "Configuración" protege tanto Roles como Configuración de tienda).
+const ETIQUETA_A_PREFIJOS_PERMISO = {
+  'Productos': ['productos'],
+  'Marcas': ['marcas'],
+  'Categorías': ['categorias'],
+  'Inventario': ['productos', 'marcas', 'categorias'],
+  'Banners': ['banners'],
+  'Ventas': ['ventas', 'pedidos', 'pagos', 'domicilios'],
+  'Usuarios': ['usuarios'],
+  'Configuración': ['roles', 'config'],
+  'Reportes': ['reportes'],
+};
+
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [role, setRole] = useState(null);
@@ -90,8 +114,16 @@ export const AuthProvider = ({ children }) => {
     if (!user) return false;
     // El rol de ADMIN/Administrador tiene todos los permisos
     if (isAdmin) return true;
-    // Verificar en módulos/permisos
-    return modules.some(m => m.nombre === moduleName || m === moduleName);
+    // `modules` trae los permisos reales del rol (p. ej. "productos.write");
+    // `moduleName` es la etiqueta en español que ya usan las rutas/menús
+    // (ver ETIQUETA_A_PREFIJOS_PERMISO más arriba) — se traduce a los
+    // prefijos que representa y se busca cualquier permiso que empiece así.
+    const prefijos = ETIQUETA_A_PREFIJOS_PERMISO[moduleName] || [moduleName.toLowerCase()];
+    return modules.some(m => {
+      const permiso = typeof m === 'string' ? m : m?.nombre;
+      if (!permiso) return false;
+      return prefijos.some(prefijo => permiso === prefijo || permiso.startsWith(`${prefijo}.`));
+    });
   };
 
   const refreshUser = async () => {

@@ -28,7 +28,7 @@ const Register = () => {
       </>
     ),
   });
-  const { form, paso, error, loading, mostrarErrores, fotoUrlRef, handleChange, siguientePaso, pasoAnterior, handleSubmit } = useRegisterForm();
+  const { form, paso, error, loading, mostrarErrores, handleChange, siguientePaso, pasoAnterior, handleSubmit } = useRegisterForm();
 
   return (
     <div className="container mt-4 register-container" style={{ maxWidth: 720 }}>
@@ -59,28 +59,21 @@ const Register = () => {
           {error && <div className="alert alert-danger">{error}</div>}
 
           <form onSubmit={handleSubmit}>
-            {/* Los 3 pasos quedan montados todo el tiempo (solo se oculta con
-                d-none el que no está activo): InformacionPersonalForm trae un
-                ImageUploadField cuyo archivo elegido vive en memoria dentro del
-                propio componente hasta el submit final (ver ImageUploadField.jsx)
-                — si el paso 1 se desmontara al avanzar a 2/3, esa selección se
-                perdería antes de llegar al submit. */}
-            <div className={paso === 1 ? '' : 'd-none'}>
+            {paso === 1 && (
               <InformacionPersonalForm
                 form={form}
                 onChange={handleChange}
                 telefonoField="celular"
                 telefonoLabel="Celular"
                 mostrarErrores={mostrarErrores}
-                fotoUrlRef={fotoUrlRef}
               />
-            </div>
-            <div className={paso === 2 ? '' : 'd-none'}>
+            )}
+            {paso === 2 && (
               <InformacionContactoForm form={form} onChange={handleChange} />
-            </div>
-            <div className={paso === 3 ? '' : 'd-none'}>
+            )}
+            {paso === 3 && (
               <CredencialesForm form={form} onChange={handleChange} mostrarErrores={mostrarErrores} />
-            </div>
+            )}
 
             <div className="d-flex justify-content-between mt-4">
               {paso > 1 ? (

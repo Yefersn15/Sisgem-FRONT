@@ -1,6 +1,7 @@
 // src/pages/pagos/services/pagosService.js
 export {
   getPagos,
+  getMisPagos,
   getPagoById,
   createPago,
   updatePago,

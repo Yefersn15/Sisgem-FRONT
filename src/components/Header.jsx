@@ -191,6 +191,11 @@ const Header = ({ vistaLlamativa, setVistaLlamativa }) => {
                     </button>
                   </li>
                   <li>
+                    <button className="dropdown-item" onClick={() => handleUserMenuClick('/mis-pedidos')}>
+                      <i className="fas fa-box me-2"></i>Mis Pedidos
+                    </button>
+                  </li>
+                  <li>
                     <button className="dropdown-item" onClick={() => handleUserMenuClick('/mis-pagos')}>
                       <i className="fas fa-credit-card me-2"></i>Mis Pagos y Abonos
                     </button>

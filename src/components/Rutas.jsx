@@ -84,6 +84,7 @@ const Rutas = ({ vistaLlamativa }) => {
       <Route path="/ventas/:id" element={<VentaDetails />} />
       <Route path="/pedidos/:id" element={<VentaDetails />} />
       <Route path="/mis-pagos" element={<PrivateRoute><MisPagos /></PrivateRoute>} />
+      <Route path="/mis-pedidos" element={<PrivateRoute><MisPedidos /></PrivateRoute>} />
       <Route path="/mis-domicilios" element={<PrivateRoute><MisDomicilios /></PrivateRoute>} />
 
       {/* === RUTAS DEL ADMIN === */}
