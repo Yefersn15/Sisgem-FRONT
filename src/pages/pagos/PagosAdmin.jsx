@@ -1,6 +1,7 @@
 import { usePagosAdmin } from './hooks/usePagosAdmin';
 import PagosAdminFiltros from './components/PagosAdminFiltros';
 import PagoRow from './components/PagoRow';
+import Pagination from '../../components/Pagination';
 import { useAyudaPagina } from '../../hooks/useAyudaPagina';
 
 const PagosAdmin = () => {
@@ -14,9 +15,13 @@ const PagosAdmin = () => {
     filterEstadoPago,
     setFilterEstadoPago,
     clearFilters,
+    currentPage,
+    setCurrentPage,
+    totalPages,
     importStatus,
     fileInputRef,
     filtered,
+    paginatedItems,
     handleExport,
     handleImport,
     handleAbonar,
@@ -29,17 +34,17 @@ const PagosAdmin = () => {
 
   return (
     <div className="container-fluid py-4">
-      <div className="d-flex justify-content-between align-items-center mb-4">
+      <div className="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
         <div>
           <h2>Gestión de Pagos / Abonos</h2>
           <p className="text-muted mb-0">Administra los pagos y abonos de las ventas</p>
         </div>
-        <div className="d-flex gap-2">
-          <button className="btn btn-outline-primary" onClick={handleExport}>
+        <div className="d-flex gap-2 flex-wrap">
+          <button className="btn btn-outline-secondary" onClick={handleExport}>
             <i className="fas fa-file-export me-1"></i>Exportar
           </button>
           <input type="file" ref={fileInputRef} accept=".xlsx,.xls" style={{ display: 'none' }} onChange={onImportChange} />
-          <button className="btn btn-outline-primary" onClick={() => fileInputRef.current && fileInputRef.current.click()}>
+          <button className="btn btn-outline-secondary" onClick={() => fileInputRef.current && fileInputRef.current.click()}>
             <i className="fas fa-file-import me-1"></i>Importar
           </button>
         </div>
@@ -77,11 +82,14 @@ const PagosAdmin = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {filtered.map(venta => (
+                  {paginatedItems.map(venta => (
                     <PagoRow key={venta.id} venta={venta} onAbonar={handleAbonar} />
                   ))}
                 </tbody>
               </table>
+            </div>
+            <div className="p-3">
+              <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
             </div>
           </div>
         </div>

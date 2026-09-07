@@ -2,6 +2,7 @@
 import { Link } from 'react-router-dom';
 import { useRolesAdmin } from './hooks/useRolesAdmin';
 import RoleRow from './components/RoleRow';
+import Pagination from '../../components/Pagination';
 import { useAyudaPagina } from '../../hooks/useAyudaPagina';
 
 const RolesAdmin = () => {
@@ -11,6 +12,10 @@ const RolesAdmin = () => {
   });
   const {
     roles,
+    paginatedItems,
+    currentPage,
+    setCurrentPage,
+    totalPages,
     showPermisos,
     toggleShowPermisos,
     categoriasPermisos,
@@ -20,7 +25,7 @@ const RolesAdmin = () => {
 
   return (
     <div className="container-fluid py-4">
-      <div className="d-flex justify-content-between align-items-center mb-4">
+      <div className="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
         <div>
           <h2>Gestión de Roles</h2>
           <p className="text-muted mb-0">Administra los roles y permisos del sistema</p>
@@ -45,7 +50,7 @@ const RolesAdmin = () => {
                 </tr>
               </thead>
               <tbody>
-                {roles.map(r => (
+                {paginatedItems.map(r => (
                   <RoleRow
                     key={r.id}
                     rol={r}
@@ -58,6 +63,9 @@ const RolesAdmin = () => {
                 ))}
               </tbody>
             </table>
+          </div>
+          <div className="p-3">
+            <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
           </div>
         </div>
       </div>

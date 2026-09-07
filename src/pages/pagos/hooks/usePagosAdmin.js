@@ -5,6 +5,8 @@ import { getPagos, exportPagos, importPagos } from '../services/pagosService';
 import { getPedidos, getVentas } from '../../../services/api/pedidos.api';
 import { getDomicilios } from '../../../services/api/domicilios.api';
 
+const ITEMS_PER_PAGE = 5;
+
 const calcularVentaConPagos = (venta, pagos) => {
   const shipping = parseFloat(venta.shipping) || 0;
   const totalVenta = (venta.subtotal || 0) + shipping;
@@ -37,6 +39,7 @@ export const usePagosAdmin = () => {
   const [domicilios, setDomicilios] = useState([]);
   const [search, setSearch] = useState('');
   const [filterEstadoPago, setFilterEstadoPago] = useState('Todos');
+  const [currentPage, setCurrentPage] = useState(1);
   const [importStatus, setImportStatus] = useState({});
   const fileInputRef = useRef(null);
 
@@ -82,6 +85,10 @@ export const usePagosAdmin = () => {
     return lista.sort((a, b) => new Date(b.ultimoPago) - new Date(a.ultimoPago));
   }, [ventasConPagos, filterEstadoPago, search]);
 
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [filterEstadoPago, search]);
+
   const handleExport = () => exportPagos();
 
   const handleImport = (file) => {
@@ -113,6 +120,9 @@ export const usePagosAdmin = () => {
     setFilterEstadoPago('Todos');
   };
 
+  const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE);
+  const paginatedItems = filtered.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
+
   return {
     domicilios,
     search,
@@ -120,10 +130,14 @@ export const usePagosAdmin = () => {
     filterEstadoPago,
     setFilterEstadoPago,
     clearFilters,
+    currentPage,
+    setCurrentPage,
+    totalPages,
     importStatus,
     setImportStatus,
     fileInputRef,
     filtered,
+    paginatedItems,
     handleExport,
     handleImport,
     handleAbonar,

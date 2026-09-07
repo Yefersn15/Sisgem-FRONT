@@ -6,7 +6,7 @@ import { getMarcas } from '../../marcas/services/marcasService';
 import { getCategorias } from '../../categorias/services/categoriasService';
 import { useConfirm } from '../../../context/ConfirmContext';
 
-const ITEMS_PER_PAGE = 20;
+const ITEMS_PER_PAGE = 5;
 
 const ordenarProductos = (lista, sortBy) => {
   return [...lista].sort((a, b) => {

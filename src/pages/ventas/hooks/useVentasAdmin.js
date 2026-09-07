@@ -8,7 +8,7 @@ import { exportToExcel } from '../../../services/api/utils';
 import { useToast } from '../../../context/ToastContext';
 import { useConfirm } from '../../../context/ConfirmContext';
 
-const ITEMS_PER_PAGE = 20;
+const ITEMS_PER_PAGE = 5;
 
 export const useVentasAdmin = () => {
   const toast = useToast();

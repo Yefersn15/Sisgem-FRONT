@@ -5,7 +5,7 @@ import { getCategorias, deleteCategoria, updateCategoria, exportCategorias, impo
 import { getProductos } from '../../../services/api/productos.api';
 import { useConfirm } from '../../../context/ConfirmContext';
 
-const ITEMS_PER_PAGE = 20;
+const ITEMS_PER_PAGE = 5;
 
 const ordenarCategorias = (lista, sortBy) => {
   return [...lista].sort((a, b) => {

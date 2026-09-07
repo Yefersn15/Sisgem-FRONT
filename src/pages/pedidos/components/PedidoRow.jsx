@@ -45,7 +45,7 @@ const PedidoRow = ({ pedido, onAprobarAbono, onRechazarAbono, onVerDetalle }) =>
             )}
           </>
         )}
-        <button className="btn btn-sm btn-outline-primary" onClick={() => onVerDetalle(pedido.id)} title="Ver detalle">
+        <button className="btn btn-sm btn-outline-info" onClick={() => onVerDetalle(pedido.id)} title="Ver detalle">
           <i className="fas fa-eye"></i>
         </button>
       </div>

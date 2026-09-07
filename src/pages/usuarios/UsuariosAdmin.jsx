@@ -5,6 +5,7 @@ import RoleChangeModal from './components/RoleChangeModal';
 import UsuarioDetalleModal from './components/UsuarioDetalleModal';
 import UsuariosAdminFiltros from './components/UsuariosAdminFiltros';
 import UsuarioRow from './components/UsuarioRow';
+import Pagination from '../../components/Pagination';
 import { useAyudaPagina } from '../../hooks/useAyudaPagina';
 
 const UsuariosAdmin = ({ source = 'usuarios' }) => {
@@ -22,6 +23,9 @@ const UsuariosAdmin = ({ source = 'usuarios' }) => {
     filterRol,
     setFilterRol,
     clearFilters,
+    currentPage,
+    setCurrentPage,
+    totalPages,
     showRoleModal,
     setShowRoleModal,
     showDetalleModal,
@@ -34,6 +38,7 @@ const UsuariosAdmin = ({ source = 'usuarios' }) => {
     handleExport,
     handleImport,
     filtered,
+    paginatedItems,
     getRoleName,
   } = useUsersList(source);
 
@@ -43,14 +48,14 @@ const UsuariosAdmin = ({ source = 'usuarios' }) => {
   };
 
   return (
-    <div className="container mt-4">
-      <div className="d-flex justify-content-between align-items-center mb-3">
+    <div className="container-fluid py-4">
+      <div className="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
         <div>
           <h2>{source === 'usuarios' ? 'Gestión de Usuarios' : 'Usuarios'}</h2>
           <p className="text-muted mb-0">{usuarios.length} registros</p>
         </div>
-        <div className="d-flex gap-2">
-          <button className="btn btn-secondary" onClick={loadData} title="Actualizar">
+        <div className="d-flex gap-2 flex-wrap">
+          <button className="btn btn-outline-secondary" onClick={loadData} title="Actualizar">
             <i className="fas fa-sync-alt"></i>
           </button>
           <button className="btn btn-outline-secondary" onClick={handleExport} title="Exportar">
@@ -81,35 +86,38 @@ const UsuariosAdmin = ({ source = 'usuarios' }) => {
       />
 
       <div className="card">
-        <div className="table-responsive">
-          <table className="table table-hover mb-0">
-            <thead>
-              <tr>
-                <th>Documento</th>
-                <th>Nombre</th>
-                {source === 'usuarios' && <th>Email</th>}
-                {source === 'usuarios' && <th>Teléfono</th>}
-                {source === 'usuarios' && <th>Rol</th>}
-                <th>Estado</th>
-                <th>Acciones</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filtered.map(u => (
-                <UsuarioRow
-                  key={u.id}
-                  usuario={u}
-                  source={source}
-                  currentUser={currentUser}
-                  isAdmin={isAdmin}
-                  getRoleName={getRoleName}
-                  onVerDetalle={setShowDetalleModal}
-                  onCambiarRol={setShowRoleModal}
-                  onToggleEstado={handleToggle}
-                />
-              ))}
-            </tbody>
-          </table>
+        <div className="card-body">
+          <div className="table-responsive">
+            <table className="table table-hover mb-0">
+              <thead>
+                <tr>
+                  <th>Documento</th>
+                  <th>Nombre</th>
+                  {source === 'usuarios' && <th>Email</th>}
+                  {source === 'usuarios' && <th>Teléfono</th>}
+                  {source === 'usuarios' && <th>Rol</th>}
+                  <th>Estado</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                {paginatedItems.map(u => (
+                  <UsuarioRow
+                    key={u.id}
+                    usuario={u}
+                    source={source}
+                    currentUser={currentUser}
+                    isAdmin={isAdmin}
+                    getRoleName={getRoleName}
+                    onVerDetalle={setShowDetalleModal}
+                    onCambiarRol={setShowRoleModal}
+                    onToggleEstado={handleToggle}
+                  />
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
         </div>
       </div>
 

@@ -15,6 +15,8 @@ import { useToast } from '../../../context/ToastContext';
 import { useConfirm, usePrompt } from '../../../context/ConfirmContext';
 import { useRepartidorAsignacion } from './useRepartidorAsignacion';
 
+const ITEMS_PER_PAGE = 5;
+
 export const useAdminDomicilios = () => {
   const toast = useToast();
   const confirm = useConfirm();
@@ -24,6 +26,7 @@ export const useAdminDomicilios = () => {
   const [search, setSearch] = useState('');
   const [ventas, setVentas] = useState([]);
   const [filter, setFilter] = useState('Todos');
+  const [currentPage, setCurrentPage] = useState(1);
 
   const cargarDatos = async () => {
     const doms = (await getDomicilios()) || [];
@@ -183,6 +186,13 @@ export const useAdminDomicilios = () => {
     return { ...dom, pedidoId, venta: ventas.find(v => String(v.id) === String(pedidoId)) };
   }), [filtered, ventas]);
 
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [filter, search]);
+
+  const totalPages = Math.ceil(domiciliosConVenta.length / ITEMS_PER_PAGE);
+  const paginatedItems = domiciliosConVenta.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
+
   const clearFilters = () => {
     setSearch('');
     setFilter('Todos');
@@ -190,6 +200,10 @@ export const useAdminDomicilios = () => {
 
   return {
     domiciliosConVenta,
+    paginatedItems,
+    currentPage,
+    setCurrentPage,
+    totalPages,
     repartidoresList,
     search,
     setSearch,

@@ -5,12 +5,15 @@ import { usePermisosPorCategoria } from './usePermisosPorCategoria';
 import { useToast } from '../../../context/ToastContext';
 import { useConfirm } from '../../../context/ConfirmContext';
 
+const ITEMS_PER_PAGE = 5;
+
 export const useRolesAdmin = () => {
   const toast = useToast();
   const confirm = useConfirm();
   const [roles, setRoles] = useState([]);
   const [permisosDisponibles, setPermisosDisponibles] = useState([]);
   const [showPermisos, setShowPermisos] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
   const categoriasPermisos = usePermisosPorCategoria(permisosDisponibles);
 
   const loadData = async () => {
@@ -44,8 +47,15 @@ export const useRolesAdmin = () => {
 
   const getPermisosAsignados = (rol) => rol.permisos || [];
 
+  const totalPages = Math.ceil(roles.length / ITEMS_PER_PAGE);
+  const paginatedItems = roles.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
+
   return {
     roles,
+    paginatedItems,
+    currentPage,
+    setCurrentPage,
+    totalPages,
     showPermisos,
     toggleShowPermisos,
     categoriasPermisos,

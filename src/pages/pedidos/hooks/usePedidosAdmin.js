@@ -6,7 +6,7 @@ import { getProductos } from '../../../services/api/productos.api';
 import { useToast } from '../../../context/ToastContext';
 import { useConfirm, usePrompt } from '../../../context/ConfirmContext';
 
-const ITEMS_PER_PAGE = 20;
+const ITEMS_PER_PAGE = 5;
 
 export const usePedidosAdmin = () => {
   const toast = useToast();

@@ -6,6 +6,8 @@ import { getRoles } from '../../roles/services/rolesService';
 import { useToast } from '../../../context/ToastContext';
 import { useConfirm } from '../../../context/ConfirmContext';
 
+const ITEMS_PER_PAGE = 5;
+
 export const useUsersList = (source = 'usuarios') => {
   const { user: currentUser } = useAuth();
   const toast = useToast();
@@ -14,6 +16,7 @@ export const useUsersList = (source = 'usuarios') => {
   const [roles, setRoles] = useState([]);
   const [search, setSearch] = useState('');
   const [filterRol, setFilterRol] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
   const [showRoleModal, setShowRoleModal] = useState(null);
   const [showDetalleModal, setShowDetalleModal] = useState(null);
   const [importStatus, setImportStatus] = useState({ message: '', type: '' });
@@ -32,6 +35,10 @@ export const useUsersList = (source = 'usuarios') => {
   useEffect(() => {
     loadData();
   }, [source]);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search, filterRol]);
 
   const handleToggle = async (id, nombre, estadoActual) => {
     const accion = estadoActual ? 'Desactivar' : 'Activar';
@@ -95,6 +102,9 @@ export const useUsersList = (source = 'usuarios') => {
     setFilterRol('');
   };
 
+  const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE);
+  const paginatedItems = filtered.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
+
   return {
     currentUser,
     isAdmin,
@@ -105,6 +115,9 @@ export const useUsersList = (source = 'usuarios') => {
     filterRol,
     setFilterRol,
     clearFilters,
+    currentPage,
+    setCurrentPage,
+    totalPages,
     showRoleModal,
     setShowRoleModal,
     showDetalleModal,
@@ -117,6 +130,7 @@ export const useUsersList = (source = 'usuarios') => {
     handleExport,
     handleImport,
     filtered,
+    paginatedItems,
     getRoleName,
   };
 };

@@ -52,12 +52,12 @@ const VentasAdmin = () => {
 
   return (
     <div className="container-fluid py-4">
-      <div className="d-flex justify-content-between align-items-center mb-4">
+      <div className="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
         <div>
           <h2>Gestión de Ventas</h2>
           <p className="text-muted mb-0">Administra las ventas y pedidos</p>
         </div>
-        <div className="d-flex gap-2">
+        <div className="d-flex gap-2 flex-wrap">
           <button className="btn btn-outline-primary" onClick={generarReporte}>
             <i className="fas fa-file-export me-1"></i>Exportar
           </button>

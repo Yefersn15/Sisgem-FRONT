@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { useBannersAdmin } from './hooks/useBannersAdmin';
 import BannerCollage from './components/BannerCollage';
+import Pagination from '../../components/Pagination';
 import { useAyudaPagina } from '../../hooks/useAyudaPagina';
 
 const AdminBanners = () => {
@@ -13,11 +14,11 @@ const AdminBanners = () => {
       </>
     ),
   });
-  const { banners, loading, handleDelete, handleToggleEstado } = useBannersAdmin();
+  const { banners, paginatedItems, currentPage, setCurrentPage, totalPages, loading, handleDelete, handleToggleEstado } = useBannersAdmin();
 
   return (
     <div className="container-fluid py-4">
-      <div className="d-flex justify-content-between align-items-center mb-4">
+      <div className="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
         <div>
           <h2>Gestión de Banners</h2>
           <p className="text-muted mb-0">Administra los banners de la página principal</p>
@@ -35,7 +36,7 @@ const AdminBanners = () => {
         <div className="alert alert-info text-center">No hay banners creados todavía.</div>
       ) : (
         <div className="row g-4">
-          {banners.map(banner => (
+          {paginatedItems.map(banner => (
             <div className="col-md-6" key={banner.id}>
               <div className="card h-100">
                 <div className="card-body">
@@ -82,6 +83,8 @@ const AdminBanners = () => {
           ))}
         </div>
       )}
+
+      <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
     </div>
   );
 };
