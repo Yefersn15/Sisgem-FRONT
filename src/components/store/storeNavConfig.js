@@ -6,6 +6,12 @@ export const getStoreMenuSections = ({ isAdmin, hasPermission }) => [
     key: 'tienda',
     title: 'Tienda',
     icon: 'fa-store',
+    // `flat: true` hace que Header.jsx renderice estos items como enlaces
+    // sueltos en la barra (como Biblioteca_ReactVite hace con Catálogo/
+    // Autores/Editoriales/Categorías), no agrupados detrás de un
+    // desplegable "Tienda" — Productos/Marcas/Categorías son secciones
+    // igual de importantes como para no esconderlas un clic más adentro.
+    flat: true,
     // El carrito no va aquí: el header público ya tiene su propio ícono con
     // contador de artículos, así que listarlo también en este menú sería
     // redundante.

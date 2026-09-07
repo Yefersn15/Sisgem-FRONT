@@ -83,23 +83,33 @@ const Header = ({ vistaLlamativa, setVistaLlamativa }) => {
         <div className="collapse navbar-collapse" id="storeNavMenu">
           <ul className="navbar-nav me-auto">
             {visibleSections.map((section) => (
-              <li className="nav-item dropdown" key={section.key}>
-                <button
-                  className={`nav-link dropdown-toggle btn btn-link ${isSectionActive(location.pathname, section) ? 'active' : ''}`}
-                  data-bs-toggle="dropdown"
-                >
-                  <i className={`fas ${section.icon} me-1`}></i>{section.title}
-                </button>
-                <ul className="dropdown-menu">
-                  {section.items.map((item) => (
-                    <li key={item.to}>
-                      <Link to={item.to} className={`dropdown-item ${isActivePath(location.pathname, item) ? 'active' : ''}`}>
-                        <i className={`fas ${item.icon} me-2`}></i>{item.label}
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              </li>
+              section.flat ? (
+                section.items.map((item) => (
+                  <li className="nav-item" key={item.to}>
+                    <Link to={item.to} className={`nav-link ${isActivePath(location.pathname, item) ? 'active' : ''}`}>
+                      <i className={`fas ${item.icon} me-1`}></i>{item.label}
+                    </Link>
+                  </li>
+                ))
+              ) : (
+                <li className="nav-item dropdown" key={section.key}>
+                  <button
+                    className={`nav-link dropdown-toggle btn btn-link ${isSectionActive(location.pathname, section) ? 'active' : ''}`}
+                    data-bs-toggle="dropdown"
+                  >
+                    <i className={`fas ${section.icon} me-1`}></i>{section.title}
+                  </button>
+                  <ul className="dropdown-menu">
+                    {section.items.map((item) => (
+                      <li key={item.to}>
+                        <Link to={item.to} className={`dropdown-item ${isActivePath(location.pathname, item) ? 'active' : ''}`}>
+                          <i className={`fas ${item.icon} me-2`}></i>{item.label}
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                </li>
+              )
             ))}
             <li className="nav-item">
               <Link className="nav-link" to="/nosotros">Nosotros</Link>
