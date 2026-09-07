@@ -95,6 +95,7 @@ const AdminLayout = () => {
         <span className="d-none d-sm-inline">{user?.nombre || user?.email || 'Administrador'}</span>
       </button>
       <ul className="dropdown-menu dropdown-menu-end">
+        <li><Link className="dropdown-item" to="/perfil"><i className="fas fa-user me-2"></i>Mi Perfil</Link></li>
         <li><Link className="dropdown-item" to="/"><i className="fas fa-globe me-2"></i>Ver sitio público</Link></li>
         <li><hr className="dropdown-divider" /></li>
         <li>

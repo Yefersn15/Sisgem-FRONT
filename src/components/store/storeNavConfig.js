@@ -11,6 +11,8 @@ export const getStoreMenuSections = ({ isAdmin, hasPermission }) => [
     // redundante.
     items: [
       { to: '/productos', icon: 'fa-box', label: 'Productos' },
+      { to: '/marcas', icon: 'fa-tag', label: 'Marcas' },
+      { to: '/categorias', icon: 'fa-folder', label: 'Categorías' },
     ],
   },
   {

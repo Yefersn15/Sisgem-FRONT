@@ -175,6 +175,29 @@ div.text-info {
   box-shadow: none;
 }
 
+/* El CSS compilado de Bootstrap define el fondo/borde de .btn-primary con
+   sus propias variables internas (--bs-btn-bg, etc.) fijas en #0d6efd — no
+   heredan de --bs-primary ni de ninguna variable global, así que cambiar el
+   acento del tema no los movía. Es el mismo motivo por el que el resto de
+   este archivo sobreescribe .badge.bg-primary/.bg-primary/.text-primary/etc.
+   directamente en vez de confiar en la cascada de Bootstrap; a estos dos les
+   faltaba el mismo tratamiento. */
+.btn-primary,
+.btn-primary:disabled,
+.btn-primary.disabled {
+  background-color: var(--accent) !important;
+  border-color: var(--accent) !important;
+  color: var(--tema-acento-texto, #fff) !important;
+}
+
+.btn-primary:hover,
+.btn-primary:focus,
+.btn-primary:active {
+  background-color: var(--accent-hover) !important;
+  border-color: var(--accent-hover) !important;
+  color: var(--tema-acento-texto, #fff) !important;
+}
+
 .btn-primary:active {
   transform: translateY(1px);
   transition: transform 0.05s linear;
@@ -249,6 +272,24 @@ div.text-info {
 /* ----------------------------
    4. Inputs y formularios - Estados y select
 ---------------------------- */
+/* El anillo de foco de Bootstrap (borde + sombra) también viene fijo en azul
+   dentro de su CSS compilado, por la misma razón que .btn-primary arriba. */
+.form-control:focus,
+.form-select:focus {
+  border-color: var(--accent) !important;
+  box-shadow: 0 0 0 0.25rem var(--accent-dim) !important;
+}
+
+.form-check-input:checked {
+  background-color: var(--accent) !important;
+  border-color: var(--accent) !important;
+}
+
+.form-check-input:focus {
+  border-color: var(--accent) !important;
+  box-shadow: 0 0 0 0.25rem var(--accent-dim) !important;
+}
+
 /* Input con error */
 input.error,
 .form-control.error,
