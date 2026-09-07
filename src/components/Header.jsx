@@ -4,7 +4,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { useConfiguracion } from '../context/ConfiguracionContext';
-import { getStoreMenuSections } from './store/storeNavConfig';
+import { getStoreMenuSections } from './header/storeNavConfig';
 import AppearanceMenu from './AppearanceMenu';
 import BrandIcon from './BrandIcon';
 

@@ -1,4 +1,4 @@
-// src/components/admin/navConfig.js
+// src/components/header/navConfig.js
 export const DASHBOARD_ITEM = { to: '/admin', icon: 'fa-home', label: 'Dashboard', exact: true };
 
 export const NAV_GROUPS = [

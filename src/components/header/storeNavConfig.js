@@ -1,4 +1,4 @@
-// src/components/store/storeNavConfig.js
+// src/components/header/storeNavConfig.js
 // Secciones del menú de la tienda (no-admin), agrupadas igual que el navConfig del admin
 // para poder alimentar tanto una barra lateral como una barra superior.
 export const getStoreMenuSections = ({ isAdmin, hasPermission }) => [

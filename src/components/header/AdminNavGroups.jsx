@@ -1,4 +1,4 @@
-// src/components/admin/AdminNavGroups.jsx
+// src/components/header/AdminNavGroups.jsx
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';

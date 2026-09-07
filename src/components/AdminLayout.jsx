@@ -22,9 +22,9 @@ import ConfiguracionAdmin from '../pages/configuracion/ConfiguracionAdmin';
 import PrivateRoute from './PrivateRoute';
 import { useAuth } from '../context/AuthContext';
 import { useConfiguracion } from '../context/ConfiguracionContext';
-import { useAdminLayoutMode } from './admin/useAdminLayoutMode';
-import AdminNavGroups from './admin/AdminNavGroups';
-import AdminTopBar from './admin/AdminTopBar';
+import { useAdminLayoutMode } from './header/useAdminLayoutMode';
+import AdminNavGroups from './header/AdminNavGroups';
+import AdminTopBar from './header/AdminTopBar';
 import AppearanceMenu from './AppearanceMenu';
 import BrandIcon from './BrandIcon';
 
