@@ -2,6 +2,7 @@
 import { Link } from 'react-router-dom';
 import { useRolesAdmin } from './hooks/useRolesAdmin';
 import RoleRow from './components/RoleRow';
+import FiltrosBar from '../../components/FiltrosBar';
 import Pagination from '../../components/Pagination';
 import { useAyudaPagina } from '../../hooks/useAyudaPagina';
 
@@ -11,7 +12,9 @@ const RolesAdmin = () => {
     contenido: <p>Define qué puede ver y hacer cada tipo de usuario del panel admin, marcando permisos por módulo. El rol "por defecto" es el que se asigna a un usuario nuevo que se registra.</p>,
   });
   const {
-    roles,
+    query,
+    setQuery,
+    clearFilters,
     paginatedItems,
     currentPage,
     setCurrentPage,
@@ -35,10 +38,22 @@ const RolesAdmin = () => {
         </Link>
       </div>
 
+      <FiltrosBar onClear={clearFilters}>
+        <div className="col-12 col-md">
+          <input
+            type="text"
+            className="form-control"
+            placeholder="Buscar por nombre o descripción..."
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+          />
+        </div>
+      </FiltrosBar>
+
       <div className="card">
-        <div className="card-body p-0">
+        <div className="card-body">
           <div className="table-responsive">
-            <table className="table table-hover mb-0">
+            <table className="table table-hover">
               <thead>
                 <tr>
                   <th>Nombre</th>
@@ -50,31 +65,32 @@ const RolesAdmin = () => {
                 </tr>
               </thead>
               <tbody>
-                {paginatedItems.map(r => (
-                  <RoleRow
-                    key={r.id}
-                    rol={r}
-                    showPermisos={showPermisos === r.id}
-                    onTogglePermisos={toggleShowPermisos}
-                    onDelete={handleDelete}
-                    getPermisosAsignados={getPermisosAsignados}
-                    categoriasPermisos={categoriasPermisos}
-                  />
-                ))}
+                {paginatedItems.length === 0 ? (
+                  <tr>
+                    <td colSpan="6" className="text-center text-muted py-4">
+                      No hay roles que mostrar
+                    </td>
+                  </tr>
+                ) : (
+                  paginatedItems.map(r => (
+                    <RoleRow
+                      key={r.id}
+                      rol={r}
+                      showPermisos={showPermisos === r.id}
+                      onTogglePermisos={toggleShowPermisos}
+                      onDelete={handleDelete}
+                      getPermisosAsignados={getPermisosAsignados}
+                      categoriasPermisos={categoriasPermisos}
+                    />
+                  ))
+                )}
               </tbody>
             </table>
           </div>
-          <div className="p-3">
-            <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
-          </div>
+
+          <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
         </div>
       </div>
-
-      {roles.length === 0 && (
-        <div className="alert alert-info text-center mt-3">
-          No hay roles registrados. Crea el primer rol con permisos.
-        </div>
-      )}
     </div>
   );
 };

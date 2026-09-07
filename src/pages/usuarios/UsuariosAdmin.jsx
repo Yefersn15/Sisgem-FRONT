@@ -37,7 +37,6 @@ const UsuariosAdmin = ({ source = 'usuarios' }) => {
     handleRoleChange,
     handleExport,
     handleImport,
-    filtered,
     paginatedItems,
     getRoleName,
   } = useUsersList(source);
@@ -88,7 +87,7 @@ const UsuariosAdmin = ({ source = 'usuarios' }) => {
       <div className="card">
         <div className="card-body">
           <div className="table-responsive">
-            <table className="table table-hover mb-0">
+            <table className="table table-hover">
               <thead>
                 <tr>
                   <th>Documento</th>
@@ -101,29 +100,33 @@ const UsuariosAdmin = ({ source = 'usuarios' }) => {
                 </tr>
               </thead>
               <tbody>
-                {paginatedItems.map(u => (
-                  <UsuarioRow
-                    key={u.id}
-                    usuario={u}
-                    source={source}
-                    currentUser={currentUser}
-                    isAdmin={isAdmin}
-                    getRoleName={getRoleName}
-                    onVerDetalle={setShowDetalleModal}
-                    onCambiarRol={setShowRoleModal}
-                    onToggleEstado={handleToggle}
-                  />
-                ))}
+                {paginatedItems.length === 0 ? (
+                  <tr>
+                    <td colSpan={source === 'usuarios' ? 7 : 4} className="text-center text-muted py-4">
+                      No hay usuarios registrados
+                    </td>
+                  </tr>
+                ) : (
+                  paginatedItems.map(u => (
+                    <UsuarioRow
+                      key={u.id}
+                      usuario={u}
+                      source={source}
+                      currentUser={currentUser}
+                      isAdmin={isAdmin}
+                      getRoleName={getRoleName}
+                      onVerDetalle={setShowDetalleModal}
+                      onCambiarRol={setShowRoleModal}
+                      onToggleEstado={handleToggle}
+                    />
+                  ))
+                )}
               </tbody>
             </table>
           </div>
           <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
         </div>
       </div>
-
-      {filtered.length === 0 && (
-        <div className="alert alert-info text-center mt-3">No hay usuarios registrados.</div>
-      )}
 
       {showRoleModal && (
         <RoleChangeModal

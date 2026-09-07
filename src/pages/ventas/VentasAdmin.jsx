@@ -58,7 +58,7 @@ const VentasAdmin = () => {
           <p className="text-muted mb-0">Administra las ventas y pedidos</p>
         </div>
         <div className="d-flex gap-2 flex-wrap">
-          <button className="btn btn-outline-primary" onClick={generarReporte}>
+          <button className="btn btn-outline-secondary" onClick={generarReporte}>
             <i className="fas fa-file-export me-1"></i>Exportar
           </button>
           <button className="btn btn-primary" onClick={handleCreate}>
@@ -108,13 +108,9 @@ const VentasAdmin = () => {
               </tbody>
             </table>
           </div>
-        </div>
 
-        {totalPages > 1 && (
-          <div className="card-footer">
-            <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
-          </div>
-        )}
+          <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
+        </div>
       </div>
 
       {(modal === 'crear' || modal === 'editar') && (

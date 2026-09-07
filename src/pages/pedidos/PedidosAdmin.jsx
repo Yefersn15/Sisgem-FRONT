@@ -72,9 +72,9 @@ const PedidosAdmin = () => {
       />
 
       <div className="card">
-        <div className="card-body p-0">
+        <div className="card-body">
           <div className="table-responsive">
-            <table className="table table-hover mb-0">
+            <table className="table table-hover">
               <thead>
                 <tr>
                   <th>Tipo</th>
@@ -87,32 +87,29 @@ const PedidosAdmin = () => {
                 </tr>
               </thead>
               <tbody>
-                {currentItems.map(pedido => (
-                  <PedidoRow
-                    key={pedido.id}
-                    pedido={pedido}
-                    onAprobarAbono={handleAprobarSolicitudAbono}
-                    onRechazarAbono={handleRechazarAbono}
-                    onVerDetalle={(id) => navigate(`/pedidos/${id}`)}
-                  />
-                ))}
-                {currentItems.length === 0 && (
+                {currentItems.length === 0 ? (
                   <tr>
                     <td colSpan="7" className="text-center text-muted py-4">
                       No hay pedidos registrados
                     </td>
                   </tr>
+                ) : (
+                  currentItems.map(pedido => (
+                    <PedidoRow
+                      key={pedido.id}
+                      pedido={pedido}
+                      onAprobarAbono={handleAprobarSolicitudAbono}
+                      onRechazarAbono={handleRechazarAbono}
+                      onVerDetalle={(id) => navigate(`/pedidos/${id}`)}
+                    />
+                  ))
                 )}
               </tbody>
             </table>
           </div>
-        </div>
 
-        {totalPages > 1 && (
-          <div className="card-footer">
-            <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
-          </div>
-        )}
+          <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
+        </div>
       </div>
 
       {modal === 'crear' && (

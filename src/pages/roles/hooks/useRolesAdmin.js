@@ -1,5 +1,5 @@
 // src/pages/roles/hooks/useRolesAdmin.js
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { getRoles, deleteRol, getPermisosDisponibles } from '../services/rolesService';
 import { usePermisosPorCategoria } from './usePermisosPorCategoria';
 import { useToast } from '../../../context/ToastContext';
@@ -13,6 +13,7 @@ export const useRolesAdmin = () => {
   const [roles, setRoles] = useState([]);
   const [permisosDisponibles, setPermisosDisponibles] = useState([]);
   const [showPermisos, setShowPermisos] = useState(null);
+  const [query, setQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const categoriasPermisos = usePermisosPorCategoria(permisosDisponibles);
 
@@ -47,11 +48,29 @@ export const useRolesAdmin = () => {
 
   const getPermisosAsignados = (rol) => rol.permisos || [];
 
-  const totalPages = Math.ceil(roles.length / ITEMS_PER_PAGE);
-  const paginatedItems = roles.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
+  const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    if (!q) return roles;
+    return roles.filter((r) =>
+      (r.nombre || '').toLowerCase().includes(q) ||
+      (r.descripcion || '').toLowerCase().includes(q)
+    );
+  }, [roles, query]);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [query]);
+
+  const clearFilters = () => setQuery('');
+
+  const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE);
+  const paginatedItems = filtered.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
 
   return {
     roles,
+    query,
+    setQuery,
+    clearFilters,
     paginatedItems,
     currentPage,
     setCurrentPage,

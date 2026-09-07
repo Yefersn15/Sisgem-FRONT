@@ -20,7 +20,6 @@ const PagosAdmin = () => {
     totalPages,
     importStatus,
     fileInputRef,
-    filtered,
     paginatedItems,
     handleExport,
     handleImport,
@@ -62,38 +61,41 @@ const PagosAdmin = () => {
         clearFilters={clearFilters}
       />
 
-      {filtered.length === 0 ? (
-        <div className="alert alert-info">No hay registros de pagos pendientes o pagados.</div>
-      ) : (
-        <div className="card">
-          <div className="card-body p-0">
-            <div className="table-responsive">
-              <table className="table table-hover mb-0">
-                <thead>
+      <div className="card">
+        <div className="card-body">
+          <div className="table-responsive">
+            <table className="table table-hover">
+              <thead>
+                <tr>
+                  <th>ID Venta</th>
+                  <th>Usuario</th>
+                  <th>Fecha</th>
+                  <th>Saldo Pendiente</th>
+                  <th>Método de Pago</th>
+                  <th>Estado Pago</th>
+                  <th>Tipo</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                {paginatedItems.length === 0 ? (
                   <tr>
-                    <th>ID Venta</th>
-                    <th>Usuario</th>
-                    <th>Fecha</th>
-                    <th>Saldo Pendiente</th>
-                    <th>Método de Pago</th>
-                    <th>Estado Pago</th>
-                    <th>Tipo</th>
-                    <th>Acciones</th>
+                    <td colSpan="8" className="text-center text-muted py-4">
+                      No hay registros de pagos pendientes o pagados
+                    </td>
                   </tr>
-                </thead>
-                <tbody>
-                  {paginatedItems.map(venta => (
+                ) : (
+                  paginatedItems.map(venta => (
                     <PagoRow key={venta.id} venta={venta} onAbonar={handleAbonar} />
-                  ))}
-                </tbody>
-              </table>
-            </div>
-            <div className="p-3">
-              <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
-            </div>
+                  ))
+                )}
+              </tbody>
+            </table>
           </div>
+
+          <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
         </div>
-      )}
+      </div>
     </div>
   );
 };
