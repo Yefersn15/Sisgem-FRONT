@@ -45,6 +45,13 @@ export const ConfiguracionProvider = ({ children }) => {
     aplicarTemaCss(temaResuelto);
   }, [temaResuelto]);
 
+  // El <title> estático de index.html es solo el valor por defecto antes de
+  // que cargue la configuración; una vez cargada, la pestaña del navegador
+  // refleja el nombre real de la tienda.
+  useEffect(() => {
+    if (config.nombreTienda) document.title = config.nombreTienda;
+  }, [config.nombreTienda]);
+
   return (
     <ConfiguracionContext.Provider value={{ ...config, loading, refetch, temaResuelto }}>
       {children}

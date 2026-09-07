@@ -1,0 +1,402 @@
+/* ================================
+   Consolidated module CSS
+   (moved here from small .module.css files to keep styles global)
+   ================================ */
+
+/* ProductosList.module.css */
+.productCard {
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.productCard:hover {
+  transform: translateY(-4px);
+}
+
+.productImage {
+  height: 250px;
+  object-fit: contain;
+  background-color: var(--surface2);
+}
+
+/* PagosList.module.css */
+.table-responsive {
+  max-height: 65vh;
+  overflow: auto;
+}
+
+.searchRow {
+  gap: 0.5rem;
+}
+
+/* AdminDomicilios.module.css */
+.domicilioCard {
+  border-left: 4px solid transparent;
+  border-radius: 8px;
+  transition: box-shadow 0.2s;
+}
+
+.domicilioCard.pendiente {
+  border-left-color: #ffc107;
+}
+
+.domicilioCard.aprobado {
+  border-left-color: #0d6efd;
+}
+
+.domicilioCard.enviado {
+  border-left-color: #0dcaf0;
+}
+
+.domicilioCard.entregado {
+  border-left-color: #198754;
+}
+
+.domicilioCard.cancelado {
+  border-left-color: #dc3545;
+}
+
+.repartidorInfo {
+  background-color: var(--surface2);
+  border-radius: 6px;
+  padding: 0.5rem;
+}
+
+/* ================================
+   Bootstrap overrides to respect theme variables
+   Ensures header, offcanvas and footer follow --surface / --text-* variables
+   ================================ */
+
+/* Navbar (override .bg-dark .navbar-dark from Bootstrap) */
+.navbar.bg-dark,
+.navbar {
+  background-color: var(--surface) !important;
+  border-bottom: 1px solid var(--border) !important;
+}
+
+.navbar.navbar-dark .navbar-brand,
+.navbar.navbar-dark .nav-link,
+.navbar .text-light,
+.navbar .navbar-text,
+.navbar .badge,
+.navbar .btn {
+  color: var(--text-primary) !important;
+}
+
+/* Buttons in header that used .btn-outline-light should adapt to theme */
+.navbar .btn-outline-light {
+  color: var(--text-primary) !important;
+  border-color: var(--border) !important;
+  background: transparent !important;
+}
+
+.navbar .btn-outline-light:hover {
+  background: var(--surface2) !important;
+  color: var(--text-primary) !important;
+}
+
+/* Offcanvas (side menu) */
+.offcanvas {
+  background: var(--surface) !important;
+  color: var(--text-primary) !important;
+  border-right: 1px solid var(--border) !important;
+}
+
+.offcanvas .offcanvas-header,
+.offcanvas .offcanvas-body {
+  color: var(--text-primary) !important;
+}
+
+.offcanvas .btn-close {
+  filter: none;
+}
+
+.offcanvas-backdrop.show {
+  background: rgba(0, 0, 0, 0.3) !important;
+}
+
+/* Footer: override bg-dark + text-white to use variables */
+footer.bg-dark {
+  background: var(--surface) !important;
+  color: var(--text-primary) !important;
+  border-top: 1px solid var(--border) !important;
+}
+
+footer.bg-dark .text-white {
+  color: var(--text-primary) !important;
+}
+
+/* Small helpers to make badges and outline buttons follow theme */
+.badge.bg-secondary {
+  background: var(--surface2) !important;
+  color: var(--text-secondary) !important;
+}
+
+.btn-outline-light,
+.btn-outline-secondary {
+  color: var(--text-primary) !important;
+  border-color: var(--border) !important;
+  background: transparent !important;
+}
+
+/* Theme-aware outline button used in header */
+.btn-outline-theme {
+  color: var(--text-primary) !important;
+  border-color: var(--border) !important;
+  background: transparent !important;
+}
+
+.btn-outline-theme:hover {
+  background: var(--surface2) !important;
+  color: var(--text-primary) !important;
+}
+
+/* Navbar links should inherit theme text color */
+.navbar .nav-link {
+  color: var(--text-secondary) !important;
+}
+
+.navbar .nav-link:hover {
+  color: var(--text-primary) !important;
+}
+
+/* App-specific navbar class for clarity */
+.app-navbar {
+  background: var(--header-bg) !important;
+  color: var(--header-text) !important;
+  border-bottom: 1px solid var(--border) !important;
+  box-shadow: none;
+}
+
+.app-navbar .navbar-brand,
+.app-navbar .nav-link,
+.app-navbar .btn,
+.app-navbar .navbar-text {
+  color: var(--header-text) !important;
+}
+
+.app-navbar .nav-link {
+  color: var(--text-secondary) !important;
+}
+
+.app-navbar .nav-link:hover {
+  color: var(--text-primary) !important;
+  background: transparent !important;
+}
+
+.app-navbar .btn-outline-theme {
+  border-color: var(--border) !important;
+  color: var(--header-text) !important;
+}
+
+.app-navbar .btn-outline-theme:hover {
+  background: var(--surface2) !important;
+  color: var(--header-text) !important;
+}
+
+/* Footer using variables */
+.app-footer {
+  background: var(--header-bg) !important;
+  color: var(--header-text) !important;
+  border-top: 1px solid var(--border) !important;
+  box-shadow: none;
+}
+
+/* Nombre de usuario en header */
+.user-name {
+  color: var(--text-primary) !important;
+}
+
+/* Override Bootstrap utility backgrounds to respect theme */
+.bg-light {
+  background-color: var(--surface2) !important;
+  color: var(--text-primary) !important;
+}
+
+.bg-white {
+  background-color: var(--surface) !important;
+  color: var(--text-primary) !important;
+}
+
+/* Ensure card images use theme-friendly background */
+.card-img-top {
+  background-color: var(--surface2) !important;
+}
+
+/* Modals: use variables, rounded corners and consistent shadows */
+.modal-content {
+  background: var(--surface) !important;
+  color: var(--text-primary) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: var(--radius-lg) !important;
+  box-shadow: var(--shadow-lg) !important;
+}
+
+.modal-header,
+.modal-footer {
+  background: var(--surface2) !important;
+  border-bottom: 1px solid var(--border) !important;
+}
+
+/* Brands: make provider/brand logos similar to Yeferson style */
+.infinite-brand-item img,
+.brand-logo {
+  width: 120px;
+  height: 120px;
+  object-fit: contain;
+  filter: none;
+  transition: transform 0.18s ease, filter 0.18s ease;
+}
+
+.infinite-brand-item img:hover,
+.brand-logo:hover {
+  transform: scale(1.04);
+}
+
+/* Admin layout classes — el sidebar/topnav se pintan con --header-bg/
+   --header-text (color de "encabezado" de la paleta activa, ver
+   utils/tema.js), igual que la barra de marca (.app-navbar). Los estados
+   hover/active se derivan con color-mix en vez de tonos fijos, para que
+   sigan siendo legibles sea cual sea el encabezado elegido. */
+.app-admin-sidebar {
+  background: var(--header-bg) !important;
+  color: var(--header-text) !important;
+  border-right: 1px solid color-mix(in srgb, var(--header-text) 15%, transparent) !important;
+}
+
+.app-admin-sidebar .nav-link {
+  color: color-mix(in srgb, var(--header-text) 80%, transparent) !important;
+}
+
+.app-admin-sidebar .nav-link:hover {
+  background: color-mix(in srgb, var(--header-text) 12%, transparent) !important;
+  color: var(--header-text) !important;
+}
+
+.app-admin-sidebar .nav-link.active {
+  background: var(--accent) !important;
+  color: var(--tema-acento-texto, white) !important;
+}
+
+.app-admin-sidebar .text-muted {
+  color: color-mix(in srgb, var(--header-text) 65%, transparent) !important;
+}
+
+.admin-main-content {
+  background: var(--bg) !important;
+  min-height: calc(100vh - var(--topbar-height) - 50px);
+}
+
+/* Menú de la tienda (no-admin): mismo lenguaje visual que el del admin,
+   personalizable como barra lateral/superior, normal o comprimida. */
+.app-store-sidebar {
+  --bs-offcanvas-width: 250px;
+  background: var(--header-bg) !important;
+  color: var(--header-text) !important;
+  border-right: 1px solid color-mix(in srgb, var(--header-text) 15%, transparent) !important;
+}
+
+.app-store-sidebar .nav-link {
+  color: color-mix(in srgb, var(--header-text) 80%, transparent) !important;
+}
+
+.app-store-sidebar .nav-link:hover {
+  background: color-mix(in srgb, var(--header-text) 12%, transparent) !important;
+  color: var(--header-text) !important;
+}
+
+.app-store-sidebar .nav-link.active {
+  background: var(--accent) !important;
+  color: var(--tema-acento-texto, white) !important;
+}
+
+.app-store-sidebar .text-muted {
+  color: color-mix(in srgb, var(--header-text) 65%, transparent) !important;
+}
+
+/* Botón que abre el StoreSidebarNav (off-canvas): pestaña pegada al borde
+   izquierdo, centrada verticalmente, no empuja ni se mezcla con el contenido. */
+.app-store-sidebar-trigger {
+  position: fixed;
+  top: 50%;
+  left: 0;
+  transform: translateY(-50%);
+  width: 24px;
+  height: 88px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--header-bg);
+  color: var(--header-text);
+  border: 1px solid color-mix(in srgb, var(--header-text) 15%, transparent);
+  border-left: none;
+  border-radius: 0 10px 10px 0;
+  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.15);
+  z-index: 1030;
+  cursor: pointer;
+  padding: 0;
+  transition: width 0.15s ease, background 0.15s ease, color 0.15s ease;
+}
+
+.app-store-sidebar-trigger:hover {
+  width: 30px;
+  background: color-mix(in srgb, var(--header-text) 12%, var(--header-bg));
+  color: var(--header-text);
+}
+
+.app-store-topnav {
+  background: var(--header-bg) !important;
+  border-bottom: 1px solid color-mix(in srgb, var(--header-text) 15%, transparent) !important;
+}
+
+.app-store-topnav .store-topnav-link {
+  color: color-mix(in srgb, var(--header-text) 80%, transparent) !important;
+  background: transparent;
+  border: 1px solid transparent;
+}
+
+.app-store-topnav .store-topnav-link:hover {
+  color: var(--header-text) !important;
+  background: color-mix(in srgb, var(--header-text) 12%, transparent);
+}
+
+.app-store-topnav .store-topnav-link.active {
+  background: var(--accent) !important;
+  color: var(--tema-acento-texto, white) !important;
+}
+
+.app-store-main-content {
+  background: var(--bg) !important;
+  min-height: calc(100vh - var(--topbar-height) - 50px);
+}
+
+/* Barra de navegación superior del admin (modo topbar) */
+.app-admin-topnav {
+  background: var(--header-bg) !important;
+  border-bottom: 1px solid color-mix(in srgb, var(--header-text) 15%, transparent) !important;
+}
+
+.app-admin-topnav .admin-topnav-link {
+  color: color-mix(in srgb, var(--header-text) 80%, transparent) !important;
+  background: transparent;
+  border: 1px solid transparent;
+}
+
+.app-admin-topnav .admin-topnav-link:hover {
+  color: var(--header-text) !important;
+  background: color-mix(in srgb, var(--header-text) 12%, transparent);
+}
+
+.app-admin-topnav .admin-topnav-link.active {
+  background: var(--accent) !important;
+  color: var(--tema-acento-texto, white) !important;
+}
+
+.app-admin-footer {
+  background: var(--surface) !important;
+  color: var(--text-muted) !important;
+  border-top: 1px solid var(--border) !important;
+}
+
+
+

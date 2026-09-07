@@ -2,7 +2,7 @@
 
 Este proyecto es una aplicación web de comercio electrónico (e-commerce) desarrollada con React + Vite. Permite gestionar una tienda en línea con catálogo de productos, carrito de compras, pedidos, sistema de usuarios y panel de administración.
 
-> **Nota**: La documentación detallada del API REST se encuentra en `../API_PROYECTO/README.md`
+> **Nota**: La documentación detallada del API REST se encuentra en el repositorio [`Sisgem-API`](https://github.com/Yefersn15/Sisgem-API), en su propio `README.md`.
 
 ---
 
@@ -10,10 +10,10 @@ Este proyecto es una aplicación web de comercio electrónico (e-commerce) desar
 
 El frontend se conecta a la API mediante variables de entorno de Vite:
 
-- `VITE_API_BASE_URL` — URL base del API. Si no se define, `src/services/dataService.js` usa `http://localhost:3000` en desarrollo (`vite dev`) y `https://sisgem-api.onrender.com` en producción como valores por defecto.
-- `VITE_USE_REMOTE_API` — Variable heredada (`true`/`false`). Actualmente **no tiene efecto** en el comportamiento de la app: todas las peticiones (productos, categorías, marcas, carrito, pedidos, etc.) se hacen siempre contra la API a través de `dataService`; ya no existen fallbacks de datos en LocalStorage.
+- `VITE_API_BASE_URL` — URL base del API. Si no se define, `src/services/api/client.js` usa `http://localhost:3000` en desarrollo (`vite dev`) y `https://sisgem-api.onrender.com` en producción como valores por defecto.
+- `VITE_USE_REMOTE_API` — Variable heredada (`true`/`false`). Actualmente **no tiene efecto** en el comportamiento de la app: todas las peticiones (productos, categorías, marcas, carrito, pedidos, etc.) se hacen siempre contra la API; ya no existen fallbacks de datos en LocalStorage.
 
-Agrega estas variables en un archivo `.env.local` en la raíz del proyecto. El repositorio no incluye actualmente un archivo `.env.example`.
+Agrega estas variables en un archivo `.env.local` en la raíz del proyecto, a partir del `.env.example` incluido en el repositorio.
 
 ---
 
@@ -134,7 +134,7 @@ No existe una ruta `/pedidos` o `/mis-pedidos` con un listado propio: el histori
 
 ### 10. Panel de Administración
 
-El admin se sirve bajo `/admin/*` con un layout propio (`AdminLayout`, en `src/components/AdminLayout.jsx`) que permite alternar entre modo barra lateral y modo barra superior (`LayoutModeSwitcher`). Incluye:
+El admin se sirve bajo `/admin/*` con un layout propio (`AdminLayout`, en `src/components/AdminLayout.jsx`) que permite alternar entre modo barra lateral y modo barra superior (`AdminSidebarNav`/`AdminTopNav`, con la preferencia guardada por `useAdminLayoutMode`). Incluye:
 
 - **Dashboard** (`/admin`): Panel principal con estadísticas, gráficas (Recharts) y accesos rápidos.
 - **Ventas** (`/admin/ventas`): Lista de todas las ventas realizadas.
@@ -392,6 +392,7 @@ La aplicación tiene dos árboles de rutas independientes montados en `src/App.j
 | `/perfil` | Perfil del usuario (requiere sesión) |
 | `/cambiar-password` | Cambiar contraseña (requiere sesión) |
 | `/ventas`, `/mis-pagos` | Mis Pagos y Abonos - historial de pedidos/ventas del cliente (requiere sesión) |
+| `/mis-domicilios` | Domicilios del cliente autenticado (requiere sesión) |
 | `/ventas/:id`, `/pedidos/:id` | Detalle de un pedido/venta (componente `VentaDetails`) |
 
 ### Panel de Administración (bajo `/admin`)
@@ -418,7 +419,7 @@ Todas requieren sesión; las que indican un permiso están protegidas además po
 
 ### Conexión al API
 
-El frontend Sisgem se conecta a la API REST del proyecto `API_PROYECTO`. La comunicación se realiza mediante el servicio `dataService` que utiliza Fetch API para realizar peticiones HTTP.
+El frontend Sisgem se conecta a la API REST del repositorio `Sisgem-API`. La comunicación se realiza mediante `fetch`, a través de un cliente HTTP compartido y una capa de servicios por módulo.
 
 #### Variables de Entorno
 
@@ -427,9 +428,9 @@ El frontend Sisgem se conecta a la API REST del proyecto `API_PROYECTO`. La comu
 | `VITE_API_BASE_URL` | URL base del API | `http://localhost:3000` en desarrollo, `https://sisgem-api.onrender.com` en producción |
 | `VITE_USE_REMOTE_API` | Variable heredada, sin efecto actual en el comportamiento de la app | `false` |
 
-#### Funcionamiento del dataService
+#### Funcionamiento del cliente HTTP
 
-El archivo `src/services/dataService.js` centraliza todas las peticiones al API a través de una única función `request(path, options)` (no hay métodos `get/post/put/...` separados):
+`src/services/api/client.js` centraliza la conexión con la API a través de una única función `request(path, options)` (no hay métodos `get/post/put/...` separados):
 
 ```javascript
 export const request = async (path, options = {}) => {
@@ -437,11 +438,12 @@ export const request = async (path, options = {}) => {
     ? path
     : `${API_BASE_URL.replace(/\/$/, '')}/${path.replace(/^\//, '')}`;
 
+  const isFormData = options.body instanceof FormData;
   const headers = {
-    'Content-Type': 'application/json', // se omite si el body es FormData
+    ...(isFormData ? {} : { 'Content-Type': 'application/json' }),
     ...(options.headers || {}),
   };
-  const token = localStorage.getItem('auth_token');
+  const token = getAuthToken();
   if (token) headers['Authorization'] = `Bearer ${token}`;
 
   const res = await fetch(url, { ...options, headers });
@@ -450,7 +452,7 @@ export const request = async (path, options = {}) => {
 };
 ```
 
-Todas las funciones exportadas por `dataService` (`getProductos`, `createPedido`, `getPagos`, etc.) usan internamente `request()` indicando el `method` y, si aplica, el `body`.
+Cada módulo tiene su propio archivo en `src/services/api/` (`auth.api.js`, `productos.api.js`, `pedidos.api.js`, etc. — 15 en total) que usa internamente `request()` indicando el `method` y, si aplica, el `body`. No existe un único archivo `dataService.js` que los agrupe a todos.
 
 #### Autenticación
 
@@ -478,8 +480,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIs...
 | Marcas | `/api/marcas`, `/api/marcas/:id`, `/api/marcas/:id/estado`, `/api/marcas/export` | GET, POST, PUT, PATCH, DELETE |
 | Pedidos / Ventas | `/api/pedidos`, `/api/pedidos/mis-pedidos`, `/api/pedidos/ventas`, `/api/pedidos/:id`, `/api/pedidos/:id/estado`, `/api/pedidos/:id/convertir-venta`, `/api/pedidos/:id/aprobar`, `/api/pedidos/:id/rechazar-abono` | GET, POST, PUT, PATCH, DELETE |
 | Pagos | `/api/pagos`, `/api/pagos/:id`, `/api/pagos/:id/estado` | GET, POST, PUT, PATCH, DELETE |
-| Domicilios | `/api/domicilios`, `/api/domicilios/:id/estado`, `/api/domicilios/:id/convertir`, `/api/domicilios/:id/tarifa`, `/api/domicilios/:id/repartidor` | GET, POST, PUT, PATCH |
-| Tarifas de Domicilio | `/api/tarifas-domicilio`, `/api/tarifas-domicilio/:id` | GET, POST, PUT, DELETE |
+| Domicilios | `/api/domicilios`, `/api/domicilios/:id/estado`, `/api/domicilios/:id/convertir`, `/api/domicilios/:id/tarifa`, `/api/domicilios/:id/repartidor`, `/api/domicilios/tarifas` | GET, POST, PUT, PATCH |
 | Carrito | `/api/carrito`, `/api/carrito/items`, `/api/carrito/items/:id` | GET, POST, PUT, DELETE |
 | Dashboard | `/api/dashboard` | GET |
 | Banners | `/api/banners`, `/api/banners/:id` | GET, POST, PUT, DELETE |
@@ -488,18 +489,11 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIs...
 
 #### Manejo de Errores
 
-El dataService maneja errores HTTP comunes:
-
-| Código | Acción en Frontend |
-|--------|-------------------|
-| 401 | Redirigir a login, limpiar token |
-| 403 | Mostrar mensaje "No tienes permiso" |
-| 404 | Mostrar "Recurso no encontrado" |
-| 500 | Mostrar "Error del servidor" |
+`client.js` no distingue por código HTTP: cualquier respuesta que no sea 2xx, o cuyo cuerpo traiga `success: false`, se convierte en un `Error` (con `err.status`) que cada pantalla captura y muestra con su propio mensaje. A propósito **no** hay redirección automática a login ni limpieza de token en 401 — el comentario del propio archivo lo explica: "No borrar token automáticamente en 401/400 - el usuario puede re-autenticarse si es necesario". El bloqueo de páginas protegidas sin sesión lo maneja `PrivateRoute.jsx` en la navegación, no el cliente HTTP.
 
 #### Uso de LocalStorage
 
-El proyecto ya no usa LocalStorage como fallback de datos de negocio: productos, categorías, marcas, pedidos, pagos y el carrito del cliente siempre se leen y escriben contra la API (la variable `VITE_USE_REMOTE_API` está definida pero no cambia este comportamiento). LocalStorage se usa únicamente para:
+El proyecto no usa LocalStorage como fallback de datos de negocio: productos, categorías, marcas, pedidos, pagos y el carrito del cliente siempre se leen y escriben contra la API (la variable `VITE_USE_REMOTE_API` está definida pero no cambia este comportamiento). LocalStorage se usa únicamente para:
 
 - **Sesión**: token JWT y datos del usuario (`auth_token`, `auth_user`).
 - **Preferencia de tema** claro/oscuro (`theme`).
@@ -512,12 +506,12 @@ El proyecto ya no usa LocalStorage como fallback de datos de negocio: productos,
 - **Enrutamiento**: React Router DOM 7
 - **Estilos**: Bootstrap 5 + CSS personalizado
 - **Iconos**: Font Awesome (`@fortawesome/fontawesome-free`)
-- **Estado global**: React Context (AuthContext, CartContext)
-- **HTTP Client**: Fetch API con `dataService`
+- **Estado global**: React Context (AuthContext, CartContext, ConfiguracionContext, ToastContext, ConfirmContext, AyudaContext)
+- **HTTP Client**: Fetch API a través de `src/services/api/client.js` + un archivo `*.api.js` por módulo
 - **Gráficas**: Recharts, usado en el Dashboard de administración (`src/pages/dashboard/AdminDashboard.jsx`) para ventas por período y rankings (top productos/marcas/categorías)
-- **Excel**: `xlsx`, usado en `dataService` para importar y exportar catálogos completos (productos, categorías, marcas, usuarios, pagos, domicilios, ventas) desde/hacia archivos `.xlsx`
+- **Excel**: `xlsx`, usado por los módulos de categorías, marcas y productos para importar y exportar sus catálogos desde/hacia archivos `.xlsx`
 - **Descarga de archivos**: `file-saver`, usado junto con `xlsx` para generar y descargar los archivos Excel exportados
-- **Generación de PDF**: `html2pdf.js`, usado en `src/services/printService.js` como respaldo para generar/descargar el voucher de una venta cuando el navegador bloquea la ventana de impresión
+- **Generación de PDF**: `html2pdf.js`, usado en `src/pages/domicilios/services/printService.js` como respaldo para generar/descargar el voucher de una venta cuando el navegador bloquea la ventana de impresión
 - **Linting**: ESLint 9
 
 ---
@@ -528,32 +522,36 @@ El proyecto ya no usa LocalStorage como fallback de datos de negocio: productos,
 src/
 ├── assets/            # Imágenes estáticas
 ├── components/        # Componentes reutilizables y layouts
-│   ├── admin/           # Navegación del admin (AdminSidebarNav, AdminTopNav, LayoutModeSwitcher, navConfig, useAdminLayoutMode)
+│   ├── admin/           # Navegación del admin (AdminSidebarNav, AdminTopNav, navConfig, useAdminLayoutMode)
+│   ├── store/            # Navegación de la tienda (StoreSidebarNav, StoreTopNav, storeNavConfig, useStoreLayoutMode)
 │   ├── upload/           # Subida y selección de imágenes (ImageUploadField, ImageGalleryModal, useImageUpload)
 │   ├── AdminLayout.jsx  # Layout y rutas internas de /admin/*
 │   ├── Layout.jsx       # Layout público (Header + Footer)
 │   ├── Header.jsx / Footer.jsx
 │   ├── Rutas.jsx        # Rutas públicas / tienda (montadas en /*)
 │   └── PrivateRoute.jsx # Guard de autenticación y permisos
-├── context/           # Contextos usados por múltiples módulos (AuthContext, CartContext)
-├── hooks/             # Hooks genéricos reutilizados por varios módulos (useDebounce)
+├── context/           # Contextos usados por múltiples módulos (AuthContext, CartContext, ConfiguracionContext, ...)
+├── hooks/             # Hooks genéricos reutilizados por varios módulos (useDebounce, useLayoutMode, useModoOscuro, ...)
 ├── pages/             # Páginas del sistema, organizadas por módulo
-│   ├── auth/            # Login, ForgotPassword, ResetPassword
+│   ├── auth/            # Login, Register (wizard de 3 pasos), ForgotPassword, ResetPassword
 │   ├── banners/         # CRUD de banners del Home (services/, hooks/, components/)
 │   ├── carrito/         # Carrito y Checkout (services/, hooks/, components/)
-│   ├── categorias/      # Categorías (público y admin) (services/, hooks/, components/)
+│   ├── categorias/      # Categorías admin (services/, hooks/, components/) — la vista pública redirige a /productos
+│   ├── configuracion/   # Configuración de la tienda: nombre, logo, horario, tema de colores (hooks/, components/)
 │   ├── dashboard/       # Dashboard admin (services/, hooks/, components/)
-│   ├── domicilios/      # Domicilios admin y "Mis Domicilios" (services/, hooks/, components/)
+│   ├── domicilios/      # Domicilios admin y "Mis Domicilios" del cliente (services/, hooks/)
 │   ├── home/            # Home (services/, hooks/, components/)
-│   ├── marcas/          # Marcas (público y admin) (services/, hooks/, components/)
-│   ├── pagos/           # Pagos admin y "Mis Pagos" (hooks/)
+│   ├── marcas/          # Marcas admin (services/, hooks/, components/) — la vista pública redirige a /productos
+│   ├── pagos/           # Pagos admin y "Mis Pagos" (hooks/, components/)
 │   ├── pedidos/         # Pedidos admin (services/, hooks/, components/)
 │   ├── productos/       # Productos (services/, hooks/, components/)
 │   ├── roles/           # Roles y permisos (services/, hooks/, components/)
 │   ├── usuarios/        # Usuarios, Perfil, Registro, Cambiar contraseña
 │   └── ventas/          # Ventas y detalle de venta/pedido (services/, hooks/, components/)
-├── services/          # dataService (API + Excel) y printService (voucher en PDF)
+├── services/api/      # Cliente HTTP (client.js) + un archivo *.api.js por módulo
+├── utils/             # Utilidades compartidas: tema de colores (tema.js, paletas.js, color.js), horario.js
+├── validations/       # Reglas de validación reutilizadas entre formularios (email.js, password.js, documento.js, telefono.js)
 └── main.jsx           # Punto de entrada
 ```
 
-> La mayoría de los módulos dentro de `pages/` siguen el mismo patrón: el componente de página en la raíz del módulo, con subcarpetas `services/` (llamadas a `dataService`), `hooks/` (lógica de estado) y `components/` (piezas de UI del propio módulo).
+> La mayoría de los módulos dentro de `pages/` siguen el mismo patrón: el componente de página en la raíz del módulo, con subcarpetas `services/` (llamadas a los `*.api.js` de `services/api/`), `hooks/` (lógica de estado) y `components/` (piezas de UI del propio módulo).

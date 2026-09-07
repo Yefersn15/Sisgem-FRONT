@@ -4,19 +4,14 @@ import { useNavigate } from 'react-router-dom';
 import { useCart } from '../../../context/CartContext';
 import { useAuth } from '../../../context/AuthContext';
 import { createPedido } from '../../../services/api/pedidos.api';
-import { getDirecciones, createDireccion } from '../../../services/api/usuarios.api';
 import { useToast } from '../../../context/ToastContext';
+import { useCheckoutDireccion } from './useCheckoutDireccion';
 
 export const useCheckoutForm = () => {
   const navigate = useNavigate();
   const toast = useToast();
   const { cartItemsWithDetails, clearCart } = useCart();
   const { user } = useAuth();
-
-  const [direcciones, setDirecciones] = useState([]);
-  const [selectedDireccionId, setSelectedDireccionId] = useState('');
-  const [showNewAddress, setShowNewAddress] = useState(false);
-  const [newAddress, setNewAddress] = useState({ direccion: '', barrio: '', telefono: '', tipo: 'casa' });
 
   const [formData, setFormData] = useState({
     direccion: '',
@@ -35,28 +30,7 @@ export const useCheckoutForm = () => {
   const [errors, setErrors] = useState({});
   const [submitting, setSubmitting] = useState(false);
 
-  useEffect(() => {
-    const loadDirecciones = async () => {
-      if (user && user.documento) {
-        try {
-          const dirs = await getDirecciones();
-          setDirecciones(dirs || []);
-          if (!selectedDireccionId) {
-            setSelectedDireccionId('registered');
-            setFormData(prev => ({
-              ...prev,
-              direccion: user.direccion || '',
-              barrio: user.barrio || '',
-              telefono: user.telefono || user.celular || ''
-            }));
-          }
-        } catch (err) {
-          console.error('Error cargando direcciones:', err);
-        }
-      }
-    };
-    loadDirecciones();
-  }, [user]);
+  const checkoutDireccion = useCheckoutDireccion({ user, setFormData, toast });
 
   useEffect(() => {
     if (user && !formData.telefono) {
@@ -109,111 +83,6 @@ export const useCheckoutForm = () => {
     if (errors[name]) {
       setErrors(prev => ({ ...prev, [name]: '' }));
     }
-  };
-
-  const handleDireccionSelect = (e) => {
-    const id = e.target.value;
-    if (id === 'new') {
-      setShowNewAddress(true);
-      setSelectedDireccionId(id);
-      setFormData(prev => ({ ...prev, direccion: '', barrio: '', telefono: '' }));
-    } else if (id === 'registered') {
-      setShowNewAddress(false);
-      setSelectedDireccionId(id);
-      setFormData(prev => ({
-        ...prev,
-        direccion: user.direccion || '',
-        barrio: user.barrio || '',
-        telefono: user.telefono || user.celular || ''
-      }));
-    } else {
-      setShowNewAddress(false);
-      setSelectedDireccionId(id);
-      const dir = direcciones.find(d => String(d.id) === String(id));
-      if (dir) {
-        setFormData(prev => ({
-          ...prev,
-          direccion: dir.direccion,
-          barrio: dir.barrio,
-          telefono: dir.telefono || prev.telefono,
-          direccion2: dir.tipo || ''
-        }));
-      }
-    }
-  };
-
-  const handleAddAddress = async () => {
-    if (!newAddress.direccion?.trim()) {
-      toast.error('La dirección es obligatoria');
-      return;
-    }
-
-    if (!user) {
-      toast.error('Debe iniciar sesión para guardar una dirección');
-      return;
-    }
-
-    if (direcciones.length >= 3) {
-      toast.error('Máximo 3 direcciones guardadas. Por favor elimina una para agregar una nueva.');
-      return;
-    }
-
-    const dirData = {
-      nombre: `${newAddress.direccion} ${newAddress.barrio || ''}`.trim(),
-      direccion: newAddress.direccion,
-      barrio: newAddress.barrio || '',
-      telefono: newAddress.telefono || user.telefono || user.celular || '',
-      tipo: newAddress.tipo || 'casa',
-      es_predeterminada: direcciones.length === 0
-    };
-
-    try {
-      const respuesta = await createDireccion(dirData);
-      let nuevaDir = respuesta;
-      let guardadaExitosamente = false;
-
-      if (Array.isArray(respuesta) && respuesta.length > 0) {
-        const dirText = (newAddress.direccion || '').toLowerCase().trim();
-        const found = respuesta.find(d => (d.direccion || '').toLowerCase().trim() === dirText);
-        if (found) {
-          nuevaDir = found;
-          guardadaExitosamente = true;
-        } else {
-          nuevaDir = respuesta[respuesta.length - 1];
-          guardadaExitosamente = Boolean(nuevaDir?.id || nuevaDir?._id);
-        }
-      } else if (respuesta && (respuesta.id || respuesta._id)) {
-        guardadaExitosamente = true;
-      }
-
-      if (guardadaExitosamente && nuevaDir) {
-        setDirecciones(prev => [...prev, nuevaDir]);
-        setSelectedDireccionId(nuevaDir.id || nuevaDir._id);
-        setFormData(prev => ({
-          ...prev,
-          direccion: nuevaDir.direccion || newAddress.direccion,
-          barrio: nuevaDir.barrio || newAddress.barrio,
-          telefono: nuevaDir.telefono || newAddress.telefono || user.telefono || user.celular || ''
-        }));
-      } else {
-        setFormData(prev => ({
-          ...prev,
-          direccion: newAddress.direccion,
-          barrio: newAddress.barrio,
-          telefono: newAddress.telefono || user.telefono || user.celular || ''
-        }));
-      }
-    } catch (e) {
-      console.error('Error agregando dirección:', e);
-      setFormData(prev => ({
-        ...prev,
-        direccion: newAddress.direccion,
-        barrio: newAddress.barrio,
-        telefono: newAddress.telefono || user.telefono || user.celular || ''
-      }));
-    }
-    setShowNewAddress(false);
-    setNewAddress({ direccion: '', barrio: '', telefono: '', tipo: 'casa' });
   };
 
   const validate = () => {
@@ -293,20 +162,13 @@ export const useCheckoutForm = () => {
   return {
     user,
     cartItemsWithDetails,
-    direcciones,
-    selectedDireccionId,
-    showNewAddress,
-    setShowNewAddress,
-    newAddress,
-    setNewAddress,
+    ...checkoutDireccion,
     formData,
     errors,
     subtotal,
     total,
     submitting,
     handleChange,
-    handleDireccionSelect,
-    handleAddAddress,
     handleSubmit,
   };
 };

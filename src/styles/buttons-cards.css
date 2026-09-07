@@ -1,0 +1,172 @@
+/* ================================
+   BUTTONS
+   ================================ */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: 500;
+  border-radius: var(--radius);
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: var(--transition);
+  background: transparent;
+  color: var(--text-primary);
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Primary (crear, guardar, aceptar principal) */
+.btn-primary {
+  background: var(--accent);
+  color: white;
+  border-color: var(--accent);
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: var(--accent-hover);
+  border-color: var(--accent-hover);
+}
+
+/* Success (completar, aceptar, aprobar) */
+.btn-success {
+  background: var(--success);
+  color: white;
+  border-color: var(--success);
+}
+
+.btn-success:hover:not(:disabled) {
+  background: #0ea271;
+  border-color: #0ea271;
+}
+
+/* Danger (eliminar, anular, rechazar) */
+.btn-danger {
+  background: var(--danger);
+  color: white;
+  border-color: var(--danger);
+}
+
+.btn-danger:hover:not(:disabled) {
+  background: #dc2626;
+  border-color: #dc2626;
+}
+
+/* Warning (advertencia, cambios de estado) */
+.btn-warning {
+  background: var(--warning);
+  color: #0f172a;
+  border-color: var(--warning);
+}
+
+.btn-warning:hover:not(:disabled) {
+  background: #f59e0b;
+}
+
+/* Secondary (cancelar, volver, limpiar) */
+.btn-secondary {
+  background: var(--surface3);
+  border-color: var(--border);
+  color: var(--text-primary);
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background: var(--surface2);
+}
+
+/* Ghost (acciones sutiles: editar, ver, toggle) */
+.btn-ghost {
+  background: transparent;
+  border-color: var(--border);
+  color: var(--text-secondary);
+}
+
+.btn-ghost:hover:not(:disabled) {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: var(--accent-dim);
+}
+
+/* Outline variants (para botones de acción secundaria con borde) */
+.btn-outline-primary {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.btn-outline-primary:hover:not(:disabled) {
+  background: var(--accent-dim);
+}
+
+.btn-outline-danger {
+  border-color: var(--danger);
+  color: var(--danger);
+}
+
+.btn-outline-danger:hover:not(:disabled) {
+  background: var(--danger-dim);
+}
+
+.btn-outline-success {
+  border-color: var(--success);
+  color: var(--success);
+}
+
+.btn-outline-success:hover:not(:disabled) {
+  background: var(--success-dim);
+}
+
+/* Tamaños */
+.btn-sm {
+  padding: 5px 12px;
+  font-size: 12px;
+  gap: 4px;
+}
+
+.btn-lg {
+  padding: 12px 24px;
+  font-size: 16px;
+}
+
+/* ================================
+   CARDS
+   ================================ */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow);
+  transition: var(--transition);
+}
+
+.card:hover {
+  box-shadow: var(--shadow-lg);
+}
+
+.card-header {
+  background: var(--surface2);
+  border-bottom: 1px solid var(--border);
+  padding: 16px 20px;
+  font-weight: 600;
+  font-size: 1rem;
+  border-top-left-radius: inherit;
+  border-top-right-radius: inherit;
+}
+
+.card-body {
+  padding: 20px;
+}
+
+.card-footer {
+  background: var(--surface2);
+  border-top: 1px solid var(--border);
+  padding: 12px 20px;
+  border-bottom-left-radius: inherit;
+  border-bottom-right-radius: inherit;
+}
+

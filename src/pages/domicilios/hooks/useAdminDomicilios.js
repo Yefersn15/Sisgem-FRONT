@@ -4,8 +4,6 @@ import {
   getDomicilios,
   saveDomicilio,
   updateDomicilioEstado,
-  asignarRepartidor,
-  editarRepartidor,
 } from '../services/domiciliosService';
 import { getVentas, getVentaById } from '../../../services/api/pedidos.api';
 import { getUsuarios } from '../../../services/api/usuarios.api';
@@ -15,6 +13,7 @@ import { openPrintVoucher } from '../services/printService';
 import { getSiguientesEstadosDomicilio, isEstadoFinalDomicilio, normalizeNumber } from './domicilioEstados';
 import { useToast } from '../../../context/ToastContext';
 import { useConfirm, usePrompt } from '../../../context/ConfirmContext';
+import { useRepartidorAsignacion } from './useRepartidorAsignacion';
 
 export const useAdminDomicilios = () => {
   const toast = useToast();
@@ -22,13 +21,9 @@ export const useAdminDomicilios = () => {
   const prompt = usePrompt();
   const [domicilios, setDomicilios] = useState([]);
   const [repartidoresList, setRepartidoresList] = useState([]);
-  const [selectedRepartidorId, setSelectedRepartidorId] = useState('');
   const [search, setSearch] = useState('');
   const [ventas, setVentas] = useState([]);
   const [filter, setFilter] = useState('Todos');
-  const [showRepartidorModal, setShowRepartidorModal] = useState(false);
-  const [currentVentaId, setCurrentVentaId] = useState(null);
-  const [repartidorForm, setRepartidorForm] = useState({ nombre: '', telefono: '', tipoVehiculo: '', placa: '' });
 
   const cargarDatos = async () => {
     const doms = (await getDomicilios()) || [];
@@ -50,85 +45,7 @@ export const useAdminDomicilios = () => {
     cargarDatos();
   }, []);
 
-  const openRepartidorModal = (ventaId) => {
-    const dom = domicilios.find(d => String(d.ventaId) === String(ventaId));
-    setCurrentVentaId(ventaId);
-    const rep = dom?.repartidor;
-    setRepartidorForm({
-      nombre: (typeof rep === 'object' ? rep?.nombre : rep) || '',
-      telefono: (typeof rep === 'object' ? rep?.telefono : dom?.telefono_repartidor) || '',
-      tipoVehiculo: (typeof rep === 'object' ? rep?.tipoVehiculo : '') || '',
-      placa: (typeof rep === 'object' ? rep?.placa : '') || '',
-      tarifa: (dom?.tarifaAplicada ?? dom?.tarifa_aplicada ?? dom?.tarifa) ?? 0
-    });
-    setSelectedRepartidorId('');
-    setShowRepartidorModal(true);
-  };
-
-  const handleRepartidorInput = (e) => {
-    const { name, value } = e.target;
-    setRepartidorForm(prev => ({ ...prev, [name]: value }));
-  };
-
-  const handleSelectRepartidor = (e) => {
-    const id = e.target.value;
-    setSelectedRepartidorId(id);
-    if (!id) {
-      setRepartidorForm({ nombre: '', telefono: '', tipoVehiculo: '', placa: '', tarifa: repartidorForm.tarifa });
-      return;
-    }
-    const user = repartidoresList.find(r => String(r.id || r._id) === String(id));
-    if (user) {
-      setRepartidorForm({ nombre: user.nombre || '', telefono: user.telefono || '', tipoVehiculo: user.tipoVehiculo || '', placa: user.placa || '', tarifa: repartidorForm.tarifa });
-    }
-  };
-
-  const handleSaveRepartidor = async () => {
-    if (!currentVentaId) return;
-    const token = localStorage.getItem('auth_token');
-    if (!token) {
-      toast.error('No hay sesión activa. Por favor, inicia sesión nuevamente.');
-      return;
-    }
-    const { nombre, telefono, tipoVehiculo, placa, tarifa } = repartidorForm;
-    if (!nombre || !telefono) return toast.error('Nombre y teléfono son obligatorios');
-
-    const dom = domicilios.find(d => String(d.ventaId) === String(currentVentaId));
-    let res = null;
-    const payload = {
-      repartidor: {
-        nombre,
-        telefono,
-        tipoVehiculo: tipoVehiculo || '',
-        placa: placa || ''
-      },
-      tarifa: tarifa !== undefined ? parseFloat(tarifa) : undefined
-    };
-    if (selectedRepartidorId) payload.repartidorId = selectedRepartidorId;
-
-    try {
-      if (dom?.repartidor?.nombre) {
-        res = await editarRepartidor(currentVentaId, payload);
-      } else {
-        res = await asignarRepartidor(currentVentaId, payload);
-      }
-    } catch (err) {
-      console.error('Error asignando repartidor:', err);
-      toast.error('No se puede asignar/editar repartidor: ' + (err?.message || err));
-      return;
-    }
-    if (!res) {
-      toast.error('No se puede asignar/editar repartidor: el pedido puede requerir aprobación previa o no existe un domicilio creado.');
-      return;
-    }
-    try {
-      const venta = ventas.find(v => String(v.id) === String(currentVentaId));
-      if (venta && res) openPrintVoucher(venta, res, { forBag: true, onError: toast.error });
-    } catch (e) {}
-    setShowRepartidorModal(false);
-    setCurrentVentaId(null);
-    cargarDatos();
-  };
+  const repartidorAsignacion = useRepartidorAsignacion({ domicilios, ventas, repartidoresList, cargarDatos, toast });
 
   const handleCambiarEstado = async (ventaId, nextState) => {
     const dom = domicilios.find(d => String(d.ventaId) === String(ventaId));
@@ -274,19 +191,12 @@ export const useAdminDomicilios = () => {
   return {
     domiciliosConVenta,
     repartidoresList,
-    selectedRepartidorId,
     search,
     setSearch,
     filter,
     setFilter,
     clearFilters,
-    showRepartidorModal,
-    setShowRepartidorModal,
-    repartidorForm,
-    openRepartidorModal,
-    handleRepartidorInput,
-    handleSelectRepartidor,
-    handleSaveRepartidor,
+    ...repartidorAsignacion,
     handleCambiarEstado,
     handleConvertirAVenta,
     handleEditarTarifa,

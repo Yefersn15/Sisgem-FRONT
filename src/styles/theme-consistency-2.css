@@ -1,0 +1,338 @@
+/* Continuación de theme-consistency.css (secciones 6-22): sidebar/topbar,
+   scrollbar, spinners, tarjetas, badges, tablas, toasts, transiciones,
+   foco, tooltips, dropdowns y popovers — separado solo por tamaño del
+   archivo, es la misma familia de ajustes de consistencia visual. */
+
+/* ----------------------------
+   6. Sidebar y Topbar
+---------------------------- */
+.sidebar-nav a {
+  transition: background-color 0.2s ease, color 0.2s ease, padding-left 0.2s ease;
+}
+
+.sidebar-nav a:hover {
+  padding-left: 20px;
+}
+
+.topbar {
+  box-shadow: var(--shadow);
+}
+
+/* ----------------------------
+   7. Iconos en menús y botones (ya cubierto en sección 1)
+---------------------------- */
+
+/* ----------------------------
+   8. Scrollbar refinado para modo oscuro
+---------------------------- */
+.theme-dark ::-webkit-scrollbar-thumb {
+  background: #2d3748;
+}
+
+.theme-dark ::-webkit-scrollbar-track {
+  background: #1a202c;
+}
+
+.theme-dark ::-webkit-scrollbar-thumb:hover {
+  background: #4a5568;
+}
+
+/* ----------------------------
+   9. Spinners con variables
+---------------------------- */
+.spinner-border {
+  color: var(--accent) !important;
+}
+
+.spinner-grow {
+  color: var(--accent) !important;
+}
+
+/* Spinner sekundario */
+.spinner-border.text-secondary {
+  color: var(--text-muted) !important;
+}
+
+/* ----------------------------
+   10. Tarjetas con efectos sutiles
+---------------------------- */
+.card {
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--accent);
+}
+
+/* ----------------------------
+   11. Badges - Refuerzo de variables
+---------------------------- */
+.badge.bg-success {
+  background-color: var(--success-dim) !important;
+  color: var(--success) !important;
+}
+
+.badge.bg-danger {
+  background-color: var(--danger-dim) !important;
+  color: var(--danger) !important;
+}
+
+.badge.bg-warning {
+  background-color: var(--warning-dim) !important;
+  color: var(--warning) !important;
+}
+
+.badge.bg-info {
+  background-color: var(--info-dim) !important;
+  color: var(--info) !important;
+}
+
+.badge.bg-primary {
+  background-color: var(--accent-dim) !important;
+  color: var(--accent) !important;
+}
+
+/* ----------------------------
+   12. Fondos Bootstrap - Corrección
+---------------------------- */
+.bg-light,
+.bg-white {
+  background-color: var(--surface) !important;
+  color: var(--text-primary) !important;
+}
+
+.bg-dark {
+  background-color: var(--surface2) !important;
+  color: var(--text-primary) !important;
+}
+
+.bg-secondary {
+  background-color: var(--surface3) !important;
+  color: var(--text-secondary) !important;
+}
+
+.bg-primary {
+  background-color: var(--accent-dim) !important;
+  color: var(--accent) !important;
+}
+
+.bg-success {
+  background-color: var(--success-dim) !important;
+  color: var(--success) !important;
+}
+
+.bg-danger {
+  background-color: var(--danger-dim) !important;
+  color: var(--danger) !important;
+}
+
+.bg-warning {
+  background-color: var(--warning-dim) !important;
+  color: var(--warning) !important;
+}
+
+.bg-info {
+  background-color: var(--info-dim) !important;
+  color: var(--info) !important;
+}
+
+/* Opacity variants */
+.bg-opacity-10 {
+  background-color: rgba(var(--bs-primary-rgb), 0.1) !important;
+}
+
+.bg-secondary.bg-opacity-10 {
+  background-color: var(--surface2) !important;
+}
+
+/* ----------------------------
+   13. Tablas - Zebra stripe
+---------------------------- */
+.table-striped tbody tr:nth-of-type(odd) {
+  background-color: var(--surface2);
+}
+
+/* Tablas con bordes más suaves */
+.table-bordered th,
+.table-bordered td {
+  border-color: var(--border);
+}
+
+/* ----------------------------
+   14. Toasts con variables
+---------------------------- */
+.toast {
+  background: var(--surface);
+  color: var(--text-primary);
+  border: 1px solid var(--border);
+}
+
+.toast-header {
+  background: var(--surface2);
+  color: var(--text-primary);
+  border-bottom: 1px solid var(--border);
+}
+
+.toast-body {
+  color: var(--text-secondary);
+}
+
+/* ----------------------------
+   15. Transición suave del tema
+---------------------------- */
+/* Mejorar transición para cambio de tema - ya definido arriba, refueros aquí */
+html,
+body,
+body * {
+  transition: background-color 0.25s ease, color 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease !important;
+}
+
+/* ----------------------------
+   16. Focus visible en elementos interactivos
+---------------------------- */
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* Quitar outline default y dejar solo focus-visible */
+*:focus {
+  outline: none;
+}
+
+/* ----------------------------
+   17. Fondo sutil para modo oscuro
+---------------------------- */
+.theme-dark body {
+  background-image: radial-gradient(circle at 10% 20%, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+
+/* ----------------------------
+   18. Tooltips
+---------------------------- */
+.tooltip-inner {
+  background-color: var(--surface) !important;
+  color: var(--text-primary) !important;
+  border: 1px solid var(--border) !important;
+  box-shadow: var(--shadow);
+}
+
+/* Flecha del tooltip */
+.bs-tooltip-auto[data-popper-placement^=top] .tooltip-arrow::before,
+.bs-tooltip-top .tooltip-arrow::before {
+  border-top-color: var(--surface) !important;
+}
+
+.bs-tooltip-auto[data-popper-placement^=bottom] .tooltip-arrow::before,
+.bs-tooltip-bottom .tooltip-arrow::before {
+  border-bottom-color: var(--surface) !important;
+}
+
+.bs-tooltip-auto[data-popper-placement^=left] .tooltip-arrow::before,
+.bs-tooltip-start .tooltip-arrow::before {
+  border-left-color: var(--surface) !important;
+}
+
+.bs-tooltip-auto[data-popper-placement^=right] .tooltip-arrow::before,
+.bs-tooltip-end .tooltip-arrow::before {
+  border-right-color: var(--surface) !important;
+}
+
+/* ----------------------------
+   19. Dropdowns adaptativos
+---------------------------- */
+.dropdown-menu {
+  background: var(--surface) !important;
+  border: 1px solid var(--border) !important;
+  color: var(--text-primary) !important;
+  box-shadow: var(--shadow-lg) !important;
+}
+
+.dropdown-item {
+  color: var(--text-secondary) !important;
+}
+
+.dropdown-item:hover,
+.dropdown-item:focus {
+  background: var(--surface2) !important;
+  color: var(--text-primary) !important;
+}
+
+.dropdown-item.active,
+.dropdown-item:active {
+  background: var(--accent-dim) !important;
+  color: var(--accent) !important;
+}
+
+.dropdown-divider {
+  border-color: var(--border) !important;
+}
+
+/* ----------------------------
+   20. Dropdowns en tema oscuro
+---------------------------- */
+.theme-dark .dropdown-menu {
+  background: var(--surface) !important;
+}
+
+/* ----------------------------
+   21. Elementos adicionales que deben respetar el tema
+---------------------------- */
+/* Listas */
+.list-group-item {
+  background: var(--surface);
+  border-color: var(--border);
+  color: var(--text-primary);
+}
+
+.list-group-item:hover {
+  background: var(--surface2);
+}
+
+/* Pagination */
+.page-link {
+  background: var(--surface);
+  border-color: var(--border);
+  color: var(--text-primary);
+}
+
+.page-link:hover {
+  background: var(--surface2);
+  border-color: var(--border);
+  color: var(--accent);
+}
+
+.page-item.active .page-link {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: white;
+}
+
+.page-item.disabled .page-link {
+  background: var(--surface2);
+  border-color: var(--border);
+  color: var(--text-muted);
+}
+
+/* ----------------------------
+   22. Popovers
+---------------------------- */
+.popover {
+  background: var(--surface) !important;
+  border: 1px solid var(--border) !important;
+  box-shadow: var(--shadow-lg) !important;
+}
+
+.popover-header {
+  background: var(--surface2) !important;
+  color: var(--text-primary) !important;
+  border-bottom: 1px solid var(--border) !important;
+}
+
+.popover-body {
+  color: var(--text-secondary) !important;
+}
+

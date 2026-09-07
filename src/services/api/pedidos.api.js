@@ -251,20 +251,6 @@ export const importVentas = async (file, onSuccess, onError) => {
 };
 
 // ----------------------------------------------------------------------
-// VENTAS - Estados y acciones
-// ----------------------------------------------------------------------
-// NOTA: preservadas tal cual del archivo original. `cambiarEstadoVenta` no
-// existe en este módulo (tampoco existía en dataService.js): ambas funciones
-// ya estaban rotas antes del split y no se usan en ninguna pantalla actual.
-export const aceptarVenta = async (id) => {
-  return await cambiarEstadoVenta(id, 'confirmado');
-};
-
-export const aprobarVenta = async (id) => {
-  return await cambiarEstadoVenta(id, 'entregado');
-};
-
-// ----------------------------------------------------------------------
 // ESTADÍSTICAS - ventas por periodo
 // ----------------------------------------------------------------------
 export const getVentasDelDia = async () => {

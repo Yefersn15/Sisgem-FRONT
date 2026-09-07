@@ -1,0 +1,26 @@
+/* ================================
+   FORMULARIOS DE AUTENTICACIÓN
+   ================================ */
+.theme-dark .auth-card,
+.theme-dark .login-card,
+.theme-dark .register-card {
+  background: var(--surface) !important;
+  border-color: var(--border) !important;
+}
+
+.theme-dark .login-container,
+.theme-dark .register-container {
+  background: var(--bg) !important;
+}
+
+/* Forzar fondo de tarjetas en modo oscuro - override de Bootstrap */
+.theme-dark .card {
+  background-color: var(--surface) !important;
+  border-color: var(--border) !important;
+}
+
+.theme-dark .card-header {
+  background-color: var(--surface2) !important;
+  border-color: var(--border) !important;
+}
+

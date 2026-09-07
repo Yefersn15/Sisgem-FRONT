@@ -1,0 +1,139 @@
+/* ================================
+   CARRUSEL INFINITO DE MARCAS
+   ================================ */
+.infinite-brands-wrapper {
+  overflow: hidden;
+  width: 100%;
+}
+
+.infinite-brands-track {
+  display: flex;
+  gap: 24px;
+  align-items: center;
+  animation: scroll-left 18s linear infinite;
+}
+
+.infinite-brands-track:hover {
+  animation-play-state: paused;
+}
+
+.infinite-brand-item {
+  flex: 0 0 auto;
+  width: 140px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.infinite-brand-item img {
+  width: 120px;
+  height: 120px;
+  object-fit: contain;
+}
+
+/* Carrusel de productos destacados */
+.infinite-product-item {
+  flex: 0 0 auto;
+  width: 160px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+}
+.infinite-product-item .card {
+  width: 100%;
+  border: none;
+}
+.infinite-product-item .card-img-top {
+  height: 140px;
+  object-fit: contain;
+  border-radius: 8px;
+}
+
+/* Carrusel de productos - reducir gap */
+.infinite-brands-wrapper.productos .infinite-brands-track {
+  gap: 12px;
+}
+
+@keyframes scroll-left {
+  0% {
+    transform: translateX(0);
+  }
+
+  100% {
+    transform: translateX(var(--translate-x));
+  }
+}
+
+/* ================================
+   Modales (estilo tipo Yeferson)
+   ================================ */
+/* Aplica a modales Bootstrap y modales custom: bordes suaves, sombra, fondo acorde al tema */
+.modal .modal-content,
+.modal-content,
+.modal-overlay .modal-content {
+  background: var(--surface) !important;
+  color: var(--text-primary) !important;
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  border-radius: 12px !important;
+  box-shadow: var(--shadow) !important;
+  padding: 20px !important;
+}
+
+.modal-backdrop.show {
+  background: var(--modal-backdrop) !important;
+}
+
+.modal-overlay {
+  background: rgba(2, 6, 23, 0.55) !important;
+  backdrop-filter: blur(5px) !important;
+}
+
+.modal-header {
+  background: transparent !important;
+  border-bottom: 1px solid var(--border) !important;
+  padding-bottom: 12px !important;
+}
+
+.modal-footer {
+  background: transparent !important;
+  border-top: 1px solid var(--border) !important;
+  padding-top: 12px !important;
+}
+
+.modal-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text-primary) !important;
+}
+
+.modal-close {
+  color: var(--text-muted) !important;
+}
+
+/* En tema claro reducimos sombra para mantener look Yeferson */
+:root .modal .modal-content {
+  box-shadow: 0 8px 24px rgba(2, 6, 23, 0.04) !important;
+}
+
+.theme-dark .modal .modal-content {
+  box-shadow: 0 12px 40px rgba(2, 6, 23, 0.6) !important;
+}
+
+/* Force modal dialog sizing and backdrop to respect theme and be wider */
+.modal {
+  background-color: var(--modal-backdrop) !important;
+}
+
+.modal .modal-dialog {
+  width: 100% !important;
+  max-width: 920px !important;
+  margin: 0 auto !important;
+}
+
+.modal .modal-dialog .modal-content {
+  max-width: 920px !important;
+  width: 100% !important;
+}
+
+

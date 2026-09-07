@@ -1,0 +1,46 @@
+/* ================================
+   OVERRIDES PARA BOOTSTRAP (si se usa)
+   ================================ */
+/* Estos estilos aseguran que los componentes de Bootstrap usen las variables personalizadas */
+:root {
+  --bs-primary: var(--accent);
+  --bs-primary-rgb: 59, 130, 246;
+  --bs-success: var(--success);
+  --bs-success-rgb: 16, 185, 129;
+  --bs-danger: var(--danger);
+  --bs-danger-rgb: 239, 68, 68;
+  --bs-warning: var(--warning);
+  --bs-warning-rgb: 245, 158, 11;
+  --bs-secondary: var(--text-muted);
+  --bs-secondary-rgb: 100, 116, 139;
+  --bs-dark: var(--text-primary);
+  --bs-dark-rgb: 15, 23, 42;
+}
+
+.theme-dark {
+  --bs-primary-rgb: 200, 245, 90;
+  --bs-success-rgb: 78, 205, 196;
+  --bs-danger-rgb: 255, 87, 87;
+  --bs-warning-rgb: 255, 179, 71;
+  --bs-secondary-rgb: 136, 136, 132;
+  --bs-dark-rgb: 240, 240, 238;
+}
+
+/* Recharts tooltip para tema oscuro */
+.recharts-tooltip-wrapper {
+  background-color: var(--surface) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 8px !important;
+}
+.recharts-default-tooltip {
+  background-color: var(--surface) !important;
+  border: 1px solid var(--border) !important;
+  color: var(--text-primary) !important;
+}
+.recharts-tooltip-label {
+  color: var(--text-primary) !important;
+  font-weight: 600 !important;
+}
+.recharts-tooltip-item {
+  color: var(--text-secondary) !important;
+}

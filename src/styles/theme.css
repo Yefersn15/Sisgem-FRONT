@@ -1,0 +1,245 @@
+/* ================================
+   VARIABLES (Light Theme - Default)
+   ================================ */
+:root {
+  /* Colores base */
+  --bg: #f4f5f7;
+  /* Fondo general */
+  --surface: #ffffff;
+  /* Tarjetas, paneles */
+  --surface2: #eef0f3;
+  /* Fondo secundario (encabezados de tabla, inputs) */
+  --surface3: #e4e7ec;
+  /* Fondo terciario (botones secundarios) */
+
+  /* Bordes */
+  --border: #e1e4ea;
+  /* Borde principal */
+  --border2: #ced2db;
+  /* Borde más claro */
+
+  /* Textos */
+  --text-primary: #1a1d24;
+  /* Texto principal */
+  --text-secondary: #4b5162;
+  /* Texto secundario */
+  --text-muted: #6b7280;
+  /* Texto deshabilitado o placeholder */
+
+  /* Colores de acento */
+  --accent: #3b82f6;
+  /* Color principal (azul) */
+  --accent-dim: rgba(59, 130, 246, 0.1);
+  --accent-hover: #2563eb;
+
+  /* Header / Footer (tema claro) - blanco profesional, sin color de acento */
+  --header-bg: var(--surface);
+  --header-text: var(--text-primary);
+  --header-overlay: rgba(15, 23, 42, 0.05);
+
+  /* Tema de marca (paletas de Configuración > Tema de colores): 5 roles +
+     su texto de contraste, calculados por utils/tema.js y aplicados aquí
+     como inline style en :root — estos valores son solo el fallback antes
+     de que cargue la configuración. --header-bg/--header-text ya siguen a
+     --tema-encabezado/-texto (ver aplicarTemaCss); estas otras cuatro
+     quedan disponibles para nuevos usos puntuales (ver clases .tema-* abajo). */
+  --tema-fondo: var(--bg);
+  --tema-fondo-texto: var(--text-primary);
+  --tema-superficie: var(--surface);
+  --tema-superficie-texto: var(--text-primary);
+  --tema-encabezado: var(--header-bg);
+  --tema-encabezado-texto: var(--header-text);
+  --tema-acento: var(--accent);
+  --tema-acento-texto: #ffffff;
+  --tema-secundario: var(--secondary);
+  --tema-secundario-texto: #ffffff;
+
+  /* Estados/botones */
+  /* PRIMARY (Azul) → Acciones principales de gestión */
+  --primary: #3b82f6;
+  /* Ver, Editar, Crear, Guardar, Agregar */
+  --primary-dim: rgba(59, 130, 246, 0.1);
+
+  /* SUCCESS (Verde) → Acciones positivas / confirmaciones */
+  --success: #10b981;
+  /* Aprobar, Convertir, Aceptar, Activar */
+  --success-dim: rgba(16, 185, 129, 0.1);
+
+  /* DANGER (Rojo) → Acciones destructivas */
+  --danger: #ef4444;
+  /* Eliminar, Anular, Rechazar */
+  --danger-dim: rgba(239, 68, 68, 0.1);
+
+  /* WARNING (Naranja) → Cambios de estado o precaución */
+  --warning: #f59e0b;
+  /* Desactivar */
+  --warning-dim: rgba(245, 158, 11, 0.1);
+
+  /* INFO (Azul cielo) → Información (opcional para “Ver” si se separa de primary) */
+  --info: #06b6d4;
+--info-dim: rgba(6, 182, 212, 0.1);
+
+  /* SECONDARY (Gris) → Acciones neutrales */
+  --secondary: #64748b;
+  /* Cancelar, Limpiar, Volver */
+  --secondary-dim: rgba(100, 116, 139, 0.1);
+
+  /* ================================
+     GUÍA DE ICONOS POR COLOR DE BOTÓN
+     ================================
+     Iconos FontAwesome estandarizados para cada acción:
+
+     PRIMARY (Azul) → Acciones principales de gestión
+       - fa-eye       → Ver (ver detalles)
+       - fa-edit    → Editar (modificar registro)
+       - fa-plus    → Crear / Agregar (nuevo elemento)
+       - fa-save    → Guardar (persistir cambios)
+       - fa-file-export → Exportar (descargar datos)
+       - fa-file-import → Importar (cargar datos)
+
+     SUCCESS (Verde) → Acciones positivas / confirmaciones
+       - fa-check     → Aprobar (confirmar acción)
+       - fa-toggle-on → Activar (habilitar algo)
+
+     DANGER (Rojo) → Acciones destructivas
+       - fa-trash     → Eliminar (borrar registro)
+       - fa-ban      → Anular (cancelar proceso)
+       - fa-times    → Rechazar (rechazar solicitud)
+
+     WARNING (Naranja) → Cambios de estado
+       - fa-toggle-off → Desactivar (deshabilitar algo)
+
+     INFO (Celeste) → Información adicional
+       - fa-eye       → Ver detalle (alternativa a primary)
+       - fa-sticky-note → Notas (observaciones)
+       - fa-key      → Permisos (gestión de accesos)
+
+     SECONDARY (Gris) → Acciones neutrales
+       - fa-times      → Cancelar (abortar acción)
+       - fa-eraser    → Limpiar (borrar filtros/formulario)
+       - fa-arrow-left → Volver (regresar)
+       - fa-sync-alt  → Actualizar (recargar datos)
+
+     Tamaño recomendado: btn-sm para acciones dentro de tablas
+     Clases: btn-outline-* para acciones secundarias, btn-* para principales
+     ================================*/
+
+  /* Efectos y medidas */
+  --radius: 8px;
+  --radius-lg: 12px;
+  --shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+  --transition: all 0.2s ease;
+
+  /* Layout */
+  --sidebar-width: 240px;
+  --topbar-height: 64px;
+
+  /* Fuentes */
+  --font-main: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+}
+
+/* Utilidades del tema de marca (Configuración > Tema de colores). El navbar
+   y sidebar ya heredan --tema-encabezado vía --header-bg/--header-text; estas
+   clases quedan disponibles para resaltar puntos concretos (ej. una franja
+   o badge) con el color de encabezado o acento de la paleta activa. */
+.tema-encabezado {
+  background-color: var(--tema-encabezado) !important;
+  color: var(--tema-encabezado-texto) !important;
+}
+.tema-encabezado-link,
+.tema-encabezado .nav-link,
+.tema-encabezado .navbar-brand {
+  color: inherit !important;
+}
+.tema-acento-bg {
+  background-color: var(--tema-acento) !important;
+  color: var(--tema-acento-texto) !important;
+}
+.text-tema-acento {
+  color: var(--tema-acento) !important;
+}
+
+/* Modal backdrop color (can be tuned per theme) */
+:root {
+  --modal-backdrop: rgba(0, 0, 0, 0.45);
+}
+
+/* ================================
+    DARK THEME
+    ================================ */
+.theme-dark {
+  /* Dark theme tuned for low-light comfort */
+  --bg: #0d0f14;
+  /* neutral near-black page background */
+  --surface: #14161d;
+  /* panels, cards */
+  --surface2: #191c25;
+  /* secondary surfaces (inputs, headers) */
+  --surface3: #20242f;
+  /* tertiary surfaces */
+
+  --border: rgba(255, 255, 255, 0.07);
+  /* subtle light border on dark */
+  --border2: rgba(255, 255, 255, 0.04);
+
+  --text-primary: #eceef2;
+  /* soft off-white for comfortable reading */
+  --text-secondary: #c4c9d4;
+  /* very bright secondary text for dark mode */
+  --text-muted: #8b93a3;
+  /* much more visible muted text */
+
+  /* Keep accent blue for recognizability but slightly brighter */
+  --accent: #2b6ef6;
+  --accent-dim: rgba(43, 110, 246, 0.08);
+  --accent-hover: #1e56d6;
+
+  /* En tema oscuro usar superficies neutras para header/footer */
+  --header-bg: var(--surface);
+  --header-text: var(--text-primary);
+  --header-overlay: rgba(255, 255, 255, 0.02);
+
+  --danger: #ff6b6b;
+  --danger-dim: rgba(255, 107, 107, 0.08);
+  --warning: #f59e0b;
+  --warning-dim: rgba(245, 158, 11, 0.08);
+  --success: #34d399;
+  --success-dim: rgba(52, 211, 153, 0.08);
+  --info: #60a5fa;
+  --info-dim: rgba(96, 165, 250, 0.08);
+
+  --shadow: 0 6px 24px rgba(2, 6, 23, 0.6);
+  --shadow-lg: 0 12px 40px rgba(2, 6, 23, 0.65);
+  --modal-backdrop: rgba(2, 6, 23, 0.6);
+}
+
+/* Tablas en tema oscuro - corregir fondo de celdas y texto */
+.theme-dark .table>tbody>tr>td,
+.theme-dark .table>thead>tr>th {
+  background-color: var(--surface) !important;
+  color: var(--text-primary) !important;
+}
+
+.theme-dark .table tbody tr:hover>td {
+  background-color: var(--surface2) !important;
+  color: var(--text-primary) !important;
+}
+
+.theme-dark .table thead th {
+  background-color: var(--surface2) !important;
+  color: var(--text-primary) !important;
+}
+
+/* Filtros y búsquedas - asegurar fondo y texto correcto en tema oscuro */
+.theme-dark .card .card-body {
+  background-color: var(--surface) !important;
+}
+
+.theme-dark .card .card-body input,
+.theme-dark .card .card-body select {
+  background-color: var(--surface2) !important;
+  color: var(--text-primary) !important;
+}
+
