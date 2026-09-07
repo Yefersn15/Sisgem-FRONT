@@ -23,6 +23,7 @@ const UsuarioEdit = () => {
     documentoExists,
     form,
     setForm,
+    fotoUrlRef,
     handleChange,
     handleSubmit,
   } = useUsuarioForm(id);
@@ -63,6 +64,7 @@ const UsuarioEdit = () => {
                   documentoRequired={!isEditing}
                   documentoDisabled={isEditing}
                   documentoExists={documentoExists}
+                  fotoUrlRef={fotoUrlRef}
                 />
               </div>
 

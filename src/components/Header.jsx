@@ -145,9 +145,9 @@ const Header = ({ vistaLlamativa, setVistaLlamativa }) => {
                   onClick={() => setUserMenuOpen(!userMenuOpen)}
                   aria-expanded={userMenuOpen}
                 >
-                  {user.fotoPerfil ? (
+                  {user.fotoUrl ? (
                     <img
-                      src={user.fotoPerfil}
+                      src={user.fotoUrl}
                       alt="Foto"
                       className="rounded-circle me-1"
                       style={{ width: 28, height: 28, objectFit: 'cover' }}
@@ -159,9 +159,9 @@ const Header = ({ vistaLlamativa, setVistaLlamativa }) => {
                 </button>
                 <ul className={`dropdown-menu dropdown-menu-end ${userMenuOpen ? 'show' : ''}`} style={{ minWidth: 200 }}>
                   <li className="text-center py-2">
-                    {user.fotoPerfil ? (
+                    {user.fotoUrl ? (
                       <img
-                        src={user.fotoPerfil}
+                        src={user.fotoUrl}
                         alt="Foto"
                         className="rounded-circle mb-2"
                         style={{ width: 60, height: 60, objectFit: 'cover' }}

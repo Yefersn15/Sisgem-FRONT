@@ -1,5 +1,5 @@
 // src/pages/usuarios/hooks/useUsuarioForm.js
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getUsuarioById, createUsuario, updateUsuario, getUsuarios } from '../services/usuariosService';
 import { getRoles } from '../../roles/services/rolesService';
@@ -7,6 +7,7 @@ import { normalizeText } from './textUtils';
 import { passwordEsValida } from '../../../validations/password';
 import { emailEsValido } from '../../../validations/email';
 import { documentoEsValido, mensajeDocumentoInvalido } from '../../../validations/documento';
+import { resolverImagenPendiente } from '../../../components/upload/useImageUpload';
 
 const FORM_INICIAL = {
   nombre: '',
@@ -21,7 +22,8 @@ const FORM_INICIAL = {
   password: '',
   confirmPassword: '',
   rolId: '',
-  estado: true
+  estado: true,
+  fotoUrl: '',
 };
 
 export const useUsuarioForm = (id) => {
@@ -35,6 +37,7 @@ export const useUsuarioForm = (id) => {
   const [error, setError] = useState('');
   const [documentoExists, setDocumentoExists] = useState(false);
   const [form, setForm] = useState(FORM_INICIAL);
+  const fotoUrlRef = useRef(null);
 
   useEffect(() => {
     const loadData = async () => {
@@ -58,7 +61,8 @@ export const useUsuarioForm = (id) => {
               password: '',
               confirmPassword: '',
               rolId: usuario.rol?.id || usuario.rol_id || '',
-              estado: usuario.estado !== false
+              estado: usuario.estado !== false,
+              fotoUrl: usuario.fotoUrl || ''
             });
           }
         } else {
@@ -150,6 +154,12 @@ export const useUsuarioForm = (id) => {
 
     setLoading(true);
     try {
+      const fotoResuelta = await resolverImagenPendiente(fotoUrlRef, form.fotoUrl);
+      if (!fotoResuelta.ok) {
+        setError('No se pudo subir la foto de perfil, intenta de nuevo');
+        return;
+      }
+
       const userData = {
         nombre: normalizeText(form.nombre),
         apellido: normalizeText(form.apellido),
@@ -161,7 +171,8 @@ export const useUsuarioForm = (id) => {
         barrio: form.barrio ? normalizeText(form.barrio) : '',
         email: form.email.toLowerCase().trim(),
         rolId: form.rolId,
-        estado: form.estado
+        estado: form.estado,
+        fotoUrl: fotoResuelta.url
       };
 
       if (!isEditing) {
@@ -194,6 +205,7 @@ export const useUsuarioForm = (id) => {
     documentoExists,
     form,
     setForm,
+    fotoUrlRef,
     handleChange,
     handleSubmit,
   };

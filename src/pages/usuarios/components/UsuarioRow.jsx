@@ -9,12 +9,29 @@ const UsuarioRow = ({ usuario, source, currentUser, isAdmin, getRoleName, onVerD
     <tr>
       <td className="font-monospace fw-bold">{usuario.documento || '—'}</td>
       <td className="fw-bold">
-        {usuario.nombre} {usuario.apellido}
-        {esAdminPrincipal && (
-          <span className="badge bg-dark ms-2" title={tituloProtegido}>
-            <i className="fas fa-shield-alt me-1"></i>Admin principal
-          </span>
-        )}
+        <div className="d-flex align-items-center gap-2">
+          {usuario.fotoUrl ? (
+            <img
+              src={usuario.fotoUrl}
+              alt=""
+              className="rounded-circle flex-shrink-0"
+              style={{ width: 32, height: 32, objectFit: 'cover' }}
+            />
+          ) : (
+            <div
+              className="rounded-circle bg-secondary-subtle d-flex align-items-center justify-content-center flex-shrink-0"
+              style={{ width: 32, height: 32 }}
+            >
+              <i className="fas fa-user text-muted" style={{ fontSize: 12 }}></i>
+            </div>
+          )}
+          <span>{usuario.nombre} {usuario.apellido}</span>
+          {esAdminPrincipal && (
+            <span className="badge bg-dark" title={tituloProtegido}>
+              <i className="fas fa-shield-alt me-1"></i>Admin principal
+            </span>
+          )}
+        </div>
       </td>
       {source === 'usuarios' && <td>{usuario.email || '—'}</td>}
       {source === 'usuarios' && <td>{usuario.telefono || '—'}</td>}

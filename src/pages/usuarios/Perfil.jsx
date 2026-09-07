@@ -4,9 +4,10 @@ import LoadingState from '../../components/LoadingState';
 import PerfilHeader from './components/PerfilHeader';
 import InfoField from './components/InfoField';
 import InformacionCuentaView from './components/InformacionCuentaView';
+import ImageUploadField from '../../components/upload/ImageUploadField';
 
 const Perfil = () => {
-  const { perfil, loading, editMode, setEditMode, form, success, error, submitting, handleChange, handleSubmit, cancelEdit } = usePerfilForm();
+  const { perfil, loading, editMode, setEditMode, form, fotoUrlRef, success, error, submitting, handleChange, handleSubmit, cancelEdit } = usePerfilForm();
 
   if (loading) {
     return <div className="container mt-4"><LoadingState /></div>;
@@ -45,6 +46,20 @@ const Perfil = () => {
                 <h6 className="text-primary mb-3 border-bottom pb-2">
                   <i className="fas fa-id-card me-2"></i>Información Personal
                 </h6>
+
+                {editMode && (
+                  <div className="mb-3">
+                    <ImageUploadField
+                      ref={fotoUrlRef}
+                      label="Foto de perfil"
+                      name="fotoUrl"
+                      value={form.fotoUrl}
+                      onChange={handleChange}
+                      folder="usuarios"
+                      size={72}
+                    />
+                  </div>
+                )}
 
                 <InfoField icon="fa-hashtag" label="Número de Documento" value={form.documento} disabled />
                 <InfoField icon="fa-user" label="Nombre" name="nombre" value={form.nombre} onChange={handleChange} disabled={!editMode} required />

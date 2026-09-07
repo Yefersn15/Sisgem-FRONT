@@ -1,5 +1,6 @@
 import { documentoEsValido, mensajeDocumentoInvalido } from '../../../validations/documento';
 import { telefonoEsValido, MENSAJE_TELEFONO_INVALIDO } from '../../../validations/telefono';
+import ImageUploadField from '../../../components/upload/ImageUploadField';
 
 const InformacionPersonalForm = ({
   form,
@@ -14,6 +15,12 @@ const InformacionPersonalForm = ({
   // inválido, solo uno con contenido inválido (documento/teléfono mal
   // escritos), igual que en Perfil/UsuarioEdit donde este prop no se pasa.
   mostrarErrores = false,
+  // Ref de ImageUploadField (ver components/upload/ImageUploadField.jsx):
+  // el archivo elegido no se sube hasta que el formulario padre llama a
+  // `resolverPendiente()` en su submit, así una foto elegida nunca se sube
+  // a Cloudinary si el usuario termina sin guardar el formulario. Opcional
+  // porque no todo consumidor de este formulario necesita foto de perfil.
+  fotoUrlRef,
 }) => {
   const nombreVacio = mostrarErrores && !form.nombre.trim();
   const apellidoVacio = mostrarErrores && !form.apellido.trim();
@@ -26,6 +33,20 @@ const InformacionPersonalForm = ({
   return (
     <div>
       <h6 className="text-primary mb-3 border-bottom pb-2">Información Personal</h6>
+
+      {fotoUrlRef && (
+        <div className="mb-3">
+          <ImageUploadField
+            ref={fotoUrlRef}
+            label="Foto de perfil"
+            name="fotoUrl"
+            value={form.fotoUrl}
+            onChange={onChange}
+            folder="usuarios"
+            size={72}
+          />
+        </div>
+      )}
 
       <div className="row g-3">
         <div className="col-md-6">

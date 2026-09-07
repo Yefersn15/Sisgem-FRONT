@@ -18,9 +18,9 @@ const PerfilHeader = ({ perfil, editMode, onEdit }) => {
       }}
     >
       <div className="d-flex align-items-center gap-3 flex-wrap">
-        {perfil.fotoPerfil ? (
+        {perfil.fotoUrl ? (
           <img
-            src={perfil.fotoPerfil}
+            src={perfil.fotoUrl}
             alt="Foto de perfil"
             className="rounded-circle"
             style={{ width: 84, height: 84, objectFit: 'cover', border: '3px solid rgba(255,255,255,0.85)' }}

@@ -1,7 +1,8 @@
 // src/pages/usuarios/hooks/usePerfilForm.js
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../../../context/AuthContext';
 import { updateUsuario } from '../services/usuariosService';
+import { resolverImagenPendiente } from '../../../components/upload/useImageUpload';
 
 export const usePerfilForm = () => {
   const { user, refreshUser } = useAuth();
@@ -13,8 +14,10 @@ export const usePerfilForm = () => {
     apellido: '',
     telefono: '',
     email: '',
-    documento: ''
+    documento: '',
+    fotoUrl: ''
   });
+  const fotoUrlRef = useRef(null);
   const [success, setSuccess] = useState('');
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
@@ -28,7 +31,8 @@ export const usePerfilForm = () => {
           apellido: user.apellido || '',
           telefono: user.telefono || '',
           email: user.email || '',
-          documento: user.documento || ''
+          documento: user.documento || '',
+          fotoUrl: user.fotoUrl || ''
         });
       }
       setLoading(false);
@@ -47,11 +51,18 @@ export const usePerfilForm = () => {
 
     setSubmitting(true);
     try {
+      const fotoResuelta = await resolverImagenPendiente(fotoUrlRef, form.fotoUrl);
+      if (!fotoResuelta.ok) {
+        setError('No se pudo subir la foto de perfil, intenta de nuevo');
+        return;
+      }
+
       await updateUsuario(user.documento, {
         nombre: form.nombre,
         apellido: form.apellido,
         telefono: form.telefono,
-        email: form.email
+        email: form.email,
+        fotoUrl: fotoResuelta.url
       });
 
       await refreshUser();
@@ -72,9 +83,10 @@ export const usePerfilForm = () => {
       apellido: perfil.apellido || '',
       telefono: perfil.telefono || '',
       email: perfil.email || '',
-      documento: perfil.documento || ''
+      documento: perfil.documento || '',
+      fotoUrl: perfil.fotoUrl || ''
     });
   };
 
-  return { perfil, loading, editMode, setEditMode, form, success, error, submitting, handleChange, handleSubmit, cancelEdit };
+  return { perfil, loading, editMode, setEditMode, form, fotoUrlRef, success, error, submitting, handleChange, handleSubmit, cancelEdit };
 };

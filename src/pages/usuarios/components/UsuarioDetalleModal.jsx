@@ -20,13 +20,26 @@ const UsuarioDetalleModal = ({ usuario, getRoleName, onClose }) => (
     }
   >
     <div className="row">
-      <div className="col-md-6 mb-3">
-        <label className="form-label small text-muted">Documento</label>
-        <p className="mb-0 fw-bold">{usuario.documento || '—'}</p>
-      </div>
-      <div className="col-md-6 mb-3">
-        <label className="form-label small text-muted">Nombre</label>
-        <p className="mb-0">{usuario.nombre} {usuario.apellido}</p>
+      <div className="col-12 mb-3 d-flex align-items-center gap-3">
+        {usuario.fotoUrl ? (
+          <img
+            src={usuario.fotoUrl}
+            alt=""
+            className="rounded-circle"
+            style={{ width: 64, height: 64, objectFit: 'cover' }}
+          />
+        ) : (
+          <div
+            className="rounded-circle bg-secondary-subtle d-flex align-items-center justify-content-center"
+            style={{ width: 64, height: 64 }}
+          >
+            <i className="fas fa-user text-muted fa-lg"></i>
+          </div>
+        )}
+        <div>
+          <p className="mb-0 fw-bold fs-5">{usuario.nombre} {usuario.apellido}</p>
+          <p className="mb-0 text-muted small">{usuario.documento || '—'}</p>
+        </div>
       </div>
       <div className="col-md-6 mb-3">
         <label className="form-label small text-muted">Email</label>
