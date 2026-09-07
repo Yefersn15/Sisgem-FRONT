@@ -1,6 +1,7 @@
 // src/pages/usuarios/hooks/useCambiarPasswordForm.js
 import { useState } from 'react';
 import { changePassword } from '../services/usuariosService';
+import { passwordEsValida } from '../../../validations/password';
 
 export const useCambiarPasswordForm = () => {
   const [form, setForm] = useState({ currentPassword: '', newPassword: '', confirmPassword: '' });
@@ -28,8 +29,8 @@ export const useCambiarPasswordForm = () => {
     }
 
     const pw = form.newPassword;
-    if (pw.length < 6) {
-      setError('La contraseña debe tener al menos 6 caracteres');
+    if (!passwordEsValida(pw)) {
+      setError('La contraseña debe tener mínimo 8 caracteres, con mayúscula, minúscula, número y símbolo');
       return;
     }
 

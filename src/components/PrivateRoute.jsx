@@ -1,6 +1,6 @@
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import LoadingState from '../shared/components/common/LoadingState';
+import LoadingState from './LoadingState';
 
 const PrivateRoute = ({ children, module, requireGuest }) => {
   const { user, role, hasPermission, loading } = useAuth();

@@ -1,28 +1,10 @@
 import { useNavigate } from 'react-router-dom';
-import { createCategoria } from './services/categoriasService';
 import { useCategoriaForm } from './hooks/useCategoriaForm';
 import CategoriaFormFields from './components/CategoriaFormFields';
-import { useState } from 'react';
 
 const CategoriaCreate = () => {
   const navigate = useNavigate();
-  const { formData, errors, handleChange, validate } = useCategoriaForm({
-    nombre: '',
-    descripcion: '',
-    activo: true,
-  });
-  const [loading, setLoading] = useState(false);
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    const validationErrors = validate();
-    if (Object.keys(validationErrors).length > 0) return;
-
-    setLoading(true);
-    createCategoria(formData);
-    setLoading(false);
-    navigate('/categorias');
-  };
+  const { formData, errors, handleChange, loading, handleSubmit } = useCategoriaForm();
 
   return (
     <div className="container mt-4">

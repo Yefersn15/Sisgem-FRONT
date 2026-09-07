@@ -1,31 +1,10 @@
-import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { createBanner } from './services/bannersService';
 import { useBannerForm } from './hooks/useBannerForm';
 import BannerFormFields from './components/BannerFormFields';
-import { useToast } from '../../context/ToastContext';
 
 const BannerCreate = () => {
   const navigate = useNavigate();
-  const toast = useToast();
-  const { form, errors, setLayout, setImageUrl, setField, validate } = useBannerForm();
-  const [loading, setLoading] = useState(false);
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    const validationErrors = validate();
-    if (Object.keys(validationErrors).length > 0) return;
-
-    setLoading(true);
-    try {
-      await createBanner(form);
-      navigate('/admin/banners');
-    } catch (err) {
-      toast.error('Error al crear banner: ' + (err.message || err));
-    } finally {
-      setLoading(false);
-    }
-  };
+  const { form, errors, setLayout, setImageUrl, setField, setContentType, setContentRefs, productos, marcas, categorias, loading, handleSubmit } = useBannerForm();
 
   return (
     <div className="container-fluid py-4" style={{ maxWidth: 960 }}>
@@ -41,6 +20,11 @@ const BannerCreate = () => {
               setLayout={setLayout}
               setImageUrl={setImageUrl}
               setField={setField}
+              setContentType={setContentType}
+              setContentRefs={setContentRefs}
+              productos={productos}
+              marcas={marcas}
+              categorias={categorias}
             />
 
             <div className="d-grid gap-2 d-md-flex justify-content-md-end">

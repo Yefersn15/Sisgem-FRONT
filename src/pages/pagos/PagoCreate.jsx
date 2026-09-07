@@ -1,24 +1,12 @@
-import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import PagoForm from './components/PagoForm';
-import { createPago } from './services/pagosService';
-import { useToast } from '../../context/ToastContext';
+import { usePagoCreate } from './hooks/usePagoCreate';
 
 const PagoCreate = () => {
   const navigate = useNavigate();
-  const toast = useToast();
-
-  const handleSubmit = async (data) => {
-    const result = await createPago(data);
-    if (result) {
-      navigate('/admin/pagos');
-    } else {
-      toast.error('Error al crear el pago');
-    }
-  };
-
   const location = useLocation();
-  const initial = { ventaId: location.state?.ventaId, fecha: new Date().toISOString().slice(0,16), metodo: 'Abono' };
+  const { handleSubmit } = usePagoCreate();
+  const initial = { ventaId: location.state?.ventaId, fecha: new Date().toISOString().slice(0, 16), metodo: 'Abono' };
 
   return (
     <div className="container mt-4">

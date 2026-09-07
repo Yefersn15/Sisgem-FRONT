@@ -1,34 +1,11 @@
-import { useState, useEffect } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
-import { getMarcaById } from './services/marcasService';
-import { getProductos } from '../../services/api/productos.api';
+import { useMarcaDetail } from './hooks/useMarcaDetail';
 import { formatPrice } from '../../services/api/utils';
 
 const MarcaDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const [marca, setMarca] = useState(null);
-  const [productos, setProductos] = useState([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const cargarDatos = async () => {
-      const marcaData = await getMarcaById(id);
-      if (!marcaData) {
-        navigate('/admin/marcas');
-        return;
-      }
-      setMarca(marcaData);
-
-      const todosProductos = await getProductos() || [];
-      const productosMarca = todosProductos.filter(p => 
-        String(p.marcaId) === String(id) || String(p.marca?.id) === String(id)
-      );
-      setProductos(productosMarca);
-      setLoading(false);
-    };
-    cargarDatos();
-  }, [id, navigate]);
+  const { marca, productos, loading } = useMarcaDetail(id);
 
   if (loading) {
     return (

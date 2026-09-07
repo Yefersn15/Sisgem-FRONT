@@ -1,40 +1,10 @@
-import { useState } from 'react';
 import { useCambiarPasswordForm } from './hooks/useCambiarPasswordForm';
-
-const PasswordField = ({ label, name, value, onChange, autoComplete, minLength, helpText }) => {
-  const [visible, setVisible] = useState(false);
-
-  return (
-    <div className="mb-3">
-      <label className="form-label">{label}</label>
-      <div className="input-group">
-        <input
-          type={visible ? 'text' : 'password'}
-          name={name}
-          className="form-control"
-          value={value}
-          onChange={onChange}
-          autoComplete={autoComplete}
-          required
-          minLength={minLength}
-        />
-        <button
-          type="button"
-          className="btn btn-secondary"
-          onClick={() => setVisible((v) => !v)}
-          tabIndex={-1}
-          aria-label={visible ? 'Ocultar contraseña' : 'Mostrar contraseña'}
-        >
-          <i className={`fas ${visible ? 'fa-eye-slash' : 'fa-eye'}`}></i>
-        </button>
-      </div>
-      {helpText && <div className="form-text">{helpText}</div>}
-    </div>
-  );
-};
+import PasswordInput from '../../components/PasswordInput';
+import PasswordRequisitos from '../../components/PasswordRequisitos';
 
 const CambiarPassword = () => {
   const { form, success, error, submitting, handleChange, handleSubmit } = useCambiarPasswordForm();
+  const noCoinciden = form.confirmPassword.length > 0 && form.newPassword !== form.confirmPassword;
 
   return (
     <div className="container mt-4" style={{ maxWidth: 520 }}>
@@ -74,33 +44,47 @@ const CambiarPassword = () => {
           )}
 
           <form onSubmit={handleSubmit}>
-            <PasswordField
-              label="Contraseña Actual *"
-              name="currentPassword"
-              value={form.currentPassword}
-              onChange={handleChange}
-              autoComplete="current-password"
-            />
+            <div className="mb-3">
+              <label className="form-label">Contraseña Actual *</label>
+              <PasswordInput
+                name="currentPassword"
+                value={form.currentPassword}
+                onChange={handleChange}
+                autoComplete="current-password"
+                required
+              />
+            </div>
 
             <hr style={{ borderColor: 'var(--border)', margin: '20px 0' }} />
 
-            <PasswordField
-              label="Nueva Contraseña *"
-              name="newPassword"
-              value={form.newPassword}
-              onChange={handleChange}
-              autoComplete="new-password"
-              minLength={6}
-              helpText="Mínimo 6 caracteres."
-            />
+            <div className="mb-3">
+              <label className="form-label">Nueva Contraseña *</label>
+              <PasswordInput
+                name="newPassword"
+                value={form.newPassword}
+                onChange={handleChange}
+                autoComplete="new-password"
+                required
+              />
+              {form.newPassword.length > 0 ? (
+                <PasswordRequisitos password={form.newPassword} />
+              ) : (
+                <div className="form-text">Mínimo 8 caracteres, con mayúscula, minúscula, número y símbolo.</div>
+              )}
+            </div>
 
-            <PasswordField
-              label="Confirmar Nueva Contraseña *"
-              name="confirmPassword"
-              value={form.confirmPassword}
-              onChange={handleChange}
-              autoComplete="new-password"
-            />
+            <div className="mb-3">
+              <label className="form-label">Confirmar Nueva Contraseña *</label>
+              <PasswordInput
+                name="confirmPassword"
+                value={form.confirmPassword}
+                onChange={handleChange}
+                autoComplete="new-password"
+                required
+                invalid={noCoinciden}
+              />
+              {noCoinciden && <div className="invalid-feedback d-block">Las contraseñas no coinciden</div>}
+            </div>
 
             <div className="d-flex gap-2 mt-4">
               <button type="submit" className="btn btn-primary" disabled={submitting}>

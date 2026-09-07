@@ -1,7 +1,7 @@
 // src/pages/usuarios/components/UsuarioDetalleModal.jsx
 import React from 'react';
 import { Link } from 'react-router-dom';
-import Modal from '../../../shared/components/common/Modal';
+import Modal from '../../../components/Modal';
 
 const UsuarioDetalleModal = ({ usuario, getRoleName, onClose }) => (
   <Modal

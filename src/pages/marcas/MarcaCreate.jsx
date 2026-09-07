@@ -1,33 +1,10 @@
-import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { createMarca } from './services/marcasService';
 import { useMarcaForm } from './hooks/useMarcaForm';
 import MarcaFormFields from './components/MarcaFormFields';
 
 const MarcaCreate = () => {
   const navigate = useNavigate();
-  const { formData, errors, handleChange, validate } = useMarcaForm({
-    nombre: '',
-    descripcion: '',
-    logoUrl: '',
-    sitioWeb: '',
-    activo: true,
-  });
-  const [loading, setLoading] = useState(false);
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    const validationErrors = validate();
-    if (Object.keys(validationErrors).length > 0) return;
-
-    setLoading(true);
-    try {
-      createMarca(formData);
-    } finally {
-      setLoading(false);
-    }
-    navigate('/marcas');
-  };
+  const { formData, errors, handleChange, loading, handleSubmit } = useMarcaForm();
 
   return (
     <div className="container mt-4">

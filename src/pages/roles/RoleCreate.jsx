@@ -1,44 +1,19 @@
 // src/pages/roles/RoleCreate.jsx
-import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getPermisosDisponibles, createRol } from './services/rolesService';
-import { usePermisosPorCategoria } from './hooks/usePermisosPorCategoria';
-import { usePermisosSelector } from './hooks/usePermisosSelector';
+import { useRoleForm } from './hooks/useRoleForm';
 import PermisosGrid from './components/PermisosGrid';
-import { useToast } from '../../context/ToastContext';
 
 const RoleCreate = () => {
   const navigate = useNavigate();
-  const toast = useToast();
-  const [nombre, setNombre] = useState('');
-  const [descripcion, setDescripcion] = useState('');
-  const [esDefault, setEsDefault] = useState(false);
-  const [permisosDisponibles, setPermisosDisponibles] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const { permisos, togglePermiso, toggleCategoria } = usePermisosSelector([]);
-  const categoriasPermisos = usePermisosPorCategoria(permisosDisponibles);
-
-  useEffect(() => {
-    getPermisosDisponibles().then(setPermisosDisponibles);
-  }, []);
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!nombre.trim()) {
-      toast.error('El nombre del rol es requerido');
-      return;
-    }
-
-    setLoading(true);
-    try {
-      await createRol({ nombre, descripcion, permisos, esDefault });
-      navigate('/admin/roles');
-    } catch (err) {
-      toast.error('Error al crear rol: ' + (err.message || err));
-    } finally {
-      setLoading(false);
-    }
-  };
+  const {
+    nombre, setNombre,
+    descripcion, setDescripcion,
+    esDefault, setEsDefault,
+    permisos, togglePermiso, toggleCategoria,
+    categoriasPermisos,
+    loading,
+    handleSubmit,
+  } = useRoleForm();
 
   return (
     <div className="container mt-4">

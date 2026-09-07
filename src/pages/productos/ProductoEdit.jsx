@@ -1,6 +1,4 @@
-import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { getProductoById, updateProducto } from './services/productosService';
 import { formatPrice } from '../../services/api/utils';
 import { useProductoForm } from './hooks/useProductoForm';
 import { useProductoReferenceData } from './hooks/useProductoReferenceData';
@@ -10,48 +8,7 @@ const ProductoEdit = ({ esDetalle = false }) => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { marcas, categorias } = useProductoReferenceData();
-  const { formData, setFormData, errors, setErrors, handleChange, validate } = useProductoForm(null);
-  const [loading, setLoading] = useState(false);
-  const [fetchError, setFetchError] = useState('');
-
-  useEffect(() => {
-    (async () => {
-      try {
-        const producto = await getProductoById(id);
-        if (!producto) {
-          setFetchError('Producto no encontrado');
-          return;
-        }
-        setFormData(producto);
-      } catch (err) {
-        console.error('Error cargando producto:', err);
-        setFetchError('Error al cargar datos');
-      }
-    })();
-  }, [id]);
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    const validationErrors = validate();
-    if (Object.keys(validationErrors).length > 0) return;
-
-    setLoading(true);
-    (async () => {
-      try {
-        await updateProducto(id, {
-          ...formData,
-          precioUnitario: parseFloat(formData.precioUnitario),
-          stockDisponible: parseInt(formData.stockDisponible),
-        });
-        navigate('/productos');
-      } catch (err) {
-        console.error(err);
-        setErrors({ submit: err.message || 'Error al actualizar' });
-      } finally {
-        setLoading(false);
-      }
-    })();
-  };
+  const { formData, errors, handleChange, loading, loadingData, fetchError, handleSubmit } = useProductoForm(id);
 
   if (fetchError) {
     return (
@@ -62,7 +19,7 @@ const ProductoEdit = ({ esDetalle = false }) => {
     );
   }
 
-  if (!formData) {
+  if (loadingData || !formData) {
     return (
       <div className="container mt-4 text-center">
         <div className="spinner-border text-primary" role="status"></div>

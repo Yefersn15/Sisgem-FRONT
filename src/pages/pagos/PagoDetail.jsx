@@ -2,7 +2,7 @@ import React from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import { formatPrice } from '../../services/api/utils';
 import { usePagoDetalle } from './hooks/usePagoDetalle';
-import LoadingState from '../../shared/components/common/LoadingState';
+import LoadingState from '../../components/LoadingState';
 
 const PagoDetail = () => {
   const { id } = useParams();

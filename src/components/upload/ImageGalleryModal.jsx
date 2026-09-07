@@ -1,8 +1,8 @@
 // src/components/upload/ImageGalleryModal.jsx
 import React, { useState, useEffect } from 'react';
 import { listarImagenes } from '../../services/api/upload.api';
-import Modal from '../../shared/components/common/Modal';
-import LoadingState from '../../shared/components/common/LoadingState';
+import Modal from '../Modal';
+import LoadingState from '../LoadingState';
 
 const ImageGalleryModal = ({ folder, onSelect, onClose }) => {
   const [images, setImages] = useState([]);

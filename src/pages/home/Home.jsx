@@ -9,8 +9,13 @@ import HomeProductoModal from './components/HomeProductoModal';
 import HomeSearchBar from './components/HomeSearchBar';
 import CategoriaCarousel from './components/CategoriaCarousel';
 import { useToast } from '../../context/ToastContext';
+import { useAyudaPagina } from '../../hooks/useAyudaPagina';
 
 const Home = () => {
+  useAyudaPagina({
+    titulo: 'Bienvenido',
+    contenido: <p>Usa el buscador para encontrar un producto, o navega por marca y categoría más abajo. Puedes ver el catálogo completo sin necesidad de iniciar sesión; solo se pide cuenta al momento de pagar.</p>,
+  });
   const { banners, marcas, destacados, categorias, productos } = useHomeData();
   const [modalProducto, setModalProducto] = useState(null);
   const toast = useToast();

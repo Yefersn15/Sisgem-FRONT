@@ -1,5 +1,18 @@
 // src/pages/marcas/hooks/useMarcaForm.js
-import { useState } from 'react';
+// Cubre tanto crear como editar: sin `id` crea una marca nueva, con `id`
+// carga la marca existente y actualiza. Evita duplicar la carga/guardado
+// entre MarcaCreate y MarcaEdit.
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { getMarcaById, createMarca, updateMarca } from '../services/marcasService';
+
+const FORM_INICIAL = {
+  nombre: '',
+  descripcion: '',
+  logoUrl: '',
+  sitioWeb: '',
+  activo: true,
+};
 
 const validateMarca = (formData) => {
   const errors = {};
@@ -10,9 +23,29 @@ const validateMarca = (formData) => {
   return errors;
 };
 
-export const useMarcaForm = (initialData) => {
-  const [formData, setFormData] = useState(initialData);
+export const useMarcaForm = (id) => {
+  const isEdit = Boolean(id);
+  const navigate = useNavigate();
+
+  const [formData, setFormData] = useState(isEdit ? null : FORM_INICIAL);
   const [errors, setErrors] = useState({});
+  const [loading, setLoading] = useState(false);
+  const [loadingData, setLoadingData] = useState(isEdit);
+  const [fetchError, setFetchError] = useState('');
+
+  useEffect(() => {
+    if (!isEdit) return;
+    (async () => {
+      const marca = await getMarcaById(id);
+      if (!marca) {
+        setFetchError('Marca no encontrada');
+        setLoadingData(false);
+        return;
+      }
+      setFormData(marca);
+      setLoadingData(false);
+    })();
+  }, [id]);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -29,5 +62,22 @@ export const useMarcaForm = (initialData) => {
     return validationErrors;
   };
 
-  return { formData, setFormData, errors, handleChange, validate };
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const validationErrors = validate();
+    if (Object.keys(validationErrors).length > 0) return;
+
+    setLoading(true);
+    try {
+      if (isEdit) await updateMarca(id, formData);
+      else await createMarca(formData);
+      navigate('/marcas');
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return { formData, errors, handleChange, validate, loading, loadingData, fetchError, handleSubmit };
 };

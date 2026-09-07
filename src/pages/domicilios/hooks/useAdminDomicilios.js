@@ -11,7 +11,7 @@ import { getVentas, getVentaById } from '../../../services/api/pedidos.api';
 import { getUsuarios } from '../../../services/api/usuarios.api';
 import { exportToExcel, formatPrice } from '../../../services/api/utils';
 import { importDomicilios } from '../../../services/api/domicilios.api';
-import { openPrintVoucher } from '../../../services/printService';
+import { openPrintVoucher } from '../services/printService';
 import { getSiguientesEstadosDomicilio, isEstadoFinalDomicilio, normalizeNumber } from './domicilioEstados';
 import { useToast } from '../../../context/ToastContext';
 import { useConfirm, usePrompt } from '../../../context/ConfirmContext';

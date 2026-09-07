@@ -1,6 +1,6 @@
 // src/pages/usuarios/components/RoleChangeModal.jsx
 import React from 'react';
-import Modal from '../../../shared/components/common/Modal';
+import Modal from '../../../components/Modal';
 
 const RoleChangeModal = ({ roles, usuario, onSelectRole, onClose }) => (
   <Modal title="Cambiar Rol" onClose={onClose} maxWidth={420}>

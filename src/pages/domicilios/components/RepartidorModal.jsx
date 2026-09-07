@@ -1,6 +1,6 @@
 // src/pages/domicilios/components/RepartidorModal.jsx
 import React from 'react';
-import Modal from '../../../shared/components/common/Modal';
+import Modal from '../../../components/Modal';
 
 const RepartidorModal = ({
   repartidoresList,

@@ -1,6 +1,4 @@
-import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { createProducto } from './services/productosService';
 import { useProductoForm } from './hooks/useProductoForm';
 import { useProductoReferenceData } from './hooks/useProductoReferenceData';
 import ProductoFormFields from './components/ProductoFormFields';
@@ -8,44 +6,7 @@ import ProductoFormFields from './components/ProductoFormFields';
 const ProductoCreate = () => {
   const navigate = useNavigate();
   const { marcas, categorias } = useProductoReferenceData();
-  const { formData, errors, setErrors, handleChange, validate } = useProductoForm({
-    nombre: '',
-    descripcion: '',
-    precioUnitario: '',
-    stockDisponible: '',
-    barcode: '',
-    fotoUrl: '',
-    categoriaId: '',
-    marcaId: '',
-    activo: true,
-    minStock: 1,
-  });
-  const [loading, setLoading] = useState(false);
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    const validationErrors = validate();
-    if (Object.keys(validationErrors).length > 0) return;
-
-    setLoading(true);
-    const newProducto = {
-      ...formData,
-      precioUnitario: parseFloat(formData.precioUnitario),
-      stockDisponible: parseInt(formData.stockDisponible),
-      minStock: parseInt(formData.minStock),
-    };
-    (async () => {
-      try {
-        await createProducto(newProducto);
-        navigate('/productos');
-      } catch (err) {
-        console.error(err);
-        setErrors({ submit: err.message || 'Error al crear producto' });
-      } finally {
-        setLoading(false);
-      }
-    })();
-  };
+  const { formData, errors, handleChange, loading, handleSubmit } = useProductoForm();
 
   return (
     <div className="container mt-4">

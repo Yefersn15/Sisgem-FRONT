@@ -1,10 +1,10 @@
 import React from 'react';
 import Header from './Header';
 import Footer from './Footer';
-import { useStoreLayoutMode } from '../shared/components/store/useStoreLayoutMode';
+import { useStoreLayoutMode } from './store/useStoreLayoutMode';
 import { useMeasuredHeight } from '../hooks/useMeasuredHeight';
-import StoreSidebarNav from '../shared/components/store/StoreSidebarNav';
-import StoreTopNav from '../shared/components/store/StoreTopNav';
+import StoreSidebarNav from './store/StoreSidebarNav';
+import StoreTopNav from './store/StoreTopNav';
 
 const Layout = ({ children }) => {
   const { isTopbar, isCompact, setOrientation, toggleCompact } = useStoreLayoutMode();

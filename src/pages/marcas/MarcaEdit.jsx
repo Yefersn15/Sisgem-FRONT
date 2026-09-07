@@ -1,44 +1,11 @@
-import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { getMarcaById, updateMarca } from './services/marcasService';
 import { useMarcaForm } from './hooks/useMarcaForm';
 import MarcaFormFields from './components/MarcaFormFields';
 
 const MarcaEdit = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { formData, setFormData, errors, handleChange, validate } = useMarcaForm(null);
-  const [loading, setLoading] = useState(false);
-  const [fetchError, setFetchError] = useState('');
-
-  useEffect(() => {
-    (async () => {
-      const marca = await getMarcaById(id);
-      if (!marca) {
-        setFetchError('Marca no encontrada');
-        return;
-      }
-      setFormData(marca);
-    })();
-  }, [id]);
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    const validationErrors = validate();
-    if (Object.keys(validationErrors).length > 0) return;
-
-    setLoading(true);
-    (async () => {
-      try {
-        await updateMarca(id, formData);
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-      navigate('/marcas');
-    })();
-  };
+  const { formData, errors, handleChange, loading, loadingData, fetchError, handleSubmit } = useMarcaForm(id);
 
   if (fetchError) {
     return (
@@ -49,7 +16,7 @@ const MarcaEdit = () => {
     );
   }
 
-  if (!formData) {
+  if (loadingData || !formData) {
     return (
       <div className="container mt-4 text-center">
         <div className="spinner-border text-primary" role="status"></div>

@@ -4,6 +4,9 @@ import { useNavigate } from 'react-router-dom';
 import { getUsuarioById, createUsuario, updateUsuario, getUsuarios } from '../services/usuariosService';
 import { getRoles } from '../../roles/services/rolesService';
 import { normalizeText } from './textUtils';
+import { passwordEsValida } from '../../../validations/password';
+import { emailEsValido } from '../../../validations/email';
+import { documentoEsValido, mensajeDocumentoInvalido } from '../../../validations/documento';
 
 const FORM_INICIAL = {
   nombre: '',
@@ -107,17 +110,22 @@ export const useUsuarioForm = (id) => {
       return;
     }
 
+    if (!emailEsValido(form.email)) {
+      setError('Ingresa un correo electrónico válido');
+      return;
+    }
+
     if (!isEditing) {
-      if (!form.documento.trim()) {
-        setError('El documento es requerido');
+      if (!documentoEsValido(form.documento, form.tipoDocumento)) {
+        setError(mensajeDocumentoInvalido(form.tipoDocumento));
         return;
       }
       if (documentoExists) {
         setError('El número de documento ya está registrado');
         return;
       }
-      if (form.password.length < 6) {
-        setError('La contraseña debe tener mínimo 6 caracteres');
+      if (!passwordEsValida(form.password)) {
+        setError('La contraseña debe tener mínimo 8 caracteres, con mayúscula, minúscula, número y símbolo');
         return;
       }
       if (form.password !== form.confirmPassword) {
@@ -125,8 +133,8 @@ export const useUsuarioForm = (id) => {
         return;
       }
     } else {
-      if (form.password && form.password.length < 6) {
-        setError('La contraseña debe tener mínimo 6 caracteres');
+      if (form.password && !passwordEsValida(form.password)) {
+        setError('La contraseña debe tener mínimo 8 caracteres, con mayúscula, minúscula, número y símbolo');
         return;
       }
       if (form.password !== form.confirmPassword) {

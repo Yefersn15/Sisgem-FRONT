@@ -1,9 +1,11 @@
 // src/pages/auth/ResetPassword.jsx
 import { Link } from 'react-router-dom';
 import { useResetPasswordForm } from './hooks/useResetPasswordForm';
+import PasswordInput from '../../components/PasswordInput';
+import PasswordRequisitos from '../../components/PasswordRequisitos';
 
 const ResetPassword = () => {
-  const { token, password, setPassword, confirmPassword, setConfirmPassword, error, loading, success, handleSubmit } = useResetPasswordForm();
+  const { token, password, setPassword, confirmPassword, setConfirmPassword, noCoinciden, error, loading, success, handleSubmit } = useResetPasswordForm();
 
   if (success) {
     return (
@@ -47,11 +49,13 @@ const ResetPassword = () => {
           <form onSubmit={handleSubmit}>
             <div className="mb-3">
               <label className="form-label">Nueva Contraseña</label>
-              <input type="password" className="form-control" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={6} disabled={loading} />
+              <PasswordInput value={password} onChange={(e) => setPassword(e.target.value)} required disabled={loading} />
+              {password.length > 0 && <PasswordRequisitos password={password} />}
             </div>
             <div className="mb-3">
               <label className="form-label">Confirmar Contraseña</label>
-              <input type="password" className="form-control" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required disabled={loading} />
+              <PasswordInput value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required disabled={loading} invalid={noCoinciden} />
+              {noCoinciden && <div className="invalid-feedback d-block">Las contraseñas no coinciden</div>}
             </div>
             <button type="submit" className="btn btn-primary w-100" disabled={loading}>
               {loading ? 'Guardando...' : 'Cambiar Contraseña'}

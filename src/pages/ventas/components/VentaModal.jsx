@@ -1,7 +1,7 @@
 // src/pages/ventas/components/VentaModal.jsx
 import React from 'react';
 import { formatPrice } from '../../../services/api/utils';
-import Modal from '../../../shared/components/common/Modal';
+import Modal from '../../../components/Modal';
 
 const METODOS_PAGO = ['Efectivo', 'Transferencia', 'Abono'];
 const TIPOS_PEDIDO = [

@@ -3,40 +3,20 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
-import AppearanceMenu from '../shared/components/common/AppearanceMenu';
+import { useConfiguracion } from '../context/ConfiguracionContext';
+import { useModoOscuro } from '../hooks/useModoOscuro';
+import AppearanceMenu from './AppearanceMenu';
+import BrandIcon from './BrandIcon';
 
 const Header = ({ isTopbar, onOrientationChange, navRef }) => {
   const cart = useCart();
   const itemCount = cart?.itemCount || 0;
   const { user, logout } = useAuth();
+  const { nombreTienda, logoUrl } = useConfiguracion();
   const navigate = useNavigate();
-  const [isDark, setIsDark] = useState(false);
+  const { isDark, setThemeMode } = useModoOscuro();
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const userMenuRef = useRef(null);
-
-  // Cargar preferencia del tema
-  useEffect(() => {
-    const savedTheme = localStorage.getItem('theme');
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    const shouldBeDark = savedTheme === 'dark' || (!savedTheme && prefersDark);
-    setIsDark(shouldBeDark);
-    if (shouldBeDark) {
-      document.documentElement.classList.add('theme-dark');
-    } else {
-      document.documentElement.classList.remove('theme-dark');
-    }
-  }, []);
-
-  const setThemeMode = (dark) => {
-    setIsDark(dark);
-    if (dark) {
-      document.documentElement.classList.add('theme-dark');
-      localStorage.setItem('theme', 'dark');
-    } else {
-      document.documentElement.classList.remove('theme-dark');
-      localStorage.setItem('theme', 'light');
-    }
-  };
 
   const handleLogout = () => {
     logout();
@@ -63,11 +43,19 @@ const Header = ({ isTopbar, onOrientationChange, navRef }) => {
   return (
     <nav ref={navRef} className="navbar app-navbar fixed-top w-100">
       <div className="container">
-        <Link className="navbar-brand ms-2" to="/">
-          SISGEM
+        <Link className="navbar-brand ms-2 d-flex align-items-center gap-2" to="/">
+          {logoUrl ? (
+            <img src={logoUrl} alt={nombreTienda} style={{ height: 28, width: 28, objectFit: 'cover', borderRadius: 6 }} />
+          ) : (
+            <BrandIcon size={24} />
+          )}
+          {nombreTienda}
         </Link>
 
         <div className="ms-3 d-flex align-items-center" style={{ gap: 12, flex: 1 }}>
+          <Link to="/nosotros" className="btn btn-outline-theme btn-sm ms-2 d-none d-md-inline-block">
+            Nosotros
+          </Link>
           <div className="ms-auto d-flex align-items-center">
             <AppearanceMenu isDark={isDark} onSetTheme={setThemeMode} isTopbar={isTopbar} onOrientationChange={onOrientationChange} />
 

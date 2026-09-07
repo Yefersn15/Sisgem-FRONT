@@ -1,5 +1,6 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
 import Home from '../pages/home/Home';
+import Nosotros from '../pages/nosotros/Nosotros';
 import ProductosList from '../pages/productos/ProductosList';
 import ProductoCreate from '../pages/productos/ProductoCreate';
 import ProductoEdit from '../pages/productos/ProductoEdit';
@@ -14,30 +15,30 @@ import Cart from '../pages/carrito/Cart';
 import Checkout from '../pages/carrito/Checkout';
 import MisPedidos from '../pages/pedidos/MisPedidos';
 import VentaDetails from '../pages/ventas/VentaDetails';
-import AdminDomicilios from '../pages/domicilios/AdminDomicilios';
+import DomiciliosAdmin from '../pages/domicilios/DomiciliosAdmin';
 
 // Admin
 import AdminDashboard from '../pages/dashboard/AdminDashboard';
 import VentasAdmin from '../pages/ventas/VentasAdmin';
 import PedidosAdmin from '../pages/pedidos/PedidosAdmin';
-import PagosList from '../pages/pagos/PagosList';
+import PagosAdmin from '../pages/pagos/PagosAdmin';
 import PagoCreate from '../pages/pagos/PagoCreate';
 import PagoDetail from '../pages/pagos/PagoDetail';
 import MisPagos from '../pages/pagos/MisPagos';
-import UsersList from '../pages/usuarios/UsersList';
+import UsuariosAdmin from '../pages/usuarios/UsuariosAdmin';
 import UsuarioEdit from '../pages/usuarios/UsuarioEdit';
-import RolesList from '../pages/roles/RolesList';
+import RolesAdmin from '../pages/roles/RolesAdmin';
 import RoleCreate from '../pages/roles/RoleCreate';
 import RoleEdit from '../pages/roles/RoleEdit';
-import AdminCategorias from '../pages/categorias/AdminCategorias';
-import AdminMarcas from '../pages/marcas/AdminMarcas';
-import AdminProductos from '../pages/productos/AdminProductos';
+import CategoriasAdmin from '../pages/categorias/CategoriasAdmin';
+import MarcasAdmin from '../pages/marcas/MarcasAdmin';
+import ProductosAdmin from '../pages/productos/ProductosAdmin';
 
 
 
 // Auth
 import Login from '../pages/auth/Login';
-import Register from '../pages/usuarios/Register';
+import Register from '../pages/auth/Register';
 import Perfil from '../pages/usuarios/Perfil';
 import CambiarPassword from '../pages/usuarios/CambiarPassword';
 import ForgotPassword from '../pages/auth/ForgotPassword';
@@ -51,6 +52,7 @@ const Rutas = () => {
     <Routes>
       {/* === PÚBLICAS: Home / Tienda === */}
       <Route path="/" element={<Home />} />
+      <Route path="/nosotros" element={<Nosotros />} />
       
       {/* === PRODUCTOS === */}
       <Route path="/productos" element={<ProductosList />} />
@@ -84,18 +86,18 @@ const Rutas = () => {
       <Route path="/admin" element={<PrivateRoute><AdminDashboard /></PrivateRoute>} />
       <Route path="/admin/ventas" element={<PrivateRoute module="Ventas"><VentasAdmin /></PrivateRoute>} />
       <Route path="/admin/pedidos" element={<PrivateRoute module="Ventas"><PedidosAdmin /></PrivateRoute>} />
-      <Route path="/admin/domicilios" element={<PrivateRoute module="Ventas"><AdminDomicilios /></PrivateRoute>} />
-      <Route path="/admin/pagos" element={<PrivateRoute module="Ventas"><PagosList /></PrivateRoute>} />
+      <Route path="/admin/domicilios" element={<PrivateRoute module="Ventas"><DomiciliosAdmin /></PrivateRoute>} />
+      <Route path="/admin/pagos" element={<PrivateRoute module="Ventas"><PagosAdmin /></PrivateRoute>} />
       <Route path="/admin/pagos/nuevo" element={<PrivateRoute module="Ventas"><PagoCreate /></PrivateRoute>} />
       <Route path="/admin/pagos/:id" element={<PrivateRoute module="Ventas"><PagoDetail /></PrivateRoute>} />
-      <Route path="/admin/usuarios" element={<PrivateRoute module="Usuarios"><UsersList source="usuarios" /></PrivateRoute>} />
-      <Route path="/admin/roles" element={<PrivateRoute module="Configuración"><RolesList /></PrivateRoute>} />
+      <Route path="/admin/usuarios" element={<PrivateRoute module="Usuarios"><UsuariosAdmin source="usuarios" /></PrivateRoute>} />
+      <Route path="/admin/roles" element={<PrivateRoute module="Configuración"><RolesAdmin /></PrivateRoute>} />
       <Route path="/admin/roles/nuevo" element={<PrivateRoute module="Configuración"><RoleCreate /></PrivateRoute>} />
       <Route path="/admin/roles/editar/:id" element={<PrivateRoute module="Configuración"><RoleEdit /></PrivateRoute>} />
       <Route path="/admin/analytics" element={<PrivateRoute module="Reportes"><AdminDashboard /></PrivateRoute>} />
-      <Route path="/admin/categorias" element={<PrivateRoute module="Categorías"><AdminCategorias /></PrivateRoute>} />
-      <Route path="/admin/marcas" element={<PrivateRoute module="Marcas"><AdminMarcas /></PrivateRoute>} />
-      <Route path="/admin/productos" element={<PrivateRoute module="Productos"><AdminProductos /></PrivateRoute>} />
+      <Route path="/admin/categorias" element={<PrivateRoute module="Categorías"><CategoriasAdmin /></PrivateRoute>} />
+      <Route path="/admin/marcas" element={<PrivateRoute module="Marcas"><MarcasAdmin /></PrivateRoute>} />
+      <Route path="/admin/productos" element={<PrivateRoute module="Productos"><ProductosAdmin /></PrivateRoute>} />
 
       {/* === PERFIL DE USUARIO === */}
       <Route path="/perfil" element={<PrivateRoute><Perfil /></PrivateRoute>} />

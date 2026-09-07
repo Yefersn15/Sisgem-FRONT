@@ -1,64 +1,22 @@
 // src/pages/roles/RoleEdit.jsx
-import React, { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import { getPermisosDisponibles, getRoleById, updateRol } from './services/rolesService';
-import { usePermisosPorCategoria } from './hooks/usePermisosPorCategoria';
-import { usePermisosSelector } from './hooks/usePermisosSelector';
+import { useParams, useNavigate } from 'react-router-dom';
+import { useRoleForm } from './hooks/useRoleForm';
 import PermisosGrid from './components/PermisosGrid';
-import { useToast } from '../../context/ToastContext';
-import LoadingState from '../../shared/components/common/LoadingState';
+import LoadingState from '../../components/LoadingState';
 
 const RoleEdit = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const toast = useToast();
-  const [nombre, setNombre] = useState('');
-  const [descripcion, setDescripcion] = useState('');
-  const [estado, setEstado] = useState(true);
-  const [esDefault, setEsDefault] = useState(false);
-  const [permisosDisponibles, setPermisosDisponibles] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [loadingData, setLoadingData] = useState(true);
-  const { permisos, setPermisos, togglePermiso, toggleCategoria } = usePermisosSelector([]);
-  const categoriasPermisos = usePermisosPorCategoria(permisosDisponibles);
-
-  useEffect(() => {
-    Promise.all([getPermisosDisponibles(), getRoleById(id)]).then(([perms, rol]) => {
-      setPermisosDisponibles(perms);
-      if (rol) {
-        setNombre(rol.nombre || '');
-        setDescripcion(rol.descripcion || '');
-        setEstado(rol.estado !== false);
-        setEsDefault(rol.esDefault === true);
-        setPermisos(rol.permisos || []);
-
-        // Verificar si es el rol de administrador
-        if (rol.nombre?.toUpperCase() === 'ADMIN' || rol.nombre?.toUpperCase() === 'ADMINISTRADOR') {
-          toast.error('El rol de Administrador no puede ser editado.');
-          navigate('/admin/roles');
-        }
-      }
-      setLoadingData(false);
-    });
-  }, [id]);
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!nombre.trim()) {
-      toast.error('El nombre del rol es requerido');
-      return;
-    }
-
-    setLoading(true);
-    try {
-      await updateRol(id, { nombre, descripcion, estado, permisos, esDefault });
-      navigate('/admin/roles');
-    } catch (err) {
-      toast.error('Error al actualizar rol: ' + (err.message || err));
-    } finally {
-      setLoading(false);
-    }
-  };
+  const {
+    nombre, setNombre,
+    descripcion, setDescripcion,
+    estado, setEstado,
+    esDefault, setEsDefault,
+    permisos, togglePermiso, toggleCategoria,
+    categoriasPermisos,
+    loading, loadingData,
+    handleSubmit,
+  } = useRoleForm(id);
 
   if (loadingData) {
     return <div className="container mt-4"><LoadingState /></div>;

@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import { formatPrice } from '../../../services/api/utils';
 import { useCart } from '../../../context/CartContext';
 import { useToast } from '../../../context/ToastContext';
-import Modal from '../../../shared/components/common/Modal';
+import Modal from '../../../components/Modal';
 
 const ProductoDetalleModal = ({ producto, onClose, linkableTags = false, showAdminActions = false, onToggleActivo, onDelete }) => {
   const [cantidad, setCantidad] = useState(1);

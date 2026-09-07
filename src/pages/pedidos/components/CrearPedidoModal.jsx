@@ -1,7 +1,7 @@
 // src/pages/pedidos/components/CrearPedidoModal.jsx
 import React from 'react';
 import { formatPrice } from '../../../services/api/utils';
-import Modal from '../../../shared/components/common/Modal';
+import Modal from '../../../components/Modal';
 
 const TIPOS_PEDIDO = [
   { value: 'mostrador', label: 'Mostrador' },

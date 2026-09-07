@@ -2,14 +2,14 @@
 import { useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { resetPassword } from '../services/authService';
+import { usePasswordFields } from '../../../hooks/usePasswordFields';
 
 export const useResetPasswordForm = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const token = searchParams.get('token') || '';
 
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
+  const { password, setPassword, confirmPassword, setConfirmPassword, noCoinciden, validar } = usePasswordFields();
   const [error, setError] = useState(token ? '' : 'Enlace de recuperación inválido. Solicita uno nuevo.');
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -22,13 +22,9 @@ export const useResetPasswordForm = () => {
       return;
     }
 
-    if (password.length < 6) {
-      setError('La contraseña debe tener al menos 6 caracteres');
-      return;
-    }
-
-    if (password !== confirmPassword) {
-      setError('Las contraseñas no coinciden');
+    const mensajeValidacion = validar({ obligatoria: true });
+    if (mensajeValidacion) {
+      setError(mensajeValidacion);
       return;
     }
 
@@ -45,5 +41,5 @@ export const useResetPasswordForm = () => {
     }
   };
 
-  return { token, password, setPassword, confirmPassword, setConfirmPassword, error, loading, success, handleSubmit };
+  return { token, password, setPassword, confirmPassword, setConfirmPassword, noCoinciden, error, loading, success, handleSubmit };
 };

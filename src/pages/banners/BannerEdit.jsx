@@ -1,52 +1,11 @@
-import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { getBannerById, updateBanner } from './services/bannersService';
 import { useBannerForm } from './hooks/useBannerForm';
 import BannerFormFields from './components/BannerFormFields';
-import { useToast } from '../../context/ToastContext';
 
 const BannerEdit = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const toast = useToast();
-  const { form, setForm, errors, setLayout, setImageUrl, setField, validate } = useBannerForm(null);
-  const [loading, setLoading] = useState(false);
-  const [fetchError, setFetchError] = useState('');
-
-  useEffect(() => {
-    (async () => {
-      const banner = await getBannerById(id);
-      if (!banner) {
-        setFetchError('Banner no encontrado');
-        return;
-      }
-      setForm({
-        layout: banner.layout,
-        images: banner.images || [],
-        titulo: banner.titulo || '',
-        texto: banner.texto || '',
-        textPosition: banner.textPosition || 'none',
-        displayOrder: banner.displayOrder || 0,
-        estado: banner.estado !== false,
-      });
-    })();
-  }, [id]);
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    const validationErrors = validate();
-    if (Object.keys(validationErrors).length > 0) return;
-
-    setLoading(true);
-    try {
-      await updateBanner(id, form);
-      navigate('/admin/banners');
-    } catch (err) {
-      toast.error('Error al actualizar banner: ' + (err.message || err));
-    } finally {
-      setLoading(false);
-    }
-  };
+  const { form, errors, setLayout, setImageUrl, setField, setContentType, setContentRefs, productos, marcas, categorias, loading, loadingData, fetchError, handleSubmit } = useBannerForm(id);
 
   if (fetchError) {
     return (
@@ -57,7 +16,7 @@ const BannerEdit = () => {
     );
   }
 
-  if (!form) {
+  if (loadingData || !form) {
     return (
       <div className="container mt-4 text-center">
         <div className="spinner-border text-primary" role="status"></div>
@@ -79,6 +38,11 @@ const BannerEdit = () => {
               setLayout={setLayout}
               setImageUrl={setImageUrl}
               setField={setField}
+              setContentType={setContentType}
+              setContentRefs={setContentRefs}
+              productos={productos}
+              marcas={marcas}
+              categorias={categorias}
             />
 
             <div className="d-grid gap-2 d-md-flex justify-content-md-end">

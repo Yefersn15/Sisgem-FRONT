@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { formatPrice } from '../../../services/api/utils';
-import Modal from '../../../shared/components/common/Modal';
+import Modal from '../../../components/Modal';
 
 const HomeProductoModal = ({ producto, onClose, onAdd }) => {
   const [cantidad, setCantidad] = useState(1);

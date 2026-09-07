@@ -1,8 +1,18 @@
 import { Link } from 'react-router-dom';
 import { useBannersAdmin } from './hooks/useBannersAdmin';
 import BannerCollage from './components/BannerCollage';
+import { useAyudaPagina } from '../../hooks/useAyudaPagina';
 
 const AdminBanners = () => {
+  useAyudaPagina({
+    titulo: 'Banners',
+    contenido: (
+      <>
+        <p>Crea banners para el inicio con imágenes propias o con contenido en vivo: productos, marcas, o los más vendidos de una marca/categoría (estos últimos se actualizan solos según las ventas).</p>
+        <p>Un banner inactivo no se muestra en la tienda, pero queda guardado.</p>
+      </>
+    ),
+  });
   const { banners, loading, handleDelete, handleToggleEstado } = useBannersAdmin();
 
   return (

@@ -1,5 +1,23 @@
 // src/pages/productos/hooks/useProductoForm.js
-import { useState } from 'react';
+// Cubre tanto crear como editar: sin `id` crea un producto nuevo, con `id`
+// carga el producto existente y actualiza. Evita duplicar la carga/guardado
+// entre ProductoCreate y ProductoEdit.
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { getProductoById, createProducto, updateProducto } from '../services/productosService';
+
+const FORM_INICIAL = {
+  nombre: '',
+  descripcion: '',
+  precioUnitario: '',
+  stockDisponible: '',
+  barcode: '',
+  fotoUrl: '',
+  categoriaId: '',
+  marcaId: '',
+  activo: true,
+  minStock: 1,
+};
 
 const validateProducto = (formData) => {
   const errors = {};
@@ -16,9 +34,34 @@ const validateProducto = (formData) => {
   return errors;
 };
 
-export const useProductoForm = (initialData) => {
-  const [formData, setFormData] = useState(initialData);
+export const useProductoForm = (id) => {
+  const isEdit = Boolean(id);
+  const navigate = useNavigate();
+
+  const [formData, setFormData] = useState(isEdit ? null : FORM_INICIAL);
   const [errors, setErrors] = useState({});
+  const [loading, setLoading] = useState(false);
+  const [loadingData, setLoadingData] = useState(isEdit);
+  const [fetchError, setFetchError] = useState('');
+
+  useEffect(() => {
+    if (!isEdit) return;
+    (async () => {
+      try {
+        const producto = await getProductoById(id);
+        if (!producto) {
+          setFetchError('Producto no encontrado');
+          return;
+        }
+        setFormData(producto);
+      } catch (err) {
+        console.error('Error cargando producto:', err);
+        setFetchError('Error al cargar datos');
+      } finally {
+        setLoadingData(false);
+      }
+    })();
+  }, [id]);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -35,5 +78,35 @@ export const useProductoForm = (initialData) => {
     return validationErrors;
   };
 
-  return { formData, setFormData, errors, setErrors, handleChange, validate };
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const validationErrors = validate();
+    if (Object.keys(validationErrors).length > 0) return;
+
+    setLoading(true);
+    try {
+      if (isEdit) {
+        await updateProducto(id, {
+          ...formData,
+          precioUnitario: parseFloat(formData.precioUnitario),
+          stockDisponible: parseInt(formData.stockDisponible),
+        });
+      } else {
+        await createProducto({
+          ...formData,
+          precioUnitario: parseFloat(formData.precioUnitario),
+          stockDisponible: parseInt(formData.stockDisponible),
+          minStock: parseInt(formData.minStock),
+        });
+      }
+      navigate('/productos');
+    } catch (err) {
+      console.error(err);
+      setErrors({ submit: err.message || `Error al ${isEdit ? 'actualizar' : 'crear'} producto` });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return { formData, errors, handleChange, validate, loading, loadingData, fetchError, handleSubmit };
 };

@@ -1,5 +1,16 @@
 // src/pages/categorias/hooks/useCategoriaForm.js
-import { useState } from 'react';
+// Cubre tanto crear como editar: sin `id` crea una categoría nueva, con `id`
+// carga la categoría existente y actualiza. Evita duplicar la carga/guardado
+// entre CategoriaCreate y CategoriaEdit.
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { getCategoriaById, createCategoria, updateCategoria } from '../services/categoriasService';
+
+const FORM_INICIAL = {
+  nombre: '',
+  descripcion: '',
+  activo: true,
+};
 
 const validateCategoria = (formData) => {
   const errors = {};
@@ -9,9 +20,29 @@ const validateCategoria = (formData) => {
   return errors;
 };
 
-export const useCategoriaForm = (initialData) => {
-  const [formData, setFormData] = useState(initialData);
+export const useCategoriaForm = (id) => {
+  const isEdit = Boolean(id);
+  const navigate = useNavigate();
+
+  const [formData, setFormData] = useState(isEdit ? null : FORM_INICIAL);
   const [errors, setErrors] = useState({});
+  const [loading, setLoading] = useState(false);
+  const [loadingData, setLoadingData] = useState(isEdit);
+  const [fetchError, setFetchError] = useState('');
+
+  useEffect(() => {
+    if (!isEdit) return;
+    (async () => {
+      const categoria = await getCategoriaById(id);
+      if (!categoria) {
+        setFetchError('Categoría no encontrada');
+        setLoadingData(false);
+        return;
+      }
+      setFormData(categoria);
+      setLoadingData(false);
+    })();
+  }, [id]);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -28,5 +59,22 @@ export const useCategoriaForm = (initialData) => {
     return validationErrors;
   };
 
-  return { formData, setFormData, errors, handleChange, validate };
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const validationErrors = validate();
+    if (Object.keys(validationErrors).length > 0) return;
+
+    setLoading(true);
+    try {
+      if (isEdit) await updateCategoria(id, formData);
+      else await createCategoria(formData);
+      navigate('/categorias');
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return { formData, errors, handleChange, validate, loading, loadingData, fetchError, handleSubmit };
 };

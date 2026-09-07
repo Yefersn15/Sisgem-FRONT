@@ -4,7 +4,7 @@
 // poder seguir escribiendo "if (!(await confirm(...))) return;" igual que
 // antes con window.confirm.
 import { createContext, useCallback, useContext, useState } from 'react';
-import Modal from '../shared/components/common/Modal';
+import Modal from '../components/Modal';
 
 const ConfirmContext = createContext(null);
 

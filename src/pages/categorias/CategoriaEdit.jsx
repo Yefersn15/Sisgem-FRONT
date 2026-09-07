@@ -1,42 +1,11 @@
-import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { getCategoriaById, updateCategoria } from './services/categoriasService';
 import { useCategoriaForm } from './hooks/useCategoriaForm';
 import CategoriaFormFields from './components/CategoriaFormFields';
 
 const CategoriaEdit = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { formData, setFormData, errors, handleChange, validate } = useCategoriaForm(null);
-  const [loading, setLoading] = useState(false);
-  const [fetchError, setFetchError] = useState('');
-
-  useEffect(() => {
-    (async () => {
-      const categoria = await getCategoriaById(id);
-      if (!categoria) {
-        setFetchError('Categoría no encontrada');
-        return;
-      }
-      setFormData(categoria);
-    })();
-  }, [id]);
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    const validationErrors = validate();
-    if (Object.keys(validationErrors).length > 0) return;
-
-    setLoading(true);
-    try {
-      await updateCategoria(id, formData);
-      navigate('/categorias');
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const { formData, errors, handleChange, loading, loadingData, fetchError, handleSubmit } = useCategoriaForm(id);
 
   if (fetchError) {
     return (
@@ -47,7 +16,7 @@ const CategoriaEdit = () => {
     );
   }
 
-  if (!formData) {
+  if (loadingData || !formData) {
     return (
       <div className="container mt-4 text-center">
         <div className="spinner-border text-primary" role="status"></div>
