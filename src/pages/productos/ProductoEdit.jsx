@@ -8,7 +8,7 @@ const ProductoEdit = ({ esDetalle = false }) => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { marcas, categorias } = useProductoReferenceData();
-  const { formData, errors, handleChange, loading, loadingData, fetchError, handleSubmit } = useProductoForm(id);
+  const { formData, errors, handleChange, loading, loadingData, fetchError, handleSubmit, fotoRef } = useProductoForm(id);
 
   if (fetchError) {
     return (
@@ -125,6 +125,7 @@ const ProductoEdit = ({ esDetalle = false }) => {
               onChange={handleChange}
               categorias={categorias}
               marcas={marcas}
+              fotoRef={fotoRef}
             />
 
             <div className="d-grid gap-2 d-md-flex justify-content-md-end">

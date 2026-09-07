@@ -2,9 +2,10 @@
 // Cubre tanto crear como editar: sin `id` crea una marca nueva, con `id`
 // carga la marca existente y actualiza. Evita duplicar la carga/guardado
 // entre MarcaCreate y MarcaEdit.
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getMarcaById, createMarca, updateMarca } from '../services/marcasService';
+import { resolverImagenPendiente } from '../../../components/upload/useImageUpload';
 
 const FORM_INICIAL = {
   nombre: '',
@@ -32,6 +33,7 @@ export const useMarcaForm = (id) => {
   const [loading, setLoading] = useState(false);
   const [loadingData, setLoadingData] = useState(isEdit);
   const [fetchError, setFetchError] = useState('');
+  const logoRef = useRef(null);
 
   useEffect(() => {
     if (!isEdit) return;
@@ -69,8 +71,14 @@ export const useMarcaForm = (id) => {
 
     setLoading(true);
     try {
-      if (isEdit) await updateMarca(id, formData);
-      else await createMarca(formData);
+      const logo = await resolverImagenPendiente(logoRef, formData.logoUrl);
+      if (!logo.ok) {
+        setErrors((prev) => ({ ...prev, logoUrl: 'No se pudo subir el logo, intenta de nuevo' }));
+        return;
+      }
+      const datosAGuardar = { ...formData, logoUrl: logo.url };
+      if (isEdit) await updateMarca(id, datosAGuardar);
+      else await createMarca(datosAGuardar);
       navigate('/marcas');
     } catch (err) {
       console.error(err);
@@ -79,5 +87,5 @@ export const useMarcaForm = (id) => {
     }
   };
 
-  return { formData, errors, handleChange, validate, loading, loadingData, fetchError, handleSubmit };
+  return { formData, errors, handleChange, validate, loading, loadingData, fetchError, handleSubmit, logoRef };
 };

@@ -2,7 +2,7 @@
 // Cubre tanto crear como editar: sin `id` crea un banner nuevo, con `id`
 // carga el banner existente y actualiza. Evita duplicar la carga/guardado
 // entre BannerCreate y BannerEdit.
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getTemplate } from './bannerTemplates';
 import { getBannerById, createBanner, updateBanner } from '../services/bannersService';
@@ -10,6 +10,7 @@ import { getProductos } from '../../productos/services/productosService';
 import { getMarcas } from '../../marcas/services/marcasService';
 import { getCategorias } from '../../categorias/services/categoriasService';
 import { useToast } from '../../../context/ToastContext';
+import { resolverImagenPendiente } from '../../../components/upload/useImageUpload';
 
 const FORM_INICIAL = {
   layout: 'single',
@@ -37,6 +38,12 @@ export const useBannerForm = (id) => {
   const [productos, setProductos] = useState([]);
   const [marcas, setMarcas] = useState([]);
   const [categorias, setCategorias] = useState([]);
+
+  // Un ImageUploadField por slot del collage (arreglo de tamaño variable
+  // según la plantilla elegida) — cada uno se resuelve contra su propio ref
+  // en el submit, ver handleSubmit.
+  const imageRefs = useRef([]);
+  const getImageRef = (index) => (el) => { imageRefs.current[index] = el; };
 
   useEffect(() => {
     Promise.all([getProductos(), getMarcas(), getCategorias()])
@@ -106,9 +113,13 @@ export const useBannerForm = (id) => {
 
   const setContentRefs = (contentRefs) => setForm(prev => ({ ...prev, contentRefs }));
 
-  const validate = () => {
+  // Recibe `images` aparte (no siempre `form.images`) porque en el submit se
+  // valida contra las imágenes YA resueltas (con los archivos pendientes
+  // subidos), no contra el estado del formulario, que todavía tiene esas
+  // casillas vacías mientras el archivo solo está seleccionado en memoria.
+  const validate = (images = form.images) => {
     const newErrors = {};
-    if (form.contentType === 'imagenes' && form.images.some(img => !img.url?.trim())) {
+    if (form.contentType === 'imagenes' && images.some(img => !img.url?.trim())) {
       newErrors.images = 'Todas las casillas de imagen deben tener una URL';
     }
     if ((form.contentType === 'productos' || form.contentType === 'marcas') && (!form.contentRefs || form.contentRefs.length === 0)) {
@@ -126,13 +137,27 @@ export const useBannerForm = (id) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const validationErrors = validate();
-    if (Object.keys(validationErrors).length > 0) return;
 
     setLoading(true);
     try {
-      if (isEdit) await updateBanner(id, form);
-      else await createBanner(form);
+      let images = form.images;
+      if (form.contentType === 'imagenes') {
+        const resultados = await Promise.all(
+          form.images.map((img, i) => resolverImagenPendiente(imageRefs.current[i], img.url))
+        );
+        if (resultados.some((r) => !r.ok)) {
+          setErrors((prev) => ({ ...prev, images: 'No se pudo subir alguna imagen, intenta de nuevo' }));
+          return;
+        }
+        images = form.images.map((img, i) => ({ ...img, url: resultados[i].url }));
+      }
+
+      const validationErrors = validate(images);
+      if (Object.keys(validationErrors).length > 0) return;
+
+      const datosAGuardar = { ...form, images };
+      if (isEdit) await updateBanner(id, datosAGuardar);
+      else await createBanner(datosAGuardar);
       navigate('/admin/banners');
     } catch (err) {
       toast.error(`Error al ${isEdit ? 'actualizar' : 'crear'} banner: ` + (err.message || err));
@@ -144,6 +169,6 @@ export const useBannerForm = (id) => {
   return {
     form, errors, setLayout, setImageUrl, setField, setContentType, setContentRefs,
     productos, marcas, categorias,
-    loading, loadingData, fetchError, handleSubmit,
+    loading, loadingData, fetchError, handleSubmit, getImageRef,
   };
 };

@@ -5,7 +5,7 @@ import BannerFormFields from './components/BannerFormFields';
 const BannerEdit = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { form, errors, setLayout, setImageUrl, setField, setContentType, setContentRefs, productos, marcas, categorias, loading, loadingData, fetchError, handleSubmit } = useBannerForm(id);
+  const { form, errors, setLayout, setImageUrl, setField, setContentType, setContentRefs, productos, marcas, categorias, loading, loadingData, fetchError, handleSubmit, getImageRef } = useBannerForm(id);
 
   if (fetchError) {
     return (
@@ -43,6 +43,7 @@ const BannerEdit = () => {
               productos={productos}
               marcas={marcas}
               categorias={categorias}
+              getImageRef={getImageRef}
             />
 
             <div className="d-grid gap-2 d-md-flex justify-content-md-end">

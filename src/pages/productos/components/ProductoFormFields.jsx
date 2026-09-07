@@ -2,7 +2,7 @@
 import React from 'react';
 import ImageUploadField from '../../../components/upload/ImageUploadField';
 
-const ProductoFormFields = ({ formData, errors, onChange, categorias, marcas }) => (
+const ProductoFormFields = ({ formData, errors, onChange, categorias, marcas, fotoRef }) => (
   <>
     <div className="row mb-3">
       <div className="col-md-6">
@@ -108,6 +108,7 @@ const ProductoFormFields = ({ formData, errors, onChange, categorias, marcas }) 
 
     <div className="mb-3">
       <ImageUploadField
+        ref={fotoRef}
         label="Imagen del producto"
         name="fotoUrl"
         value={formData.fotoUrl}

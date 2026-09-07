@@ -47,11 +47,11 @@ import ResetPassword from '../pages/auth/ResetPassword';
 // Protected Route
 import PrivateRoute from './PrivateRoute';
 
-const Rutas = () => {
+const Rutas = ({ vistaLlamativa }) => {
   return (
     <Routes>
       {/* === PÚBLICAS: Home / Tienda === */}
-      <Route path="/" element={<Home />} />
+      <Route path="/" element={<Home vistaLlamativa={vistaLlamativa} />} />
       <Route path="/nosotros" element={<Nosotros />} />
       
       {/* === PRODUCTOS === */}

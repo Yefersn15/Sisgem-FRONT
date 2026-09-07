@@ -2,7 +2,7 @@
 import React from 'react';
 import ImageUploadField from '../../../components/upload/ImageUploadField';
 
-const MarcaFormFields = ({ formData, errors, onChange }) => (
+const MarcaFormFields = ({ formData, errors, onChange, logoRef }) => (
   <>
     <div className="mb-3">
       <div className="col-md-6">
@@ -33,6 +33,7 @@ const MarcaFormFields = ({ formData, errors, onChange }) => (
     <div className="row mb-3">
       <div className="col-md-6">
         <ImageUploadField
+          ref={logoRef}
           label="Logo"
           name="logoUrl"
           value={formData.logoUrl}

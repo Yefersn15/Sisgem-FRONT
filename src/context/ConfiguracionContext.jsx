@@ -1,6 +1,7 @@
-import { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
 import { getConfiguracion } from '../services/api/configuracion.api';
-import { aplicarTemaCss } from '../utils/tema';
+import { resolverTema, aplicarTemaCss } from '../utils/tema';
+import { useModoOscuro } from '../hooks/useModoOscuro';
 
 const DEFECTO = {
   nombreTienda: 'SISGEM',
@@ -10,7 +11,7 @@ const DEFECTO = {
   telefono: '',
   email: '',
   horario: [],
-  tema: { colorAcento: '#3b82f6' },
+  tema: { modo: 'NINGUNO', paletaId: null, colores: null },
   mapaEmbedUrl: '',
 };
 
@@ -23,6 +24,7 @@ const ConfiguracionContext = createContext({ ...DEFECTO, loading: true, refetch:
 export const ConfiguracionProvider = ({ children }) => {
   const [config, setConfig] = useState(DEFECTO);
   const [loading, setLoading] = useState(true);
+  const { isDark } = useModoOscuro();
 
   const refetch = useCallback(async () => {
     try {
@@ -37,12 +39,14 @@ export const ConfiguracionProvider = ({ children }) => {
     refetch().finally(() => setLoading(false));
   }, [refetch]);
 
+  const temaResuelto = useMemo(() => resolverTema(config.tema, isDark), [config.tema, isDark]);
+
   useEffect(() => {
-    if (config.tema?.colorAcento) aplicarTemaCss(config.tema.colorAcento);
-  }, [config.tema?.colorAcento]);
+    aplicarTemaCss(temaResuelto);
+  }, [temaResuelto]);
 
   return (
-    <ConfiguracionContext.Provider value={{ ...config, loading, refetch }}>
+    <ConfiguracionContext.Provider value={{ ...config, loading, refetch, temaResuelto }}>
       {children}
     </ConfiguracionContext.Provider>
   );

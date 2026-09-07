@@ -8,7 +8,7 @@ import { useModoOscuro } from '../hooks/useModoOscuro';
 import AppearanceMenu from './AppearanceMenu';
 import BrandIcon from './BrandIcon';
 
-const Header = ({ isTopbar, onOrientationChange, navRef }) => {
+const Header = ({ isTopbar, onOrientationChange, navRef, vistaLlamativa, setVistaLlamativa }) => {
   const cart = useCart();
   const itemCount = cart?.itemCount || 0;
   const { user, logout } = useAuth();
@@ -57,7 +57,14 @@ const Header = ({ isTopbar, onOrientationChange, navRef }) => {
             Nosotros
           </Link>
           <div className="ms-auto d-flex align-items-center">
-            <AppearanceMenu isDark={isDark} onSetTheme={setThemeMode} isTopbar={isTopbar} onOrientationChange={onOrientationChange} />
+            <AppearanceMenu
+              isDark={isDark}
+              onSetTheme={setThemeMode}
+              isTopbar={isTopbar}
+              onOrientationChange={onOrientationChange}
+              vistaLlamativa={vistaLlamativa}
+              setVistaLlamativa={setVistaLlamativa}
+            />
 
             <Link to="/carrito" className="btn btn-outline-theme position-relative">
               <i className="fas fa-shopping-cart"></i>

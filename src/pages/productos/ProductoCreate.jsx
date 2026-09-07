@@ -6,7 +6,7 @@ import ProductoFormFields from './components/ProductoFormFields';
 const ProductoCreate = () => {
   const navigate = useNavigate();
   const { marcas, categorias } = useProductoReferenceData();
-  const { formData, errors, handleChange, loading, handleSubmit } = useProductoForm();
+  const { formData, errors, handleChange, loading, handleSubmit, fotoRef } = useProductoForm();
 
   return (
     <div className="container mt-4">
@@ -22,6 +22,7 @@ const ProductoCreate = () => {
               onChange={handleChange}
               categorias={categorias}
               marcas={marcas}
+              fotoRef={fotoRef}
             />
 
             <div className="d-grid gap-2 d-md-flex justify-content-md-end">

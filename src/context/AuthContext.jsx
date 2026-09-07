@@ -3,7 +3,17 @@ import { request } from '../services/api/client';
 
 const AuthContext = createContext();
 
+// eslint-disable-next-line react-refresh/only-export-components -- hook co-ubicado a propósito con su Provider
 export const useAuth = () => useContext(AuthContext);
+
+// Criterio único de "es administrador": antes repetido literalmente en
+// PrivateRoute, StoreTopNav y demás componentes de menú. `role` nunca se
+// setea en este contexto (no hay endpoint que lo llene), así que el chequeo
+// real recae sobre los campos que sí trae el usuario autenticado.
+// eslint-disable-next-line react-refresh/only-export-components -- función utilitaria co-ubicada a propósito
+export const esAdmin = (user, role) =>
+  role?.nombre === 'ADMIN' || role?.nombre === 'Administrador' ||
+  user?.rol_id === 5 || user?.rol === 'ADMIN' || user?.rol === 'Administrador';
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
@@ -74,10 +84,12 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem('auth_user');
   };
 
+  const isAdmin = esAdmin(user, role);
+
   const hasPermission = (moduleName) => {
     if (!user) return false;
     // El rol de ADMIN/Administrador tiene todos los permisos
-    if (role?.nombre === 'ADMIN' || role?.nombre === 'Administrador' || user?.rol_id === 5 || user?.rol === 'ADMIN' || user?.rol === 'Administrador') return true;
+    if (isAdmin) return true;
     // Verificar en módulos/permisos
     return modules.some(m => m.nombre === moduleName || m === moduleName);
   };
@@ -95,15 +107,16 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ 
-      user, 
-      role, 
-      modules, 
-      login, 
-      logout, 
-      hasPermission, 
+    <AuthContext.Provider value={{
+      user,
+      role,
+      modules,
+      login,
+      logout,
+      hasPermission,
+      isAdmin,
       loading,
-      refreshUser 
+      refreshUser
     }}>
       {children}
     </AuthContext.Provider>

@@ -3,7 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import LoadingState from './LoadingState';
 
 const PrivateRoute = ({ children, module, requireGuest }) => {
-  const { user, role, hasPermission, loading } = useAuth();
+  const { user, hasPermission, isAdmin, loading } = useAuth();
   const location = useLocation();
 
   if (loading) return <LoadingState />;
@@ -12,22 +12,19 @@ const PrivateRoute = ({ children, module, requireGuest }) => {
   if (requireGuest) {
     if (user) {
       // Ya está logueado, redirigir según el rol
-      if (role?.nombre === 'ADMIN' || role?.nombre === 'Administrador' || user.rol_id === 5) {
+      if (isAdmin) {
         return <Navigate to="/admin" replace />;
       }
-      return <Navigate to="/" replace />;
+      return <Navigate to={location.state?.from?.pathname || '/'} replace />;
     }
     return children;
   }
-  
+
   // Si no está logueado, redirigir a login
   if (!user) {
     return <Navigate to="/login" replace state={{ from: location }} />;
   }
-  
-  // Verificar si es administrador
-  const isAdmin = role?.nombre === 'ADMIN' || role?.nombre === 'Administrador' || user?.rol_id === 5 || user?.rol === 'ADMIN' || user?.rol === 'Administrador';
-  
+
   // Si es admin, permitir acceso a todo
   if (isAdmin) {
     return children;

@@ -14,12 +14,12 @@ import './App.css';
 
 // Componente para redirigir según el rol después del login
 const AuthRouter = () => {
-  const { user, role, loading } = useAuth();
+  const { user, isAdmin, loading } = useAuth();
 
   if (loading) return <LoadingState />;
-  
+
   // Si es admin, va directamente a /admin
-  if (user && (role?.nombre === 'ADMIN' || role?.nombre === 'Administrador' || user.rol_id === 5)) {
+  if (user && isAdmin) {
     return <Navigate to="/admin" replace />;
   }
   

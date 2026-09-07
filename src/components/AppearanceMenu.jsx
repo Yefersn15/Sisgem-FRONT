@@ -2,8 +2,11 @@
 import React from 'react';
 
 // Agrupa tema (claro/oscuro) y orientación del menú (lateral/superior) en un
-// único dropdown. Se usa tanto en el header del admin como en el de la tienda.
-const AppearanceMenu = ({ isDark, onSetTheme, isTopbar, onOrientationChange }) => (
+// único dropdown. Se usa tanto en el header del admin como en el de la
+// tienda; en la tienda además se le pasa `vistaLlamativa`/`setVistaLlamativa`
+// para sumar la sección "Vista de inicio" (el admin no la recibe, así que
+// esa sección no se renderiza ahí).
+const AppearanceMenu = ({ isDark, onSetTheme, isTopbar, onOrientationChange, vistaLlamativa, setVistaLlamativa }) => (
   <div className="dropdown me-2">
     <button
       className="btn btn-outline-theme dropdown-toggle btn-sm"
@@ -37,6 +40,22 @@ const AppearanceMenu = ({ isDark, onSetTheme, isTopbar, onOrientationChange }) =
           <i className="fas fa-bars"></i><span>Barra superior</span>
         </button>
       </li>
+      {setVistaLlamativa && (
+        <>
+          <li><hr className="dropdown-divider" /></li>
+          <li><h6 className="dropdown-header">Vista de inicio</h6></li>
+          <li>
+            <button className={`dropdown-item d-flex align-items-center gap-2 ${!vistaLlamativa ? 'active' : ''}`} onClick={() => setVistaLlamativa(false)}>
+              <i className="fas fa-house"></i><span>Clásica</span>
+            </button>
+          </li>
+          <li>
+            <button className={`dropdown-item d-flex align-items-center gap-2 ${vistaLlamativa ? 'active' : ''}`} onClick={() => setVistaLlamativa(true)}>
+              <i className="fas fa-wand-magic-sparkles"></i><span>Llamativa</span>
+            </button>
+          </li>
+        </>
+      )}
     </ul>
   </div>
 );

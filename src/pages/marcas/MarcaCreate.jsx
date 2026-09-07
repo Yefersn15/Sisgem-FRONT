@@ -4,7 +4,7 @@ import MarcaFormFields from './components/MarcaFormFields';
 
 const MarcaCreate = () => {
   const navigate = useNavigate();
-  const { formData, errors, handleChange, loading, handleSubmit } = useMarcaForm();
+  const { formData, errors, handleChange, loading, handleSubmit, logoRef } = useMarcaForm();
 
   return (
     <div className="container mt-4">
@@ -18,6 +18,7 @@ const MarcaCreate = () => {
               formData={formData}
               errors={errors}
               onChange={handleChange}
+              logoRef={logoRef}
             />
 
             <div className="d-grid gap-2 d-md-flex justify-content-md-end">

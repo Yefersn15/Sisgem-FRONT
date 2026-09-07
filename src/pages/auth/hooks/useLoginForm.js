@@ -1,7 +1,7 @@
 // src/pages/auth/hooks/useLoginForm.js
 import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { useAuth } from '../../../context/AuthContext';
+import { useAuth, esAdmin } from '../../../context/AuthContext';
 
 export const useLoginForm = () => {
   const [email, setEmail] = useState('');
@@ -21,7 +21,10 @@ export const useLoginForm = () => {
     try {
       const result = await login(email, password);
       if (result && result.success) {
-        navigate(from, { replace: true });
+        // El staff siempre entra por el panel de administración; a un
+        // usuario normal se le devuelve a la página desde la que lo
+        // mandamos a loguearse (ver PrivateRoute.jsx, mismo criterio).
+        navigate(esAdmin(result.user) ? '/admin' : from, { replace: true });
       } else {
         setError(result?.message || 'Credenciales inválidas');
       }

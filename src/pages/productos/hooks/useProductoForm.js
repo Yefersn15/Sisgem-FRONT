@@ -2,9 +2,10 @@
 // Cubre tanto crear como editar: sin `id` crea un producto nuevo, con `id`
 // carga el producto existente y actualiza. Evita duplicar la carga/guardado
 // entre ProductoCreate y ProductoEdit.
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getProductoById, createProducto, updateProducto } from '../services/productosService';
+import { resolverImagenPendiente } from '../../../components/upload/useImageUpload';
 
 const FORM_INICIAL = {
   nombre: '',
@@ -43,6 +44,7 @@ export const useProductoForm = (id) => {
   const [loading, setLoading] = useState(false);
   const [loadingData, setLoadingData] = useState(isEdit);
   const [fetchError, setFetchError] = useState('');
+  const fotoRef = useRef(null);
 
   useEffect(() => {
     if (!isEdit) return;
@@ -85,15 +87,23 @@ export const useProductoForm = (id) => {
 
     setLoading(true);
     try {
+      const foto = await resolverImagenPendiente(fotoRef, formData.fotoUrl);
+      if (!foto.ok) {
+        setErrors((prev) => ({ ...prev, fotoUrl: 'No se pudo subir la imagen, intenta de nuevo' }));
+        return;
+      }
+
       if (isEdit) {
         await updateProducto(id, {
           ...formData,
+          fotoUrl: foto.url,
           precioUnitario: parseFloat(formData.precioUnitario),
           stockDisponible: parseInt(formData.stockDisponible),
         });
       } else {
         await createProducto({
           ...formData,
+          fotoUrl: foto.url,
           precioUnitario: parseFloat(formData.precioUnitario),
           stockDisponible: parseInt(formData.stockDisponible),
           minStock: parseInt(formData.minStock),
@@ -108,5 +118,5 @@ export const useProductoForm = (id) => {
     }
   };
 
-  return { formData, errors, handleChange, validate, loading, loadingData, fetchError, handleSubmit };
+  return { formData, errors, handleChange, validate, loading, loadingData, fetchError, handleSubmit, fotoRef };
 };

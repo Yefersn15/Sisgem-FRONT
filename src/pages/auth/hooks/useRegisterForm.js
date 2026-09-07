@@ -22,10 +22,13 @@ const FORM_INICIAL = {
   confirmPassword: ''
 };
 
+export const TOTAL_PASOS = 3;
+
 export const useRegisterForm = () => {
   const navigate = useNavigate();
   const toast = useToast();
   const [form, setForm] = useState(FORM_INICIAL);
+  const [paso, setPaso] = useState(1);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -42,36 +45,60 @@ export const useRegisterForm = () => {
     setForm({ ...form, [name]: processedValue });
   };
 
+  // Cada paso se valida antes de avanzar, así el usuario nunca llega a
+  // "Registrarse" arrastrando un error de un paso anterior que ya no ve.
+  const validarPaso = (numeroPaso) => {
+    if (numeroPaso === 1) {
+      if (!form.nombre.trim() || !form.apellido.trim()) {
+        return 'Completa nombre y apellido';
+      }
+      if (!documentoEsValido(form.documento, form.tipoDocumento)) {
+        return mensajeDocumentoInvalido(form.tipoDocumento);
+      }
+      return '';
+    }
+    if (numeroPaso === 3) {
+      if (!emailEsValido(form.email)) {
+        return 'Ingresa un correo electrónico válido';
+      }
+      if (form.password !== form.confirmPassword) {
+        return 'Las contraseñas no coinciden';
+      }
+      if (!passwordEsValida(form.password)) {
+        return 'La contraseña debe tener mínimo 8 caracteres, con mayúscula, minúscula, número y símbolo';
+      }
+      return '';
+    }
+    return '';
+  };
+
+  const siguientePaso = () => {
+    const mensaje = validarPaso(paso);
+    if (mensaje) {
+      setError(mensaje);
+      return;
+    }
+    setError('');
+    setPaso((p) => Math.min(p + 1, TOTAL_PASOS));
+  };
+
+  const pasoAnterior = () => {
+    setError('');
+    setPaso((p) => Math.max(p - 1, 1));
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const mensaje = validarPaso(3);
+    if (mensaje) {
+      setError(mensaje);
+      return;
+    }
+
     setError('');
     setLoading(true);
 
     try {
-      if (!documentoEsValido(form.documento, form.tipoDocumento)) {
-        setError(mensajeDocumentoInvalido(form.tipoDocumento));
-        setLoading(false);
-        return;
-      }
-
-      if (!emailEsValido(form.email)) {
-        setError('Ingresa un correo electrónico válido');
-        setLoading(false);
-        return;
-      }
-
-      if (form.password !== form.confirmPassword) {
-        setError('Las contraseñas no coinciden');
-        setLoading(false);
-        return;
-      }
-
-      if (!passwordEsValida(form.password)) {
-        setError('La contraseña debe tener mínimo 8 caracteres, con mayúscula, minúscula, número y símbolo');
-        setLoading(false);
-        return;
-      }
-
       const result = await registerUser({
         nombre: normalizeText(form.nombre),
         apellido: normalizeText(form.apellido),
@@ -99,5 +126,5 @@ export const useRegisterForm = () => {
     }
   };
 
-  return { form, error, loading, handleChange, handleSubmit };
+  return { form, paso, error, loading, handleChange, siguientePaso, pasoAnterior, handleSubmit };
 };

@@ -4,7 +4,7 @@ import BannerFormFields from './components/BannerFormFields';
 
 const BannerCreate = () => {
   const navigate = useNavigate();
-  const { form, errors, setLayout, setImageUrl, setField, setContentType, setContentRefs, productos, marcas, categorias, loading, handleSubmit } = useBannerForm();
+  const { form, errors, setLayout, setImageUrl, setField, setContentType, setContentRefs, productos, marcas, categorias, loading, handleSubmit, getImageRef } = useBannerForm();
 
   return (
     <div className="container-fluid py-4" style={{ maxWidth: 960 }}>
@@ -25,6 +25,7 @@ const BannerCreate = () => {
               productos={productos}
               marcas={marcas}
               categorias={categorias}
+              getImageRef={getImageRef}
             />
 
             <div className="d-grid gap-2 d-md-flex justify-content-md-end">

@@ -16,12 +16,12 @@ const ConfiguracionAdmin = () => {
     titulo: 'Configuración',
     contenido: (
       <>
-        <p>Datos de la tienda (nombre, logo, contacto, horario de atención, ubicación) y el color de acento del sitio, visibles para todos los visitantes: encabezado, pie de página, inicio y panel de administración.</p>
+        <p>Datos de la tienda (nombre, logo, contacto, horario de atención, ubicación) y el tema de colores del sitio, visibles para todos los visitantes: encabezado, pie de página, inicio y panel de administración.</p>
         <p>Se guarda en la base de datos de esta tienda (no depende de servicios externos), excepto el mapa, que usa la URL de "Insertar un mapa" de Google Maps si la defines.</p>
       </>
     ),
   });
-  const { form, setForm, guardando, handleSubmit } = useConfiguracionForm();
+  const { form, setForm, guardando, handleSubmit, logoRef } = useConfiguracionForm();
 
   if (!form) {
     return <div className="text-center py-5"><div className="spinner-border" role="status"></div></div>;
@@ -53,12 +53,13 @@ const ConfiguracionAdmin = () => {
               </div>
 
               <div className="col-12">
-                <label className="form-label d-block">Color de acento del sitio</label>
+                <label className="form-label d-block">Tema de colores del sitio</label>
                 <SelectorTema value={form.tema} onChange={(tema) => setForm({ ...form, tema })} />
               </div>
 
               <div className="col-12">
                 <ImageUploadField
+                  ref={logoRef}
                   label="Logo"
                   folder="logo"
                   value={form.logoUrl}

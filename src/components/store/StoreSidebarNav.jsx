@@ -20,8 +20,7 @@ const closeOffcanvas = () => {
 
 const StoreSidebarNav = () => {
   const location = useLocation();
-  const { role, user, hasPermission } = useAuth();
-  const isAdmin = role?.nombre === 'ADMIN' || role?.nombre === 'Administrador' || user?.rol_id === 5 || user?.rol === 'ADMIN' || user?.rol === 'Administrador';
+  const { hasPermission, isAdmin } = useAuth();
 
   const visibleSections = getStoreMenuSections({ isAdmin, hasPermission })
     .filter(section => !section.condition || section.condition())

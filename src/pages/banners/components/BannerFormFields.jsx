@@ -41,7 +41,7 @@ const construirPreviewVivo = (contentType, contentRefs, productos, marcas) => {
   return [];
 };
 
-const BannerFormFields = ({ form, errors, setLayout, setImageUrl, setField, setContentType, setContentRefs, productos = [], marcas = [], categorias = [] }) => {
+const BannerFormFields = ({ form, errors, setLayout, setImageUrl, setField, setContentType, setContentRefs, productos = [], marcas = [], categorias = [], getImageRef }) => {
   const template = getTemplate(form.layout);
   const contentType = form.contentType || 'imagenes';
 
@@ -69,6 +69,7 @@ const BannerFormFields = ({ form, errors, setLayout, setImageUrl, setField, setC
           {form.images.map((img, i) => (
             <div className="col-md-6" key={i}>
               <ImageUploadField
+                ref={getImageRef(i)}
                 label={`Imagen ${i + 1}`}
                 value={img.url}
                 onValueChange={(url) => setImageUrl(i, url)}

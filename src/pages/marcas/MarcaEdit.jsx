@@ -5,7 +5,7 @@ import MarcaFormFields from './components/MarcaFormFields';
 const MarcaEdit = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { formData, errors, handleChange, loading, loadingData, fetchError, handleSubmit } = useMarcaForm(id);
+  const { formData, errors, handleChange, loading, loadingData, fetchError, handleSubmit, logoRef } = useMarcaForm(id);
 
   if (fetchError) {
     return (
@@ -36,6 +36,7 @@ const MarcaEdit = () => {
               formData={formData}
               errors={errors}
               onChange={handleChange}
+              logoRef={logoRef}
             />
 
             <div className="d-grid gap-2 d-md-flex justify-content-md-end">
