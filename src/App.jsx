@@ -9,6 +9,7 @@ import { ConfirmProvider } from './context/ConfirmContext';
 import { ConfiguracionProvider } from './context/ConfiguracionContext';
 import { AyudaProvider } from './context/AyudaContext';
 import LoadingState from './components/LoadingState';
+import ConnectionWatcher from './components/ConnectionWatcher';
 import './App.css';
 
 // Componente para redirigir según el rol después del login
@@ -35,6 +36,7 @@ function App() {
             <AyudaProvider>
               <AuthProvider>
                 <CartProvider>
+                  <ConnectionWatcher />
                   <Routes>
                     {/* Ruta para redirigir según el rol */}
                     <Route path="/auth-router" element={<AuthRouter />} />

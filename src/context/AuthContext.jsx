@@ -62,8 +62,21 @@ export const AuthProvider = ({ children }) => {
           }
         } catch (e) {
           console.warn('Error obteniendo usuario desde API:', e.message || e);
-          localStorage.removeItem('auth_token');
-          localStorage.removeItem('auth_user');
+          // Solo se cierra sesión si el token en sí fue rechazado (401 -
+          // client.js ya limpió el storage en ese caso). Un error de red o
+          // un 429/5xx transitorio no debe desloguear a alguien que sí tiene
+          // un token válido: cuando vuelva la conexión, ConnectionWatcher
+          // reintenta esta misma carga.
+          if (e.status !== 401) {
+            const cached = localStorage.getItem('auth_user');
+            if (cached) {
+              try {
+                const cachedUser = JSON.parse(cached);
+                setUser(cachedUser);
+                if (cachedUser.permisos) setModules(cachedUser.permisos);
+              } catch { /* caché corrupta, se ignora */ }
+            }
+          }
         }
       }
       setLoading(false);

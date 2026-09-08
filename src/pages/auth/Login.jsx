@@ -1,8 +1,10 @@
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { useLoginForm } from './hooks/useLoginForm';
 import { useAyudaPagina } from '../../hooks/useAyudaPagina';
 
 const Login = () => {
+  const location = useLocation();
+  const sessionExpired = location.state?.sessionExpired;
   useAyudaPagina({
     titulo: 'Iniciar sesión',
     contenido: (
@@ -19,6 +21,9 @@ const Login = () => {
       <div className="card login-card">
         <div className="card-header">Iniciar Sesión</div>
         <div className="card-body">
+          {sessionExpired && !error && (
+            <div className="alert alert-warning">Tu sesión expiró. Inicia sesión de nuevo para continuar.</div>
+          )}
           {error && <div className="alert alert-danger">{error}</div>}
           <form onSubmit={handleSubmit}>
             <div className="mb-3">

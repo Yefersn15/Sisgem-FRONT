@@ -23,6 +23,51 @@ export const getAuthToken = () => {
   }
 };
 
+const clearSession = () => {
+  try {
+    localStorage.removeItem('auth_token');
+    localStorage.removeItem('auth_user');
+  } catch {
+    // localStorage no disponible (modo privado, etc.) - nada que limpiar
+  }
+};
+
+// Bus de eventos mínimo para que módulos sin React (este archivo) avisen a
+// componentes de la UI (ConnectionWatcher) sobre el estado de la conexión y
+// sesiones expiradas, sin que client.js dependa de React ni del router.
+const connectionListeners = new Set();
+export const onConnectionEvent = (callback) => {
+  connectionListeners.add(callback);
+  return () => connectionListeners.delete(callback);
+};
+const emitConnectionEvent = (event) => connectionListeners.forEach((cb) => cb(event));
+
+// 'ok' | 'lost': evita reemitir el mismo estado en cada request mientras la
+// caída persiste (para que el componente no reinicie su lógica de aviso).
+let connectionState = 'ok';
+// El ping de recuperación (pingApi) golpea la raíz pública de la API, que a
+// propósito NO pasa por el limitador de solicitudes (ver app.js) para no
+// empeorar un 429 real reintentando contra él. Eso significa que un ping
+// exitoso demuestra que el servidor está vivo, pero NO que el límite de
+// solicitudes ya se liberó — así que solo se usa para "levantar" el aviso
+// cuando la causa fue una caída real (red/servidor), nunca cuando fue un 429:
+// esa sola la limpia una solicitud real de la API que vuelva a tener éxito.
+let ultimaCausaPerdida = null; // 'network' | 'server-error' | 'rate-limited'
+const reportConnectionOk = () => {
+  if (connectionState !== 'ok') {
+    connectionState = 'ok';
+    ultimaCausaPerdida = null;
+    emitConnectionEvent('restored');
+  }
+};
+const reportConnectionLost = (causa) => {
+  ultimaCausaPerdida = causa;
+  if (connectionState !== 'lost') {
+    connectionState = 'lost';
+    emitConnectionEvent('lost');
+  }
+};
+
 export const request = async (path, options = {}) => {
   const url = path.startsWith('http') ? path : `${API_BASE_URL.replace(/\/$/, '')}/${path.replace(/^\//, '')}`;
 
@@ -47,7 +92,38 @@ export const request = async (path, options = {}) => {
     opts.body = JSON.stringify(opts.body);
   }
 
-  const res = await fetch(url, opts);
+  let res;
+  try {
+    res = await fetch(url, opts);
+  } catch {
+    // El fetch nunca llegó a obtener respuesta (servidor caído, sin
+    // internet, CORS, timeout de Render al "despertar" el servicio, etc.):
+    // esto sí es "se perdió la conexión", a diferencia de un 429/5xx (el
+    // servidor respondió, solo que con un error).
+    reportConnectionLost('network');
+    throw new Error('No se pudo conectar con el servidor. Verifica tu conexión e intenta de nuevo.');
+  }
+
+  // Un 401 significa que el token no existe/es inválido/expiró (verifyToken
+  // lo rechazó): si creíamos tener sesión, se fuerza el cierre y se manda al
+  // login. Se hace aquí y no en cada pantalla porque cualquier llamada,
+  // desde cualquier página, puede ser la primera en descubrir que el token
+  // ya no sirve.
+  if (res.status === 401 && getAuthToken()) {
+    clearSession();
+    emitConnectionEvent('session-expired');
+  }
+
+  // 429 (límite de solicitudes) y 5xx (error del servidor) sí implican que
+  // el servidor respondió, pero la app no puede operar con normalidad —
+  // se trata igual que una desconexión para mostrarle al usuario un aviso
+  // en vez de dejar que cada pantalla falle en silencio o con un error
+  // técnico suelto.
+  if (res.status === 429 || res.status >= 500) {
+    reportConnectionLost(res.status === 429 ? 'rate-limited' : 'server-error');
+  } else {
+    reportConnectionOk();
+  }
 
   if (!res.ok) {
     let txt = '';
@@ -65,7 +141,6 @@ export const request = async (path, options = {}) => {
     } catch {
       // txt no era JSON, se deja tal cual
     }
-    // No borrar token automáticamente en 401/400 - el usuario puede re-autenticarse si es necesario
     const err = new Error(message || `Error ${res.status} ${res.statusText}`);
     err.status = res.status;
     throw err;
@@ -95,4 +170,23 @@ export const request = async (path, options = {}) => {
   }
 
   return data;
+};
+
+// Ping liviano para el aviso de "reconectando": la raíz de la API ("/", no
+// "/api/...") no pasa por el rate limiter general, así que reintentar contra
+// ella mientras el backend está caído/saturado no empeora el problema. Pero
+// por eso mismo un ping exitoso NO demuestra que un 429 ya se liberó (ver
+// ultimaCausaPerdida) — en ese caso el aviso se deja como está y solo lo
+// levanta una solicitud real de la API que vuelva a tener éxito.
+export const pingApi = async () => {
+  try {
+    const res = await fetch(API_BASE_URL);
+    if (res.ok) {
+      if (ultimaCausaPerdida !== 'rate-limited') reportConnectionOk();
+      return true;
+    }
+    return false;
+  } catch {
+    return false;
+  }
 };
