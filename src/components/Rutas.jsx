@@ -19,6 +19,7 @@ import MisPedidos from '../pages/pedidos/MisPedidos';
 import VentaDetails from '../pages/ventas/VentaDetails';
 import DomiciliosAdmin from '../pages/domicilios/DomiciliosAdmin';
 import MisDomicilios from '../pages/domicilios/MisDomicilios';
+import MisEntregas from '../pages/domicilios/MisEntregas';
 
 // Admin
 import AdminDashboard from '../pages/dashboard/AdminDashboard';
@@ -86,6 +87,7 @@ const Rutas = ({ vistaLlamativa }) => {
       <Route path="/mis-pagos" element={<PrivateRoute><MisPagos /></PrivateRoute>} />
       <Route path="/mis-pedidos" element={<PrivateRoute><MisPedidos /></PrivateRoute>} />
       <Route path="/mis-domicilios" element={<PrivateRoute><MisDomicilios /></PrivateRoute>} />
+      <Route path="/mis-entregas" element={<PrivateRoute><MisEntregas /></PrivateRoute>} />
 
       {/* === RUTAS DEL ADMIN === */}
       <Route path="/admin" element={<PrivateRoute><AdminDashboard /></PrivateRoute>} />

@@ -206,6 +206,11 @@ const Header = ({ vistaLlamativa, setVistaLlamativa }) => {
                     </button>
                   </li>
                   <li>
+                    <button className="dropdown-item" onClick={() => handleUserMenuClick('/mis-entregas')}>
+                      <i className="fas fa-motorcycle me-2"></i>Mis Entregas
+                    </button>
+                  </li>
+                  <li>
                     <button className="dropdown-item" onClick={() => handleUserMenuClick('/cambiar-password')}>
                       <i className="fas fa-key me-2"></i>Cambiar Contraseña
                     </button>

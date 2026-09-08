@@ -206,6 +206,36 @@ export const saveDomicilio = async (domicilio) => {
   return null;
 };
 
+// Domicilios asignados al repartidor autenticado (vista "Mis Entregas") y
+// cambio de estado de UNO de sus propios domicilios; distinto de
+// getDomicilioByVentaId/updateDomicilioEstado que son de uso administrativo.
+export const getMisEntregas = async () => {
+  try {
+    const data = await request('/api/domicilios/mis-domicilios');
+    return Array.isArray(data) ? data : [];
+  } catch (e) {
+    console.error('Error obteniendo mis entregas:', e);
+    return [];
+  }
+};
+
+export const cambiarEstadoMiEntrega = (id, estado) =>
+  request(`/api/domicilios/${id}/estado-repartidor`, { method: 'PATCH', body: { estado } });
+
+// Domicilios del cliente autenticado (sus propios pedidos a domicilio), vía
+// el endpoint dedicado del backend en lugar de filtrar client-side
+// getDomicilios()/getVentas() (ambos admin-only, por lo que un cliente normal
+// nunca veía nada en "Mis Domicilios").
+export const getMisPedidosDomicilio = async () => {
+  try {
+    const data = await request('/api/domicilios/mis-pedidos-domicilio');
+    return Array.isArray(data) ? data : [];
+  } catch (e) {
+    console.error('Error obteniendo mis pedidos a domicilio:', e);
+    return [];
+  }
+};
+
 // Reasignación de repartidor (+ su tarifa) e importación/exportación en
 // Excel viven en sus propios archivos (domicilios.repartidor.api.js,
 // domicilios.excel.api.js) por ser flujos autocontenidos; se re-exportan

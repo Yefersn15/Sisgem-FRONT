@@ -9,4 +9,7 @@ export {
   getDomicilioByVentaId,
   importDomicilios,
   exportDomicilios,
+  getMisEntregas,
+  cambiarEstadoMiEntrega,
+  getMisPedidosDomicilio,
 } from '../../../services/api/domicilios.api';

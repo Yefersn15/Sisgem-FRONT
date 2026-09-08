@@ -1,8 +1,7 @@
 // src/pages/domicilios/hooks/useMisDomicilios.js
 import { useState, useEffect, useMemo } from 'react';
 import { useAuth } from '../../../context/AuthContext';
-import { getDomicilios } from '../services/domiciliosService';
-import { getVentas } from '../../../services/api/pedidos.api';
+import { getMisPedidosDomicilio } from '../services/domiciliosService';
 
 const BADGE_CLASSES = {
   entregado: 'bg-success',
@@ -18,10 +17,23 @@ export const getBadgeClass = (estado) => BADGE_CLASSES[String(estado || '').toLo
 
 const ITEMS_PER_PAGE = 5;
 
+// El backend devuelve el Domicilio con su Pedido anidado (as: 'pedido');
+// se aplana aquí para que la vista siga trabajando con `ventaId`/`tarifa`
+// igual que antes, sin que el resto del componente sepa de la anidación.
+const mapDomicilio = (d) => ({
+  id: d.id,
+  ventaId: d.pedido?.id ?? d.pedidoId,
+  direccion: d.direccion || '',
+  direccion2: d.direccion2 || '',
+  barrio: d.barrio || '',
+  estado: d.estado || 'Pendiente',
+  tarifa: d.tarifaAplicada ?? d.costo ?? 0,
+  repartidor: d.repartidor || null,
+});
+
 export const useMisDomicilios = () => {
   const { user } = useAuth();
   const [domicilios, setDomicilios] = useState([]);
-  const [ventas, setVentas] = useState([]);
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState('Todos');
   const [currentPage, setCurrentPage] = useState(1);
@@ -29,17 +41,8 @@ export const useMisDomicilios = () => {
   useEffect(() => {
     const cargarDatos = async () => {
       if (user) {
-        const todasLasVentas = (await getVentas()) || [];
-        const ventasDelUsuario = todasLasVentas.filter(v => v.usuarioId === user.id);
-        setVentas(ventasDelUsuario);
-
-        const ventaIds = ventasDelUsuario.map(v => v.id);
-
-        const todosDomicilios = (await getDomicilios()) || [];
-        const domiciliosDelUsuario = todosDomicilios.filter(d =>
-          ventaIds.includes(d.ventaId) || ventaIds.includes(d.id)
-        );
-        setDomicilios(domiciliosDelUsuario);
+        const misDomicilios = (await getMisPedidosDomicilio()) || [];
+        setDomicilios(misDomicilios.map(mapDomicilio));
       }
     };
     cargarDatos();
@@ -48,17 +51,15 @@ export const useMisDomicilios = () => {
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
     return domicilios.filter(d => {
-      if (filter !== 'Todos' && d.estado !== filter) return false;
+      if (filter !== 'Todos' && String(d.estado).toLowerCase() !== filter) return false;
       if (!q) return true;
 
-      const venta = ventas.find(v => String(v.id) === String(d.ventaId) || String(v.id) === String(d.id));
-      const fields = [d.id, d.direccion, d.estado, venta?.id].filter(Boolean).join(' ').toLowerCase();
+      const fields = [d.id, d.ventaId, d.direccion, d.estado].filter(Boolean).join(' ').toLowerCase();
       return fields.includes(q);
     });
-  }, [domicilios, ventas, search, filter]);
+  }, [domicilios, search, filter]);
 
-  const getVentaInfo = (domicilio) =>
-    ventas.find(v => String(v.id) === String(domicilio.ventaId) || String(v.id) === String(domicilio.id));
+  const getVentaInfo = (domicilio) => (domicilio.ventaId ? { id: domicilio.ventaId } : null);
 
   useEffect(() => {
     setCurrentPage(1);
