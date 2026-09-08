@@ -26,12 +26,13 @@ export const NAV_GROUPS = [
     key: 'ventas',
     label: 'Ventas',
     icon: 'fa-shopping-cart',
-    permissions: ['Ventas'],
+    permissions: ['Ventas', 'Caja'],
     items: [
       { to: '/admin/ventas', icon: 'fa-shopping-cart', label: 'Ventas' },
       { to: '/admin/pedidos', icon: 'fa-box', label: 'Pedidos' },
       { to: '/admin/domicilios', icon: 'fa-truck', label: 'Domicilios' },
       { to: '/admin/pagos', icon: 'fa-money-bill-wave', label: 'Pagos' },
+      { to: '/admin/caja', icon: 'fa-cash-register', label: 'Caja', permission: 'Caja' },
     ],
   },
   {

@@ -20,6 +20,7 @@ import VentaDetails from '../pages/ventas/VentaDetails';
 import DomiciliosAdmin from '../pages/domicilios/DomiciliosAdmin';
 import MisDomicilios from '../pages/domicilios/MisDomicilios';
 import MisEntregas from '../pages/domicilios/MisEntregas';
+import CajaAdmin from '../pages/caja/CajaAdmin';
 
 // Admin
 import AdminDashboard from '../pages/dashboard/AdminDashboard';
@@ -94,6 +95,7 @@ const Rutas = ({ vistaLlamativa }) => {
       <Route path="/admin/ventas" element={<PrivateRoute module="Ventas"><VentasAdmin /></PrivateRoute>} />
       <Route path="/admin/pedidos" element={<PrivateRoute module="Ventas"><PedidosAdmin /></PrivateRoute>} />
       <Route path="/admin/domicilios" element={<PrivateRoute module="Ventas"><DomiciliosAdmin /></PrivateRoute>} />
+      <Route path="/admin/caja" element={<PrivateRoute module="Caja"><CajaAdmin /></PrivateRoute>} />
       <Route path="/admin/pagos" element={<PrivateRoute module="Ventas"><PagosAdmin /></PrivateRoute>} />
       <Route path="/admin/pagos/nuevo" element={<PrivateRoute module="Ventas"><PagoCreate /></PrivateRoute>} />
       <Route path="/admin/pagos/:id" element={<PrivateRoute module="Ventas"><PagoDetail /></PrivateRoute>} />

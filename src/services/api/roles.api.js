@@ -51,6 +51,8 @@ export const getPermisosDisponibles = async () => {
     'marcas.read', 'marcas.write', 'marcas.delete',
     // Banners
     'banners.read', 'banners.write', 'banners.delete',
+    // Caja
+    'caja.read', 'caja.write',
     // Usuarios
     'usuarios.read', 'usuarios.write', 'usuarios.delete',
     // Roles

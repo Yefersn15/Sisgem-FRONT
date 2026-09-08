@@ -33,6 +33,7 @@ const ETIQUETA_A_PREFIJOS_PERMISO = {
   'Categorías': ['categorias'],
   'Inventario': ['productos', 'marcas', 'categorias'],
   'Banners': ['banners'],
+  'Caja': ['caja'],
   'Ventas': ['ventas', 'pedidos', 'pagos', 'domicilios'],
   'Usuarios': ['usuarios'],
   'Configuración': ['roles', 'config'],
