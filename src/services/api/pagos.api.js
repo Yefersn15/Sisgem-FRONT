@@ -20,7 +20,8 @@ const mapearPago = (pago) => {
     referencia: pago.referencia,
     estado: pago.estado,
     fecha: pago.fecha_pago || pago.created_at || pago.createdAt,
-    notas: pago.observaciones
+    notas: pago.observaciones,
+    registradoPorNombre: pago.registradoPorNombre,
   };
 };
 

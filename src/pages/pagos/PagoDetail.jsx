@@ -87,9 +87,10 @@ const PagoDetail = () => {
           <table className="table table-sm table-hover">
             <thead>
               <tr>
-                <th style={{ width: '40%' }}>Fecha</th>
-                <th style={{ width: '30%' }}>Método</th>
-                <th style={{ width: '30%' }}>Monto</th>
+                <th style={{ width: '30%' }}>Fecha</th>
+                <th style={{ width: '25%' }}>Método</th>
+                <th style={{ width: '20%' }}>Monto</th>
+                <th style={{ width: '25%' }}>Registrado por</th>
               </tr>
             </thead>
             <tbody>
@@ -106,10 +107,11 @@ const PagoDetail = () => {
                       {formatPrice(p.monto || 0)}
                     </span>
                   </td>
+                  <td className="text-muted">{p.registradoPorNombre || '—'}</td>
                 </tr>
               )) : (
                 <tr>
-                  <td colSpan="3" className="text-center text-muted">No hay abonos realizados</td>
+                  <td colSpan="4" className="text-center text-muted">No hay abonos realizados</td>
                 </tr>
               )}
             </tbody>
