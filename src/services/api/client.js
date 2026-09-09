@@ -53,6 +53,10 @@ let connectionState = 'ok';
 // cuando la causa fue una caída real (red/servidor), nunca cuando fue un 429:
 // esa sola la limpia una solicitud real de la API que vuelva a tener éxito.
 let ultimaCausaPerdida = null; // 'network' | 'server-error' | 'rate-limited'
+// Para que ConnectionWatcher pueda espaciar su reintento en segundo plano
+// según la causa (un 429 se libera en minutos, no tiene sentido revisar
+// cada pocos segundos; una caída de red sí conviene revisarla seguido).
+export const getUltimaCausaPerdida = () => ultimaCausaPerdida;
 const reportConnectionOk = () => {
   if (connectionState !== 'ok') {
     connectionState = 'ok';

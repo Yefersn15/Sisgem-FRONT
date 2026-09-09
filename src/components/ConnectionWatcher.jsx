@@ -10,9 +10,15 @@
 // primera en notar el problema.
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { onConnectionEvent, pingApi } from '../services/api/client';
+import { onConnectionEvent, pingApi, getUltimaCausaPerdida } from '../services/api/client';
 
-const REINTENTO_MS = 5000;
+// Un 429 se libera solo cuando pasa la ventana del límite (minutos), así que
+// revisarlo cada 5s solo genera tráfico de sobra sin acelerar nada; una
+// caída de red o un 5xx sí puede resolverse en segundos y conviene revisar
+// seguido. pingApi() golpea una ruta que no pasa por el limitador, pero aun
+// así no tiene sentido insistir tan seguido cuando no va a cambiar pronto.
+const REINTENTO_MS_RED = 5000;
+const REINTENTO_MS_LIMITE = 45000;
 
 const ConnectionWatcher = () => {
   const [reconectando, setReconectando] = useState(false);
@@ -33,9 +39,12 @@ const ConnectionWatcher = () => {
     const unsubscribe = onConnectionEvent((event) => {
       if (event === 'lost') {
         setReconectando(true);
-        if (!pollRef.current) {
-          pollRef.current = setInterval(pingApi, REINTENTO_MS);
-        }
+        // Se reinicia el intervalo (no solo "crear si no existe"): la causa
+        // puede cambiar entre un evento y otro, y el ritmo de reintento debe
+        // ajustarse a la causa actual, no quedar fijo con la primera.
+        detenerPolling();
+        const intervalo = getUltimaCausaPerdida() === 'rate-limited' ? REINTENTO_MS_LIMITE : REINTENTO_MS_RED;
+        pollRef.current = setInterval(pingApi, intervalo);
       } else if (event === 'restored') {
         setReconectando(false);
         detenerPolling();
