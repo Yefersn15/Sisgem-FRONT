@@ -45,7 +45,7 @@ const ConfiguracionAdmin = () => {
       <p className="text-muted mb-4">
         Personaliza el nombre, logo y datos de contacto que se muestran en todo el sitio para todos los visitantes.
       </p>
-      <div className="card" style={{ maxWidth: 720 }}>
+      <div className="card mx-auto" style={{ maxWidth: 720 }}>
         <div className="card-body">
           <div className="d-flex align-items-center justify-content-between mb-4">
             {PASOS.map(({ numero, label }, i) => (

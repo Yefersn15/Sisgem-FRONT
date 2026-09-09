@@ -102,7 +102,7 @@ const Header = ({ vistaLlamativa, setVistaLlamativa }) => {
                   <ul className="dropdown-menu">
                     {section.items.map((item) => (
                       <li key={item.to}>
-                        <Link to={item.to} className={`dropdown-item ${isActivePath(location.pathname, item) ? 'active' : ''}`}>
+                        <Link to={item.to} className={`dropdown-item d-flex align-items-center ${isActivePath(location.pathname, item) ? 'active' : ''}`}>
                           <i className={`fas ${item.icon} me-2`}></i>{item.label}
                         </Link>
                       </li>
@@ -186,38 +186,38 @@ const Header = ({ vistaLlamativa, setVistaLlamativa }) => {
                   </li>
                   <li><hr className="dropdown-divider" /></li>
                   <li>
-                    <button className="dropdown-item" onClick={() => handleUserMenuClick('/perfil')}>
+                    <button className="dropdown-item d-flex align-items-center" onClick={() => handleUserMenuClick('/perfil')}>
                       <i className="fas fa-user me-2"></i>Mi Perfil
                     </button>
                   </li>
                   <li>
-                    <button className="dropdown-item" onClick={() => handleUserMenuClick('/mis-pedidos')}>
+                    <button className="dropdown-item d-flex align-items-center" onClick={() => handleUserMenuClick('/mis-pedidos')}>
                       <i className="fas fa-box me-2"></i>Mis Pedidos
                     </button>
                   </li>
                   <li>
-                    <button className="dropdown-item" onClick={() => handleUserMenuClick('/mis-pagos')}>
+                    <button className="dropdown-item d-flex align-items-center" onClick={() => handleUserMenuClick('/mis-pagos')}>
                       <i className="fas fa-credit-card me-2"></i>Mis Pagos y Abonos
                     </button>
                   </li>
                   <li>
-                    <button className="dropdown-item" onClick={() => handleUserMenuClick('/mis-domicilios')}>
+                    <button className="dropdown-item d-flex align-items-center" onClick={() => handleUserMenuClick('/mis-domicilios')}>
                       <i className="fas fa-truck me-2"></i>Mis Domicilios
                     </button>
                   </li>
                   <li>
-                    <button className="dropdown-item" onClick={() => handleUserMenuClick('/mis-entregas')}>
+                    <button className="dropdown-item d-flex align-items-center" onClick={() => handleUserMenuClick('/mis-entregas')}>
                       <i className="fas fa-motorcycle me-2"></i>Mis Entregas
                     </button>
                   </li>
                   <li>
-                    <button className="dropdown-item" onClick={() => handleUserMenuClick('/cambiar-password')}>
+                    <button className="dropdown-item d-flex align-items-center" onClick={() => handleUserMenuClick('/cambiar-password')}>
                       <i className="fas fa-key me-2"></i>Cambiar Contraseña
                     </button>
                   </li>
                   <li><hr className="dropdown-divider" /></li>
                   <li>
-                    <button className="dropdown-item text-danger" onClick={handleLogout}>
+                    <button className="dropdown-item d-flex align-items-center text-danger" onClick={handleLogout}>
                       <i className="fas fa-sign-out-alt me-2"></i>Cerrar Sesión
                     </button>
                   </li>

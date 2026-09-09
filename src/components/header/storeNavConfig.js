@@ -27,7 +27,8 @@ export const getStoreMenuSections = ({ isAdmin, hasPermission }) => [
     icon: 'fa-cube',
     condition: () => isAdmin
       || hasPermission('Ventas') || hasPermission('Usuarios') || hasPermission('Configuración')
-      || hasPermission('Reportes') || hasPermission('Inventario') || hasPermission('Productos'),
+      || hasPermission('Reportes') || hasPermission('Inventario') || hasPermission('Productos')
+      || hasPermission('Caja'),
     items: isAdmin ? [
       { to: '/admin', icon: 'fa-home', label: 'Dashboard' },
       { to: '/admin/productos', icon: 'fa-boxes', label: 'Productos', module: 'Inventario' },
@@ -37,8 +38,10 @@ export const getStoreMenuSections = ({ isAdmin, hasPermission }) => [
       { to: '/admin/pedidos', icon: 'fa-box', label: 'Pedidos', module: 'Ventas' },
       { to: '/admin/domicilios', icon: 'fa-truck', label: 'Domicilios', module: 'Ventas' },
       { to: '/admin/pagos', icon: 'fa-money-bill-wave', label: 'Pagos', module: 'Ventas' },
+      { to: '/admin/caja', icon: 'fa-cash-register', label: 'Caja', module: 'Caja' },
       { to: '/admin/usuarios', icon: 'fa-users', label: 'Usuarios', module: 'Usuarios' },
       { to: '/admin/roles', icon: 'fa-user-shield', label: 'Roles', module: 'Configuración' },
+      { to: '/admin/configuracion', icon: 'fa-store', label: 'Configuración', module: 'Configuración' },
     ] : [
       { to: '/admin', icon: 'fa-cube', label: 'Panel Admin' },
       ...(hasPermission('Inventario') || hasPermission('Productos') ? [
@@ -52,11 +55,15 @@ export const getStoreMenuSections = ({ isAdmin, hasPermission }) => [
         { to: '/admin/domicilios', icon: 'fa-truck', label: 'Domicilios', module: 'Ventas' },
         { to: '/admin/pagos', icon: 'fa-money-bill-wave', label: 'Pagos', module: 'Ventas' },
       ] : []),
+      ...(hasPermission('Caja') ? [
+        { to: '/admin/caja', icon: 'fa-cash-register', label: 'Caja', module: 'Caja' },
+      ] : []),
       ...(hasPermission('Usuarios') ? [
         { to: '/admin/usuarios', icon: 'fa-users', label: 'Usuarios', module: 'Usuarios' },
       ] : []),
       ...(hasPermission('Configuración') ? [
         { to: '/admin/roles', icon: 'fa-user-shield', label: 'Roles', module: 'Configuración' },
+        { to: '/admin/configuracion', icon: 'fa-store', label: 'Configuración', module: 'Configuración' },
       ] : []),
     ],
   },
