@@ -6,7 +6,7 @@
 const AdminTopBar = ({ left, right, menuMovil }) => (
   <nav className="app-admin-topbar border-bottom px-3 px-md-4">
     <div className="d-flex align-items-center justify-content-between py-2 gap-2">
-      <div className="d-flex align-items-center gap-3 flex-grow-1 overflow-hidden">{left}</div>
+      <div className="d-flex align-items-center gap-3 flex-grow-1" style={{ minWidth: 0 }}>{left}</div>
       <div className="d-flex align-items-center gap-2 flex-shrink-0">{right}</div>
     </div>
     {menuMovil}

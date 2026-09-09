@@ -67,7 +67,7 @@ const AdminLayout = () => {
   const cerrarMenuMovil = () => setMenuMovilAbierto(false);
 
   const marca = (
-    <Link to="/admin" className="app-admin-topbar-link d-flex align-items-center text-decoration-none fw-bold">
+    <Link to="/admin" className="app-admin-topbar-link d-flex align-items-center text-decoration-none fw-bold overflow-hidden" style={{ minWidth: 0 }}>
       {logoUrl ? (
         <img src={logoUrl} alt={nombreTienda} height={28} style={{ objectFit: 'contain', borderRadius: 6 }} />
       ) : (

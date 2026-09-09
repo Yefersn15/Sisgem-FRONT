@@ -5,6 +5,8 @@ import { updateConfiguracion } from '../services/configuracionService';
 import { useToast } from '../../../context/ToastContext';
 import { resolverImagenPendiente } from '../../../components/upload/useImageUpload';
 
+export const TOTAL_PASOS = 3;
+
 // Estado local del FORMULARIO de edición (precargado desde el contexto global
 // una vez termina de cargar). No duplica el estado global: solo lo copia a un
 // borrador editable y, al guardar, pide al contexto que se recargue con los
@@ -14,6 +16,10 @@ export const useConfiguracionForm = () => {
   const toast = useToast();
   const [form, setForm] = useState(null);
   const [guardando, setGuardando] = useState(false);
+  const [paso, setPaso] = useState(1);
+  // Igual que en useRegisterForm/useUsuarioForm: recién tras un intento de
+  // avanzar con el paso inválido se muestra el error debajo del campo.
+  const [pasosConIntento, setPasosConIntento] = useState({});
   const logoRef = useRef(null);
 
   useEffect(() => {
@@ -32,6 +38,27 @@ export const useConfiguracionForm = () => {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps -- solo debe precargar una vez, cuando termina de cargar
   }, [config.loading]);
+
+  // Único campo realmente obligatorio de toda la configuración: los demás
+  // (contacto, horario) son opcionales, por eso solo el paso 1 valida algo.
+  const pasoEsValido = (numeroPaso) => {
+    if (numeroPaso === 1) {
+      return Boolean(form.nombreTienda.trim().length >= 2);
+    }
+    return true;
+  };
+
+  const siguientePaso = () => {
+    if (!pasoEsValido(paso)) {
+      setPasosConIntento((prev) => ({ ...prev, [paso]: true }));
+      return;
+    }
+    setPaso((p) => Math.min(p + 1, TOTAL_PASOS));
+  };
+
+  const pasoAnterior = () => {
+    setPaso((p) => Math.max(p - 1, 1));
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -52,5 +79,15 @@ export const useConfiguracionForm = () => {
     }
   };
 
-  return { form, setForm, guardando, handleSubmit, logoRef };
+  return {
+    form,
+    setForm,
+    guardando,
+    handleSubmit,
+    logoRef,
+    paso,
+    mostrarErrores: Boolean(pasosConIntento[paso]),
+    siguientePaso,
+    pasoAnterior,
+  };
 };
