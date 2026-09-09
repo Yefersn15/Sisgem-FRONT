@@ -2,15 +2,20 @@
 import { request } from './client';
 
 export const getRoles = async () => {
-  const data = await request('/api/roles');
-  return Array.isArray(data) ? data.map(r => ({
-    id: r._id || r.id,
-    nombre: r.nombre,
-    descripcion: r.descripcion,
-    estado: r.estado,
-    permisos: r.permisos || [],
-    esDefault: r.esDefault || false
-  })) : [];
+  try {
+    const data = await request('/api/roles');
+    return Array.isArray(data) ? data.map(r => ({
+      id: r._id || r.id,
+      nombre: r.nombre,
+      descripcion: r.descripcion,
+      estado: r.estado,
+      permisos: r.permisos || [],
+      esDefault: r.esDefault || false
+    })) : [];
+  } catch (e) {
+    console.error('Error obteniendo roles:', e);
+    return [];
+  }
 };
 
 export const getRoleById = async (id) => {

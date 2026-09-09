@@ -41,8 +41,13 @@ const mapApiToProducto = (api) => ({
 });
 
 export const getProductos = async () => {
-  const data = await request('/api/productos');
-  return Array.isArray(data) ? data.map(mapApiToProducto) : [];
+  try {
+    const data = await request('/api/productos');
+    return Array.isArray(data) ? data.map(mapApiToProducto) : [];
+  } catch (e) {
+    console.error('Error obteniendo productos:', e);
+    return [];
+  }
 };
 
 export const getProductoById = async (id) => {

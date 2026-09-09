@@ -4,22 +4,27 @@ import { request } from './client';
 import { exportToExcel } from './utils';
 
 export const getUsuarios = async () => {
-  const data = await request('/api/usuarios');
-  return Array.isArray(data) ? data.map(u => ({
-    id: u.documento || u.id || u._id,
-    documento: u.documento,
-    nombre: u.nombre,
-    apellido: u.apellido,
-    email: u.email,
-    telefono: u.telefono,
-    tipoVehiculo: u.tipoVehiculo || u.tipo_vehiculo || '',
-    placa: u.placa || '',
-    rol: u.rol ? { id: u.rol.id, nombre: u.rol.nombre } : (u.rolId ? { id: u.rolId } : null),
-    rol_id: u.rol?.id || u.rolId,
-    rol_nombre: u.rol?.nombre,
-    estado: u.estado,
-    fecha_creacion: u.createdAt
-  })) : [];
+  try {
+    const data = await request('/api/usuarios');
+    return Array.isArray(data) ? data.map(u => ({
+      id: u.documento || u.id || u._id,
+      documento: u.documento,
+      nombre: u.nombre,
+      apellido: u.apellido,
+      email: u.email,
+      telefono: u.telefono,
+      tipoVehiculo: u.tipoVehiculo || u.tipo_vehiculo || '',
+      placa: u.placa || '',
+      rol: u.rol ? { id: u.rol.id, nombre: u.rol.nombre } : (u.rolId ? { id: u.rolId } : null),
+      rol_id: u.rol?.id || u.rolId,
+      rol_nombre: u.rol?.nombre,
+      estado: u.estado,
+      fecha_creacion: u.createdAt
+    })) : [];
+  } catch (e) {
+    console.error('Error obteniendo usuarios:', e);
+    return [];
+  }
 };
 
 export const getUsuarioById = async (id) => {
@@ -85,8 +90,13 @@ export const importUsuarios = async (file, onSuccess, onError) => {
 // DIRECCIONES DEL USUARIO
 // ----------------------------------------------------------------------
 export const getDirecciones = async () => {
-  const data = await request('/api/usuarios/direcciones');
-  return Array.isArray(data) ? data : [];
+  try {
+    const data = await request('/api/usuarios/direcciones');
+    return Array.isArray(data) ? data : [];
+  } catch (e) {
+    console.error('Error obteniendo direcciones:', e);
+    return [];
+  }
 };
 
 export const createDireccion = async (direccion) => {

@@ -23,8 +23,13 @@ const mapApiToMarca = (api) => ({
 });
 
 export const getMarcas = async () => {
-  const data = await request('/api/marcas');
-  return Array.isArray(data) ? data.map(mapApiToMarca) : [];
+  try {
+    const data = await request('/api/marcas');
+    return Array.isArray(data) ? data.map(mapApiToMarca) : [];
+  } catch (e) {
+    console.error('Error obteniendo marcas:', e);
+    return [];
+  }
 };
 
 export const getMarcaById = async (id) => {

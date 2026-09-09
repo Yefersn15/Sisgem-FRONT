@@ -2,8 +2,13 @@
 import { request } from './client';
 
 export const getBanners = async () => {
-  const data = await request('/api/banners');
-  return Array.isArray(data) ? data : [];
+  try {
+    const data = await request('/api/banners');
+    return Array.isArray(data) ? data : [];
+  } catch (e) {
+    console.error('Error obteniendo banners:', e);
+    return [];
+  }
 };
 
 export const createBanner = async (banner) => {

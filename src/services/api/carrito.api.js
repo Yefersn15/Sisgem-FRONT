@@ -2,8 +2,13 @@
 import { request } from './client';
 
 export const getCart = async () => {
-  const data = await request('/api/carrito');
-  return data;
+  try {
+    const data = await request('/api/carrito');
+    return data;
+  } catch (e) {
+    console.error('Error obteniendo el carrito:', e);
+    return { items: [] };
+  }
 };
 
 export const addToCart = async (productoId, cantidad = 1) => {
@@ -36,8 +41,8 @@ export const clearCart = async () => {
 
 // Para compatibilidad hacia atrás - obtener items con detalles
 export const getCartItemsWithDetails = async () => {
-  const data = await request('/api/carrito');
-  if (!data || !data.items) return [];
+  const data = await getCart();
+  if (!data || !Array.isArray(data.items)) return [];
   return data.items.map(item => ({
     producto: item.producto,
     cantidad: item.cantidad

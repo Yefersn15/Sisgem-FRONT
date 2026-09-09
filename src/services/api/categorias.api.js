@@ -19,8 +19,13 @@ const mapApiToCategoria = (api) => ({
 });
 
 export const getCategorias = async () => {
-  const data = await request('/api/categorias');
-  return Array.isArray(data) ? data.map(mapApiToCategoria) : [];
+  try {
+    const data = await request('/api/categorias');
+    return Array.isArray(data) ? data.map(mapApiToCategoria) : [];
+  } catch (e) {
+    console.error('Error obteniendo categorías:', e);
+    return [];
+  }
 };
 
 export const getCategoriaById = async (id) => {
