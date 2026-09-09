@@ -1,5 +1,5 @@
 // src/pages/productos/hooks/useProductosAdmin.js
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import useDebounce from '../../../hooks/useDebounce';
 import { getProductos, deleteProducto, updateProducto, exportProductos, importProductos } from '../services/productosService';
 import { getMarcas } from '../../marcas/services/marcasService';
@@ -69,6 +69,14 @@ export const useProductosAdmin = () => {
     setCurrentPage(1);
   };
 
+  // Se salta la primera ejecución del segundo efecto: React corre AMBOS
+  // efectos tras el primer render (las dependencias solo controlan las
+  // re-ejecuciones posteriores), así que sin este guard "cargar datos
+  // iniciales" y "recargar al cambiar filtros" disparaban cada uno su propia
+  // copia de getProductos/getMarcas/getCategorias al mismo tiempo en cada
+  // montaje — el doble de solicitudes de las necesarias.
+  const primerRenderRef = useRef(true);
+
   useEffect(() => {
     (async () => {
       const mar = (await getMarcas()) || [];
@@ -76,10 +84,12 @@ export const useProductosAdmin = () => {
       setMarcas(mar);
       setCategorias(cat);
       await cargarProductos(mar, cat);
+      primerRenderRef.current = false;
     })();
   }, []);
 
   useEffect(() => {
+    if (primerRenderRef.current) return;
     cargarProductos();
   }, [debounced, filterMarca, filterCategoria, filterEstado, sortBy]);
 
