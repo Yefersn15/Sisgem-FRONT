@@ -100,6 +100,17 @@ export const aplicarTemaCss = (temaResuelto) => {
   root.setProperty('--surface', temaResuelto.superficie);
   root.setProperty('--text-primary', temaResuelto.superficieTexto);
   root.setProperty('--border', conAlpha(temaResuelto.superficieTexto, 0.12));
+
+  // --surface2/--surface3 (fondo de inputs/selects y de botones secundarios,
+  // ver src/styles/forms-tables-badges.css) antes quedaban fijos en
+  // theme.css (un gris/negro que solo cambiaba entre claro/oscuro), así que
+  // los formularios nunca reflejaban la paleta elegida aquí. Se derivan
+  // mezclando --surface con su color de texto de contraste: en paletas
+  // claras (texto negro) da un gris levemente más oscuro que la superficie;
+  // en modo oscuro (texto blanco) da un gris levemente más claro, igual a
+  // como ya se veían antes (--surface3 más clara que --surface2 en oscuro).
+  root.setProperty('--surface2', mezclar(temaResuelto.superficie, temaResuelto.superficieTexto, 0.06));
+  root.setProperty('--surface3', mezclar(temaResuelto.superficie, temaResuelto.superficieTexto, 0.12));
 };
 
 // Convierte un color de texto de contraste ('#000000' o '#ffffff', ver
@@ -126,4 +137,19 @@ const oscurecer = (hex, factor = 0.15) => {
   const rgb = hexToRgb(hex);
   if (!rgb) return hex;
   return rgbToHex({ r: rgb.r * (1 - factor), g: rgb.g * (1 - factor), b: rgb.b * (1 - factor) });
+};
+
+// Interpola linealmente entre dos colores hex ('#rrggbb'); t=0 devuelve
+// hexA, t=1 devuelve hexB. Sirve para oscurecer o aclarar hexA "hacia" un
+// color de referencia (ver uso en --surface2/--surface3 arriba) en vez de
+// siempre restar brillo, que solo tiene sentido en fondos claros.
+const mezclar = (hexA, hexB, t) => {
+  const a = hexToRgb(hexA);
+  const b = hexToRgb(hexB);
+  if (!a || !b) return hexA;
+  return rgbToHex({
+    r: a.r + (b.r - a.r) * t,
+    g: a.g + (b.g - a.g) * t,
+    b: a.b + (b.b - a.b) * t,
+  });
 };

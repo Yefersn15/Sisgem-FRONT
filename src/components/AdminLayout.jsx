@@ -30,16 +30,39 @@ import AppearanceMenu from './AppearanceMenu';
 import BrandIcon from './BrandIcon';
 
 const AdminFooter = () => {
-  const { nombreTienda } = useConfiguracion();
+  const { nombreTienda, direccion, telefono, email } = useConfiguracion();
+  const { user } = useAuth();
+  const tieneContacto = direccion || telefono || email;
 
   return (
     <footer className="app-admin-footer py-3 px-4">
-      <div className="d-flex justify-content-between align-items-center">
-        <div className="text-muted small">
-          <i className="fas fa-cube me-1"></i> {nombreTienda} - Sistema de Gestión Mercantil
+      <div className="row gy-2">
+        <div className="col-md-4 text-muted small">
+          <i className="fas fa-cube me-1"></i> {nombreTienda} — Sistema de Gestión Mercantil
         </div>
-        <div className="text-muted small">
-          © {new Date().getFullYear()} Todos los derechos reservados
+
+        <div className="col-md-4 text-muted small">
+          {tieneContacto ? (
+            <>
+              {direccion && <div><i className="fas fa-map-marker-alt me-1"></i>{direccion}</div>}
+              {telefono && <div><i className="fas fa-phone me-1"></i>{telefono}</div>}
+              {email && <div><i className="fas fa-envelope me-1"></i>{email}</div>}
+            </>
+          ) : (
+            <Link to="/admin/configuracion" className="text-muted">
+              <i className="fas fa-map-marker-alt me-1"></i>Agrega los datos de contacto de tu tienda
+            </Link>
+          )}
+        </div>
+
+        <div className="col-md-4 text-muted small text-md-end">
+          <div>
+            {user?.nombre && <><i className="fas fa-user me-1"></i>Conectado como {user.nombre}</>}
+          </div>
+          <div>
+            <Link to="/" className="text-muted me-2"><i className="fas fa-external-link-alt me-1"></i>Ver sitio público</Link>
+            © {new Date().getFullYear()} Todos los derechos reservados
+          </div>
         </div>
       </div>
     </footer>

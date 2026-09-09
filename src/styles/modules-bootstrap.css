@@ -305,10 +305,12 @@ footer.bg-dark .text-white {
   min-height: 60vh;
 }
 
-/* Barra de navegación superior del admin (modo topbar) */
+/* Barra de navegación superior del admin (modo topbar). Sin border-bottom
+   propio a propósito: este <nav> vive dentro de .app-admin-topbar, que ya
+   tiene su propia línea inferior (ver arriba) — tenerla en los dos creaba
+   una doble línea muy junta debajo del topbar. */
 .app-admin-topnav {
   background: var(--header-bg) !important;
-  border-bottom: 1px solid color-mix(in srgb, var(--header-text) 15%, transparent) !important;
 }
 
 .app-admin-topnav .admin-topnav-link {
