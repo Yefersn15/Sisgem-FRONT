@@ -28,6 +28,7 @@ const Footer = () => {
               <ul className="list-unstyled small mb-0">
                 <li className="mb-1"><a href="mailto:yefersonandres225@gmail.com" className="text-reset text-decoration-none"><i className="fas fa-envelope me-2"></i>yefersonandres225@gmail.com</a></li>
                 <li className="mb-1"><a href="https://github.com/Yefersn15" target="_blank" rel="noopener noreferrer" className="text-reset text-decoration-none"><i className="fab fa-github me-2"></i>github.com/Yefersn15</a></li>
+                <li className="mb-1"><a href="https://yefersonmoreno-miportafolios.vercel.app/" target="_blank" rel="noopener noreferrer" className="text-reset text-decoration-none"><i className="fas fa-briefcase me-2"></i>Portafolio</a></li>
               </ul>
             )}
           </div>
