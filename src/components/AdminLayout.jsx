@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate, Routes, Route } from 'react-router-dom';
 import AdminDashboard from '../pages/dashboard/AdminDashboard';
 import VentasAdmin from '../pages/ventas/VentasAdmin';
+import CajaAdmin from '../pages/caja/CajaAdmin';
 import DomiciliosAdmin from '../pages/domicilios/DomiciliosAdmin';
 import PagosAdmin from '../pages/pagos/PagosAdmin';
 import PagoCreate from '../pages/pagos/PagoCreate';
@@ -132,6 +133,7 @@ const AdminLayout = () => {
       <Route index element={<PrivateRoute module="Ventas"><AdminDashboard /></PrivateRoute>} />
 
       <Route path="ventas" element={<PrivateRoute module="Ventas"><VentasAdmin /></PrivateRoute>} />
+      <Route path="caja" element={<PrivateRoute module="Caja"><CajaAdmin /></PrivateRoute>} />
       <Route path="productos" element={<PrivateRoute module="Inventario"><ProductosAdmin /></PrivateRoute>} />
       <Route path="marcas" element={<PrivateRoute module="Inventario"><MarcasAdmin /></PrivateRoute>} />
       <Route path="categorias" element={<PrivateRoute module="Inventario"><CategoriasAdmin /></PrivateRoute>} />

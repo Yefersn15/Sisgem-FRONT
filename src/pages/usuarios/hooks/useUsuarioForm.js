@@ -6,7 +6,7 @@ import { getRoles } from '../../roles/services/rolesService';
 import { normalizeText } from './textUtils';
 import { passwordEsValida } from '../../../validations/password';
 import { emailEsValido } from '../../../validations/email';
-import { documentoEsValido, mensajeDocumentoInvalido } from '../../../validations/documento';
+import { documentoEsValido } from '../../../validations/documento';
 import { resolverImagenPendiente } from '../../../components/upload/useImageUpload';
 
 const FORM_INICIAL = {
@@ -26,6 +26,8 @@ const FORM_INICIAL = {
   fotoUrl: '',
 };
 
+export const TOTAL_PASOS = 3;
+
 export const useUsuarioForm = (id) => {
   const navigate = useNavigate();
   const isEditing = Boolean(id);
@@ -37,6 +39,12 @@ export const useUsuarioForm = (id) => {
   const [error, setError] = useState('');
   const [documentoExists, setDocumentoExists] = useState(false);
   const [form, setForm] = useState(FORM_INICIAL);
+  const [paso, setPaso] = useState(1);
+  // Pasos donde el usuario ya intentó avanzar/enviar con datos inválidos:
+  // recién ahí cada campo del paso empieza a mostrar su propio mensaje de
+  // error debajo (ver InformacionPersonalForm/CredencialesForm), igual que
+  // en useRegisterForm.
+  const [pasosConIntento, setPasosConIntento] = useState({});
   const fotoUrlRef = useRef(null);
 
   useEffect(() => {
@@ -105,53 +113,52 @@ export const useUsuarioForm = (id) => {
     }
   };
 
+  const pasoEsValido = (numeroPaso) => {
+    if (numeroPaso === 1) {
+      if (!form.nombre.trim() || !form.apellido.trim()) return false;
+      // El documento está deshabilitado al editar (ya viene cargado y válido),
+      // solo se valida al crear.
+      if (!isEditing) {
+        if (!documentoEsValido(form.documento, form.tipoDocumento)) return false;
+        if (documentoExists) return false;
+      }
+      return true;
+    }
+    if (numeroPaso === 3) {
+      if (!emailEsValido(form.email)) return false;
+      if (!form.rolId) return false;
+      if (!isEditing) {
+        if (!passwordEsValida(form.password)) return false;
+        if (form.password !== form.confirmPassword) return false;
+      } else {
+        if (form.password && !passwordEsValida(form.password)) return false;
+        if (form.password !== form.confirmPassword) return false;
+      }
+      return true;
+    }
+    return true;
+  };
+
+  const siguientePaso = () => {
+    if (!pasoEsValido(paso)) {
+      setPasosConIntento((prev) => ({ ...prev, [paso]: true }));
+      return;
+    }
+    setPaso((p) => Math.min(p + 1, TOTAL_PASOS));
+  };
+
+  const pasoAnterior = () => {
+    setPaso((p) => Math.max(p - 1, 1));
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!pasoEsValido(3)) {
+      setPasosConIntento((prev) => ({ ...prev, 3: true }));
+      return;
+    }
+
     setError('');
-
-    if (!form.nombre.trim() || !form.apellido.trim()) {
-      setError('El nombre y apellido son requeridos');
-      return;
-    }
-
-    if (!emailEsValido(form.email)) {
-      setError('Ingresa un correo electrónico válido');
-      return;
-    }
-
-    if (!isEditing) {
-      if (!documentoEsValido(form.documento, form.tipoDocumento)) {
-        setError(mensajeDocumentoInvalido(form.tipoDocumento));
-        return;
-      }
-      if (documentoExists) {
-        setError('El número de documento ya está registrado');
-        return;
-      }
-      if (!passwordEsValida(form.password)) {
-        setError('La contraseña debe tener mínimo 8 caracteres, con mayúscula, minúscula, número y símbolo');
-        return;
-      }
-      if (form.password !== form.confirmPassword) {
-        setError('Las contraseñas no coinciden');
-        return;
-      }
-    } else {
-      if (form.password && !passwordEsValida(form.password)) {
-        setError('La contraseña debe tener mínimo 8 caracteres, con mayúscula, minúscula, número y símbolo');
-        return;
-      }
-      if (form.password !== form.confirmPassword) {
-        setError('Las contraseñas no coinciden');
-        return;
-      }
-    }
-
-    if (!form.rolId) {
-      setError('Debe seleccionar un rol');
-      return;
-    }
-
     setLoading(true);
     try {
       const fotoResuelta = await resolverImagenPendiente(fotoUrlRef, form.fotoUrl);
@@ -206,7 +213,11 @@ export const useUsuarioForm = (id) => {
     form,
     setForm,
     fotoUrlRef,
+    paso,
+    mostrarErrores: Boolean(pasosConIntento[paso]),
     handleChange,
+    siguientePaso,
+    pasoAnterior,
     handleSubmit,
   };
 };

@@ -22,7 +22,7 @@ export const useUsersList = (source = 'usuarios') => {
   const [importStatus, setImportStatus] = useState({ message: '', type: '' });
   const fileRef = useRef(null);
 
-  const isAdmin = currentUser && (currentUser.rol_id === 5 || currentUser.rol === 'ADMIN');
+  const isAdmin = currentUser && currentUser.rol === 'ADMIN';
 
   const loadData = async () => {
     if (source === 'usuarios') {

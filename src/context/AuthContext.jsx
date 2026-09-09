@@ -13,7 +13,7 @@ export const useAuth = () => useContext(AuthContext);
 // eslint-disable-next-line react-refresh/only-export-components -- función utilitaria co-ubicada a propósito
 export const esAdmin = (user, role) =>
   role?.nombre === 'ADMIN' || role?.nombre === 'Administrador' ||
-  user?.rol_id === 5 || user?.rol === 'ADMIN' || user?.rol === 'Administrador';
+  user?.rol === 'ADMIN' || user?.rol === 'Administrador';
 
 // hasPermission() recibe las mismas etiquetas en español que ya usan
 // Rutas.jsx/AdminLayout.jsx/navConfig.js/storeNavConfig.js (module="Ventas",
