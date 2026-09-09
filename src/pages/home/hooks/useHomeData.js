@@ -4,6 +4,7 @@ import { getBanners, getTopProductos } from '../services/homeService';
 import { getMarcas } from '../../marcas/services/marcasService';
 import { getProductos } from '../../productos/services/productosService';
 import { getCategorias } from '../../categorias/services/categoriasService';
+import { getVentas } from '../../../services/api/pedidos.api';
 
 export const useHomeData = () => {
   const [banners, setBanners] = useState([]);
@@ -20,7 +21,11 @@ export const useHomeData = () => {
     const m = (await getMarcas()) || [];
     setMarcas(m.filter(x => x.activo !== false));
 
-    const topVendidos = await getTopProductos(10);
+    // getTopProductos ya no busca las ventas por su cuenta (ver
+    // dashboard.api.js): recibe la lista ya cargada, para no repetir la
+    // misma consulta completa cada vez que algo pide el ranking.
+    const ventas = (await getVentas()) || [];
+    const topVendidos = getTopProductos(ventas, 10);
     const p = (await getProductos()) || [];
     const activos = p.filter(x => x.activo !== false);
     setProductos(activos);
