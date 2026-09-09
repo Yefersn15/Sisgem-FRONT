@@ -25,7 +25,10 @@ const Footer = () => {
                 {email && <li className="mb-1"><i className="fas fa-envelope me-2"></i>{email}</li>}
               </ul>
             ) : (
-              <p className="small mb-0" style={{ opacity: 0.85 }}>Próximamente</p>
+              <ul className="list-unstyled small mb-0">
+                <li className="mb-1"><a href="mailto:yefersonandres225@gmail.com" className="text-reset text-decoration-none"><i className="fas fa-envelope me-2"></i>yefersonandres225@gmail.com</a></li>
+                <li className="mb-1"><a href="https://github.com/Yefersn15" target="_blank" rel="noopener noreferrer" className="text-reset text-decoration-none"><i className="fab fa-github me-2"></i>github.com/Yefersn15</a></li>
+              </ul>
             )}
           </div>
 
